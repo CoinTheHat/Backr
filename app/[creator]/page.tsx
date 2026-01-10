@@ -16,7 +16,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const resolvedParams = use(params);
     const creatorId = resolvedParams.creator;
 
-    const { isConnected } = useAccount();
+    const { isConnected, address } = useAccount();
     const router = useRouter();
 
     const [isSubscribed, setIsSubscribed] = useState(false);
@@ -60,33 +60,69 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             .then(data => setPosts(data));
     }, [creatorId]);
 
-    // IMPORTANT: In production this would come from the specific creator's profile contract.
-    // For local dev without a deployed factory/profile, we must simulate or ask for address.
-    // We will assume a fixed address or the one from FACTORY lookup if we were to implement lookup here.
-    const [mockContractAddress] = useState('0x...');
+    // Fetch creator's deployed profile contract address
+    const [creatorContractAddress, setCreatorContractAddress] = useState<string>('');
 
-    const { data: hash, writeContract } = useWriteContract();
+    useEffect(() => {
+        // Fetch creator's contract from database
+        fetch('/api/creators')
+            .then(res => res.json())
+            .then(creators => {
+                const creator = creators.find((c: any) => c.address === creatorId);
+                // In a real setup, we'd store the deployed contract address in DB
+                // For now, we'll use a placeholder or fetch from Factory
+                setCreatorContractAddress(creator?.contractAddress || '');
+            });
+    }, [creatorId]);
+
+    const { data: hash, writeContract, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isSubscribedOnChain } = useWaitForTransactionReceipt({ hash });
 
     useEffect(() => {
         if (isSubscribedOnChain) {
             setIsSubscribed(true);
+            setLoading(false);
+            alert('✅ Subscription successful! Welcome to the community!');
         }
     }, [isSubscribedOnChain]);
 
-    const handleSubscribe = (tierId: any) => {
-        if (!isConnected) {
+    const handleSubscribe = async (tierId: number) => {
+        if (!isConnected || !address) {
             alert("Please connect wallet first!");
             return;
         }
 
-        // SIMULATION FOR DEMO (Since we might not have deployed contract address dynamically here)
+        const selectedTier = creatorTiers[tierId];
+        if (!selectedTier) {
+            alert("Tier not found!");
+            return;
+        }
+
         setLoading(true);
-        setTimeout(() => {
+
+        try {
+            // Convert price to Wei (assuming price is in MNT)
+            const priceInWei = BigInt(parseFloat(selectedTier.price) * 1e18);
+
+            // Call subscribe function with native MNT
+            writeContract({
+                address: creatorContractAddress as `0x${string}`,
+                abi: [{
+                    "inputs": [{ "internalType": "uint256", "name": "_tierId", "type": "uint256" }],
+                    "name": "subscribe",
+                    "outputs": [],
+                    "stateMutability": "payable",
+                    "type": "function"
+                }],
+                functionName: 'subscribe',
+                args: [BigInt(tierId)],
+                value: priceInWei
+            });
+        } catch (error) {
+            console.error('Subscription error:', error);
             setLoading(false);
-            setIsSubscribed(true);
-            alert("Simulated: 5 MNT sent to Creator Contract!");
-        }, 1500);
+            alert('❌ Subscription failed. Please try again.');
+        }
     };
 
     const displayName = creatorProfile?.name || `Creator ${creatorId.substring(0, 6)}...`;
