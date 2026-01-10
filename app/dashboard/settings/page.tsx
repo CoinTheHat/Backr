@@ -186,7 +186,7 @@ export default function SettingsPage() {
                         <p style={{ color: '#a1a1aa', fontSize: '0.875rem' }}>Connected Address</p>
                         <p style={{ fontFamily: 'monospace', color: '#65b3ad' }}>{address}</p>
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#65b3ad', background: 'rgba(101, 179, 173, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>Connected on Mantle Testnet</span>
+                    <span style={{ fontSize: '0.75rem', color: '#65b3ad', background: 'rgba(101, 179, 173, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>Connected on Mantle Mainnet</span>
                 </div>
             </Card>
         </div>

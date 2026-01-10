@@ -43,12 +43,12 @@ export default function WalletButton() {
     }
 
     // Network Enforcer
-    const isWrongNetwork = chain?.id !== 5003; // Mantle Sepolia Testnet ID
+    const isWrongNetwork = chain?.id !== 5000; // Mantle Mainnet ID
 
     if (isWrongNetwork) {
         return (
             <Button
-                onClick={() => switchChain({ chainId: 5003 })}
+                onClick={() => switchChain({ chainId: 5000 })}
                 style={{ fontSize: '0.875rem', padding: '8px 16px', background: '#ef4444', border: 'none', color: '#fff' }}
             >
                 Switch to Mantle

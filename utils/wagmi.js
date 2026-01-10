@@ -1,9 +1,9 @@
 import { createConfig, http } from 'wagmi';
-import { mantleSepoliaTestnet } from 'wagmi/chains';
+import { mantle } from 'wagmi/chains';
 import { createClient } from 'viem';
 
 export const config = createConfig({
-    chains: [mantleSepoliaTestnet],
+    chains: [mantle],
     client({ chain }) {
         return createClient({ chain, transport: http() });
     },
