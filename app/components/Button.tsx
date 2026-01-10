@@ -30,28 +30,32 @@ export default function Button({ children, onClick, variant = 'primary', classNa
     };
 
     if (variant === 'primary') {
-        styles.background = 'linear-gradient(135deg, #65b3ad 0%, #4d8f8a 100%)';
+        styles.background = 'linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(20, 184, 166, 0.2) 100%)';
         styles.color = '#fff';
-        styles.boxShadow = '0 0 10px rgba(101, 179, 173, 0.4)'; // Initial glow
-        styles.border = '1px solid rgba(255,255,255,0.1)';
+        styles.boxShadow = '0 0 15px rgba(139, 92, 246, 0.3), inset 0 0 10px rgba(139, 92, 246, 0.1)';
+        styles.border = '1px solid rgba(139, 92, 246, 0.5)';
+        styles.backdropFilter = 'blur(10px)';
     } else if (variant === 'secondary') {
-        styles.background = 'rgba(26, 29, 36, 0.8)';
+        styles.background = 'rgba(255, 255, 255, 0.05)';
         styles.color = '#fff';
-        styles.border = '1px solid #2e333d';
+        styles.border = '1px solid rgba(255, 255, 255, 0.1)';
+        styles.backdropFilter = 'blur(10px)';
     } else if (variant === 'outline') {
         styles.background = 'transparent';
-        styles.color = '#65b3ad';
-        styles.border = '1px solid #65b3ad';
+        styles.color = '#14b8a6';
+        styles.border = '1px solid #14b8a6';
     }
 
     const handleMouseEnter = (e: any) => {
         if (props.disabled) return;
         if (variant === 'primary') {
-            e.currentTarget.style.transform = 'translateY(-1px)';
-            e.currentTarget.style.boxShadow = '0 0 20px rgba(101, 179, 173, 0.6)'; // Intense glow
+            e.currentTarget.style.transform = 'translateY(-2px)';
+            e.currentTarget.style.boxShadow = '0 0 25px rgba(139, 92, 246, 0.6), inset 0 0 20px rgba(139, 92, 246, 0.2)';
+            e.currentTarget.style.border = '1px solid rgba(139, 92, 246, 0.8)';
         } else {
-            e.currentTarget.style.borderColor = '#65b3ad';
-            e.currentTarget.style.color = '#65b3ad'; // Ensure text colors on hover for secondary
+            e.currentTarget.style.borderColor = '#8b5cf6';
+            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
         }
     };
 
@@ -59,10 +63,11 @@ export default function Button({ children, onClick, variant = 'primary', classNa
         if (props.disabled) return;
         if (variant === 'primary') {
             e.currentTarget.style.transform = 'translateY(0)';
-            e.currentTarget.style.boxShadow = '0 0 10px rgba(101, 179, 173, 0.4)';
+            e.currentTarget.style.boxShadow = '0 0 15px rgba(139, 92, 246, 0.3), inset 0 0 10px rgba(139, 92, 246, 0.1)';
+            e.currentTarget.style.border = '1px solid rgba(139, 92, 246, 0.5)';
         } else if (variant === 'secondary') {
-            e.currentTarget.style.borderColor = '#2e333d';
-            e.currentTarget.style.color = '#fff';
+            e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+            e.currentTarget.style.background = 'rgba(255, 255, 255, 0.05)';
         }
     };
 

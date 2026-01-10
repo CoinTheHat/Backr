@@ -1,12 +1,14 @@
 /* Global Reset & Base Styles */
 :root {
-  --background: #0f1115;
+  --background: #0b0d11;
+  /* Deep dark bg */
   --foreground: #ffffff;
-  --primary: #65b3ad;
-  /* Mantle-ish Teal */
-  --secondary: #1a1d24;
-  --accent: #d1fae5;
-  --border: #2e333d;
+  --primary: #8b5cf6;
+  /* Purple */
+  --accent: #14b8a6;
+  /* Teal */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-bg: rgba(255, 255, 255, 0.03);
 }
 
 * {
@@ -18,12 +20,13 @@
 body {
   background-color: var(--background);
   color: var(--foreground);
-  /* Mesh Gradient Background */
+  /* Cyberpunk Deep Mesh Gradient */
   background-image:
-    radial-gradient(circle at 15% 50%, rgba(101, 179, 173, 0.15), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.15), transparent 25%);
+    radial-gradient(circle at 10% 20%, rgba(139, 92, 246, 0.15), transparent 40%),
+    radial-gradient(circle at 90% 50%, rgba(20, 184, 166, 0.15), transparent 40%),
+    radial-gradient(circle at 50% 80%, rgba(139, 92, 246, 0.1), transparent 50%);
   background-size: 150% 150%;
-  animation: gradient-move 15s ease infinite alternate;
+  animation: gradient-move 20s ease infinite alternate;
   min-height: 100vh;
   font-family: var(--font-geist-sans), sans-serif;
   overflow-x: hidden;
