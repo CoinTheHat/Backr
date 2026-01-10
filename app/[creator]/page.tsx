@@ -122,37 +122,147 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             {/* Membership Tiers Section */}
             {!isSubscribed && (
                 <div style={{ marginBottom: '64px' }}>
-                    <h2 style={{ fontSize: '1.5rem', marginBottom: '24px', textAlign: 'center' }}>Select a Membership Tier</h2>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+                    <h2 style={{ fontSize: '2rem', marginBottom: '32px', textAlign: 'center', fontWeight: 'bold', background: 'linear-gradient(135deg, #65b3ad 0%, #9d65ad 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Select a Membership Tier</h2>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
                         {creatorTiers.map((tier: any, i) => (
-                            <Card key={i} style={{ display: 'flex', flexDirection: 'column', height: '100%', border: tier.recommended ? '1px solid #65b3ad' : '1px solid #2e333d', position: 'relative' }}>
+                            <div
+                                key={i}
+                                style={{
+                                    position: 'relative',
+                                    padding: '2px',
+                                    borderRadius: '16px',
+                                    background: tier.recommended
+                                        ? 'linear-gradient(135deg, #65b3ad 0%, #9d65ad 50%, #65b3ad 100%)'
+                                        : 'linear-gradient(135deg, #2e333d 0%, #1a1d24 100%)',
+                                    backgroundSize: '200% 200%',
+                                    animation: tier.recommended ? 'gradientShift 3s ease infinite' : 'none',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                    cursor: 'pointer'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
+                                    e.currentTarget.style.boxShadow = tier.recommended
+                                        ? '0 20px 60px rgba(101, 179, 173, 0.4), 0 0 40px rgba(157, 101, 173, 0.3)'
+                                        : '0 20px 40px rgba(0, 0, 0, 0.5)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0) scale(1)';
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            >
                                 {tier.recommended && (
-                                    <div style={{ position: 'absolute', top: 0, right: 0, background: '#65b3ad', color: '#000', fontSize: '0.75rem', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '8px' }}>
-                                        Recommended
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: '-12px',
+                                        right: '20px',
+                                        background: 'linear-gradient(135deg, #65b3ad 0%, #9d65ad 100%)',
+                                        color: '#fff',
+                                        fontSize: '0.75rem',
+                                        fontWeight: 'bold',
+                                        padding: '6px 16px',
+                                        borderRadius: '20px',
+                                        boxShadow: '0 4px 12px rgba(101, 179, 173, 0.5)',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '1px'
+                                    }}>
+                                        ⭐ Best Value
                                     </div>
                                 )}
-                                <div style={{ flex: 1, marginBottom: '24px' }}>
-                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>{tier.name}</h3>
-                                    <div style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '8px', color: '#65b3ad' }}>
-                                        {tier.price} MNT<span style={{ fontSize: '1rem', color: '#a1a1aa', fontWeight: 'normal' }}>/mo</span>
-                                    </div>
-                                    <div style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span style={{ border: '1px solid #2e333d', borderRadius: '4px', padding: '2px 6px' }}>Pay with MNT</span>
-                                    </div>
-                                    {tier.benefits && (
-                                        <ul style={{ paddingLeft: '20px', color: '#a1a1aa', marginBottom: '16px' }}>
-                                            {tier.benefits.map((b: string, k: number) => <li key={k}>{b}</li>)}
+
+                                <div style={{
+                                    background: 'linear-gradient(180deg, rgba(26,29,36,0.95) 0%, rgba(26,29,36,1) 100%)',
+                                    backdropFilter: 'blur(20px)',
+                                    borderRadius: '14px',
+                                    padding: '32px 24px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    height: '100%',
+                                    minHeight: '320px'
+                                }}>
+                                    <div style={{ flex: 1, marginBottom: '24px' }}>
+                                        <h3 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '12px', color: '#fff' }}>{tier.name}</h3>
+                                        <div style={{
+                                            fontSize: '3rem',
+                                            fontWeight: 'bold',
+                                            marginBottom: '12px',
+                                            background: tier.recommended
+                                                ? 'linear-gradient(135deg, #65b3ad 0%, #9d65ad 100%)'
+                                                : 'linear-gradient(135deg, #65b3ad 0%, #7dcbc3 100%)',
+                                            WebkitBackgroundClip: 'text',
+                                            WebkitTextFillColor: 'transparent',
+                                            lineHeight: '1'
+                                        }}>
+                                            {tier.price} <span style={{ fontSize: '1.25rem', opacity: 0.7 }}>MNT</span>
+                                        </div>
+                                        <div style={{
+                                            fontSize: '0.875rem',
+                                            color: '#a1a1aa',
+                                            marginBottom: '20px',
+                                            display: 'inline-block',
+                                            background: 'rgba(101, 179, 173, 0.1)',
+                                            border: '1px solid rgba(101, 179, 173, 0.3)',
+                                            borderRadius: '8px',
+                                            padding: '4px 10px'
+                                        }}>
+                                            💎 Pay with MNT
+                                        </div>
+
+                                        <ul style={{ listStyle: 'none', padding: 0, margin: '20px 0 0 0', color: '#d4d4d8' }}>
+                                            {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((benefit: string, j: number) => (
+                                                <li key={j} style={{
+                                                    marginBottom: '12px',
+                                                    paddingLeft: '24px',
+                                                    position: 'relative',
+                                                    fontSize: '0.95rem'
+                                                }}>
+                                                    <span style={{
+                                                        position: 'absolute',
+                                                        left: 0,
+                                                        color: '#65b3ad',
+                                                        fontWeight: 'bold',
+                                                        fontSize: '1.1rem'
+                                                    }}>✓</span>
+                                                    {benefit}
+                                                </li>
+                                            )) : (
+                                                <li style={{ color: '#71717a', fontStyle: 'italic' }}>No benefits listed</li>
+                                            )}
                                         </ul>
-                                    )}
+                                    </div>
+
+                                    <Button
+                                        onClick={() => handleSubscribe(tier.id)}
+                                        disabled={loading}
+                                        style={{
+                                            width: '100%',
+                                            background: tier.recommended
+                                                ? 'linear-gradient(135deg, #65b3ad 0%, #9d65ad 100%)'
+                                                : 'linear-gradient(135deg, #65b3ad 0%, #7dcbc3 100%)',
+                                            border: 'none',
+                                            fontSize: '1rem',
+                                            fontWeight: 'bold',
+                                            padding: '14px',
+                                            boxShadow: '0 4px 12px rgba(101, 179, 173, 0.3)',
+                                            transition: 'all 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e: any) => {
+                                            e.currentTarget.style.transform = 'scale(1.05)';
+                                            e.currentTarget.style.boxShadow = '0 6px 20px rgba(101, 179, 173, 0.5)';
+                                        }}
+                                        onMouseLeave={(e: any) => {
+                                            e.currentTarget.style.transform = 'scale(1)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(101, 179, 173, 0.3)';
+                                        }}
+                                    >
+                                        {loading ? '⏳ Processing on Mantle...' : '🚀 Subscribe Now'}
+                                    </Button>
                                 </div>
-                                <Button onClick={() => handleSubscribe(tier.id)} disabled={loading}>
-                                    {loading ? 'Processing on Mantle...' : 'Subscribe Now'}
-                                </Button>
-                            </Card>
+                            </div>
                         ))}
                     </div>
                 </div>
-            )}
+            )
+            }
 
             {/* Posts Feed for Fans */}
             <div>
@@ -207,6 +317,6 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 )}
             </div>
 
-        </div>
+        </div >
     );
 }
