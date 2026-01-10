@@ -40,6 +40,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         { label: 'Settings', path: '/dashboard/settings', icon: '⚙️' },
     ];
 
+    // Access Control: Enforce Wallet Connection
+    if (!address) {
+        return (
+            <div style={{
+                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                height: '100vh', background: '#11141a', color: '#fff', textAlign: 'center'
+            }}>
+                <div style={{ marginBottom: '24px', padding: '24px', background: '#1a1d24', borderRadius: '16px', border: '1px solid #2e333d' }}>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '16px' }}>Access Restricted 🔒</h1>
+                    <p style={{ color: '#a1a1aa', marginBottom: '24px' }}>You must connect your wallet to access the Creator Dashboard.</p>
+                    <WalletButton />
+                    <Button variant="outline" style={{ marginTop: '16px', width: '100%', justifyContent: 'center' }} onClick={() => router.push('/')}>
+                        Return Home
+                    </Button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
             {/* Sidebar */}
