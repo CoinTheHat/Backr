@@ -1,4 +1,6 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kinship - Mantle Web3 Membership Platform
+[![Vercel Deploy](https://deploy.vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCoinTheHat%2FPatreon-On-Mantle)
+
 
 ## Getting Started
 
