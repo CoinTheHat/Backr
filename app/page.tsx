@@ -100,70 +100,9 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Featured Creators Section */}
-        <div style={{ width: '100%', maxWidth: '1200px', marginBottom: '100px' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '16px', color: '#fff' }}>Featured Creators</h2>
-          <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '64px' }}>Join the new wave of creator economy.</p>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
-            {/* Card 1 */}
-            <Card style={{ padding: 0, height: '400px', background: 'linear-gradient(180deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%)', border: '1px solid rgba(139,92,246,0.2)', boxShadow: '0 0 30px rgba(139,92,246,0.1)' }}>
-              {/* Image: Cyberpunk Gamer / VR */}
-              <div style={{ height: '240px', background: 'url(https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=1000&auto=format&fit=crop) center/cover' }}></div>
-              <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>The Mantle Gamer</h3>
-                  <span style={{ fontSize: '0.75rem', color: '#2dd4bf', background: 'rgba(45,212,191,0.1)', padding: '4px 8px', borderRadius: '4px' }}>Verified</span>
-                </div>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '16px' }}>Early access and exclusive gaming streams</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '8px', color: '#fff', fontSize: '0.9rem' }}>$5 <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>USDC/mo</span></div>
-                  <span style={{ color: '#64748b', fontSize: '0.8rem' }}>On-Chain Verified</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Card 2 */}
-            <Card style={{ padding: 0, height: '400px', background: 'linear-gradient(180deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%)', border: '1px solid rgba(236,72,153,0.2)', boxShadow: '0 0 30px rgba(236,72,153,0.1)' }}>
-              {/* Image: Digital Art / Neon Anime Vibe */}
-              <div style={{ height: '240px', background: 'url(https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=1000&auto=format&fit=crop) center/cover' }}></div>
-              <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>Art by Luna</h3>
-                  <span style={{ fontSize: '0.75rem', color: '#2dd4bf', background: 'rgba(45,212,191,0.1)', padding: '4px 8px', borderRadius: '4px' }}>Verified</span>
-                </div>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '16px' }}>Exclusive digital art & behind-the-scenes</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '8px', color: '#fff', fontSize: '0.9rem' }}>$16 <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>USDC/mo</span></div>
-                  <span style={{ color: '#64748b', fontSize: '0.8rem' }}>On-Chain Verified</span>
-                </div>
-              </div>
-            </Card>
-
-            {/* Card 3 */}
-            <Card style={{ padding: 0, height: '400px', background: 'linear-gradient(180deg, rgba(30,41,59,0.5) 0%, rgba(15,23,42,0.8) 100%)', border: '1px solid rgba(45,212,191,0.2)', boxShadow: '0 0 30px rgba(45,212,191,0.1)' }}>
-              {/* Image: Blockchain / Abstract Tech */}
-              <div style={{ height: '240px', background: 'url(https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1000&auto=format&fit=crop) center/cover' }}></div>
-              <div style={{ padding: '24px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>CryptoCrunch</h3>
-                  <span style={{ fontSize: '0.75rem', color: '#2dd4bf', background: 'rgba(45,212,191,0.1)', padding: '4px 8px', borderRadius: '4px' }}>Verified</span>
-                </div>
-                <p style={{ color: '#94a3b8', fontSize: '0.9rem', marginBottom: '16px' }}>Exclusive crypto news & analysis</p>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: '8px', color: '#fff', fontSize: '0.9rem' }}>$5 <span style={{ opacity: 0.6, fontSize: '0.75rem' }}>USDC/mo</span></div>
-                  <span style={{ color: '#64748b', fontSize: '0.8rem' }}>On-Chain Verified</span>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </div>
-
-      </main>
-
-      <footer style={{ padding: '60px', textAlign: 'center', color: '#64748b', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <p>&copy; 2026 Kinship. Built on Mantle Testnet.</p>
-      </footer>
+        <footer style={{ padding: '60px', textAlign: 'center', color: '#64748b', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+          <p>&copy; 2026 Kinship. Built on Mantle.</p>
+        </footer>
     </div>
   );
 }
