@@ -19,7 +19,7 @@ export default function Dashboard() {
     const [deployedAddress, setDeployedAddress] = useState<Address | null>(null);
 
     // Check if already deployed (read from Factory)
-    const { data: existingProfile } = useReadContract({
+    const { data: existingProfile, refetch: refetchProfile } = useReadContract({
         address: FACTORY_ADDRESS as Address,
         abi: FACTORY_ABI,
         functionName: 'getProfile',
@@ -44,13 +44,16 @@ export default function Dashboard() {
     // When confirmed, save to our DB
     useEffect(() => {
         if (isConfirmed && address) {
+            // Trigger a refetch to update the UI specifically for the deployment step
+            refetchProfile();
+
             // In a real app we'd get the address from the logs, but for now let's re-fetch or assume success
             fetch('/api/creators', {
                 method: 'POST',
                 body: JSON.stringify({ address, name: `Creator ${address.slice(0, 6)}` })
             });
         }
-    }, [isConfirmed, address]);
+    }, [isConfirmed, address, refetchProfile]);
 
     // If connected but no profile, show onboarding "Become a Creator"
     // BUT user said "no email etc, just wallet".
