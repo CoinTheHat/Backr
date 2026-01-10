@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/utils/db';
+import { supabase } from '@/utils/supabase';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
@@ -9,8 +9,17 @@ export async function GET(request: Request) {
         return NextResponse.json([]);
     }
 
-    const tiers = db.tiers.getByCreator(address);
-    return NextResponse.json(tiers);
+    const { data: tiers, error } = await supabase
+        .from('tiers')
+        .select('*')
+        .eq('creatorAddress', address);
+
+    if (error) {
+        console.error('Error fetching tiers:', error);
+        return NextResponse.json([]);
+    }
+
+    return NextResponse.json(tiers || []);
 }
 
 export async function POST(request: Request) {
@@ -21,6 +30,26 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing data' }, { status: 400 });
     }
 
-    db.tiers.saveAll(address, tiers);
-    return NextResponse.json({ success: true });
+    // Delete all existing tiers for this creator
+    await supabase.from('tiers').delete().eq('creatorAddress', address);
+
+    // Insert new tiers
+    const tiersToInsert = tiers.map((tier: any) => ({
+        creatorAddress: address,
+        name: tier.name,
+        price: tier.price,
+        duration: tier.duration || '30',
+        benefits: tier.benefits || [],
+        recommended: tier.recommended || false,
+        active: tier.active !== false
+    }));
+
+    const { data, error } = await supabase.from('tiers').insert(tiersToInsert).select();
+
+    if (error) {
+        console.error('Error saving tiers:', error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
+    return NextResponse.json({ success: true, data });
 }
