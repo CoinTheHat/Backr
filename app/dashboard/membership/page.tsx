@@ -53,17 +53,16 @@ export default function MembershipPage() {
     };
 
     const handleSave = async (tier: any) => {
-        setEditingIndex(null);
         if (!address) return;
 
-        // Update local state
-        const updatedTiers = [...tiers]; // logic to update specific tier...
-
+        // Save the current tiers list (which includes the edited tier)
         await fetch('/api/tiers', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address, tiers: updatedTiers }) // Ideally we save the specific modified list
+            body: JSON.stringify({ address, tiers })
         });
+
+        setEditingIndex(null);
         window.location.reload(); // Quick refresh
     };
 
@@ -109,11 +108,27 @@ export default function MembershipPage() {
 
                                 <div>
                                     <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Benefits (Comma separated)</label>
-                                    <Input value={tier.benefits.join(', ')} onChange={(e: any) => {
-                                        const newTiers = [...tiers];
-                                        newTiers[index].benefits = e.target.value.split(',').map((b: string) => b.trim());
-                                        setTiers(newTiers);
-                                    }} />
+                                    <textarea
+                                        value={tier.benefits.join(', ')}
+                                        onChange={(e: any) => {
+                                            const newTiers = [...tiers];
+                                            newTiers[index].benefits = e.target.value.split(',').map((b: string) => b.trim()).filter((b: string) => b);
+                                            setTiers(newTiers);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            background: '#1a1d24',
+                                            border: '1px solid #2e333d',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '0.875rem',
+                                            fontFamily: 'inherit',
+                                            resize: 'vertical',
+                                            minHeight: '80px'
+                                        }}
+                                        placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
+                                    />
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
