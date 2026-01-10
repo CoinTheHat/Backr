@@ -43,13 +43,17 @@ export default function Home() {
         </div>
       </nav>
 
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ maxWidth: '800px', marginBottom: '80px', marginTop: '48px' }}>
-          <h2 style={{ fontSize: '4rem', fontWeight: '800', lineHeight: '1.1', marginBottom: '24px', letterSpacing: '-0.02em' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '0 24px', position: 'relative' }}>
+        {/* Floating Background Orbs */}
+        <div className="floating-orb" style={{ top: '10%', left: '15%', width: '300px', height: '300px', background: 'rgba(101, 179, 173, 0.3)' }}></div>
+        <div className="floating-orb" style={{ bottom: '20%', right: '15%', width: '400px', height: '400px', background: 'rgba(139, 92, 246, 0.2)', animationDelay: '-5s' }}></div>
+
+        <div style={{ maxWidth: '800px', marginBottom: '80px', marginTop: '48px', position: 'relative', zIndex: 1 }}>
+          <h2 style={{ fontSize: '5rem', fontWeight: '800', lineHeight: '1.1', marginBottom: '24px', letterSpacing: '-0.03em' }}>
             Support Creators.<br />
-            <span style={{ color: '#65b3ad' }}>Directly. On-Chain.</span>
+            <span className="animate-text-gradient">Directly. On-Chain.</span>
           </h2>
-          <p style={{ fontSize: '1.25rem', color: '#a1a1aa', marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px' }}>
+          <p style={{ fontSize: '1.5rem', color: '#a1a1aa', marginBottom: '48px', maxWidth: '600px', margin: '0 auto 48px', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>
             The Web3 membership platform for communities that value transparency, ownership, and culture over speculation. Built on Mantle.
           </p>
 

@@ -29,9 +29,9 @@ export default function Card({ children, className = '', noHover = false, ...pro
             className={`${className} ${!noHover ? 'card-interactive' : ''}`}
             onMouseEnter={(e) => {
                 if (noHover) return;
-                e.currentTarget.style.transform = 'translateY(-4px)';
-                e.currentTarget.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04), 0 0 15px rgba(101, 179, 173, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(101, 179, 173, 0.4)';
+                e.currentTarget.style.transform = 'translateY(-6px) scale(1.01)';
+                e.currentTarget.style.boxShadow = '0 20px 30px -5px rgba(0, 0, 0, 0.2), 0 0 30px rgba(101, 179, 173, 0.3)';
+                e.currentTarget.style.borderColor = 'rgba(101, 179, 173, 0.6)';
             }}
             onMouseLeave={(e) => {
                 if (noHover) return;
