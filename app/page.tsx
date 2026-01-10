@@ -30,7 +30,7 @@ export default function Home() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #65b3ad, #fff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Kinship</h1>
           <div style={{ display: 'flex', gap: '24px', fontSize: '0.875rem', color: '#a1a1aa' }}>
-            <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', ':hover': { color: '#fff' } }}>Explore</span>
+            <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', color: '#a1a1aa' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Explore</span>
             <span style={{ cursor: 'pointer' }}>How it Works</span>
             <span style={{ cursor: 'pointer' }}>Creators</span>
           </div>
