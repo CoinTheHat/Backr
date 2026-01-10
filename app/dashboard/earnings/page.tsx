@@ -4,8 +4,8 @@ import { useState, useEffect } from 'react';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
-import { useAccount, useReadContract, useWriteContract, useBalance } from 'wagmi';
-import { parseEther, formatEther } from 'viem';
+import { useAccount, useReadContract, useWriteContract, useBalance, usePublicClient } from 'wagmi';
+import { parseEther, formatEther, parseAbiItem } from 'viem';
 import { SUBSCRIPTION_FACTORY_ABI, SUBSCRIPTION_ABI } from '@/utils/abis';
 import { FACTORY_ADDRESS } from '@/utils/addresses';
 import { supabase } from '@/utils/supabase';
@@ -54,6 +54,43 @@ export default function EarningsPage() {
         fetchRevenue();
     }, [address]);
 
+    const publicClient = usePublicClient();
+    const [payouts, setPayouts] = useState<any[]>([]);
+
+    // 4. Fetch Payout History from Chain Events
+    useEffect(() => {
+        const fetchPayouts = async () => {
+            if (!contractAddress || !publicClient) return;
+
+            try {
+                const logs = await publicClient.getLogs({
+                    address: contractAddress as `0x${string}`,
+                    event: parseAbiItem('event Withdrawn(uint256 amount)'),
+                    fromBlock: 'earliest' // In prod, maybe limit range
+                });
+
+                const history = await Promise.all(logs.map(async (log: any) => {
+                    const block = await publicClient.getBlock({ blockNumber: log.blockNumber });
+                    return {
+                        hash: log.transactionHash,
+                        amount: formatEther(log.args.amount),
+                        date: new Date(Number(block.timestamp) * 1000).toLocaleDateString(),
+                        to: address // Owner always receives existing logic
+                    };
+                }));
+
+                // Sort newest first
+                setPayouts(history.reverse());
+            } catch (e) {
+                console.error("Error fetching payouts:", e);
+            }
+        };
+
+        if (contractAddress) {
+            fetchPayouts();
+        }
+    }, [contractAddress, publicClient, address, balanceData]); // Refetch when balance changes (after withdraw)
+
     const handleWithdraw = () => {
         if (!contractAddress) return;
         writeContract({
@@ -64,7 +101,12 @@ export default function EarningsPage() {
         }, {
             onSuccess: () => {
                 setWithdrawOpen(false);
-                setTimeout(refetchBalance, 3000); // refresh balance after delay
+                // Give time for indexing/block mining then refetch accounts
+                setTimeout(() => {
+                    refetchBalance();
+                    // trigger re-fetch of logs? typically takes a bit. 
+                    // ideally we just wait for the transaction receipt in a real app.
+                }, 5000);
             }
         });
     };
@@ -100,9 +142,8 @@ export default function EarningsPage() {
                                     onChange={(e: any) => setAmount(e.target.value)}
                                     placeholder={displayBalance}
                                     type="number"
-                                    disabled={true} // For MVP, we only support full withdrawal often, or user can input. Contract withdraw() withdraws ALL compatible funds.
+                                    disabled={true}
                                 />
-                                {/* The contract withdraw function withdraws EVERYTHING. So input is purely visual or disabled. */}
                             </div>
                             <p style={{ fontSize: '0.75rem', color: '#eab308', marginTop: '8px' }}>
                                 Note: This action withdraws the entire available balance.
@@ -159,11 +200,20 @@ export default function EarningsPage() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: '#52525b' }}>
-                                No withdrawals found yet.
-                            </td>
-                        </tr>
+                        {payouts.length > 0 ? payouts.map((p, i) => (
+                            <tr key={i} style={{ borderBottom: '1px solid #2e333d' }}>
+                                <td style={{ padding: '16px' }}>{p.date}</td>
+                                <td style={{ padding: '16px', fontWeight: 'bold', color: '#fff' }}>{parseFloat(p.amount).toFixed(2)} MNT</td>
+                                <td style={{ padding: '16px', fontFamily: 'monospace' }}>{p.to.slice(0, 6)}...{p.to.slice(-4)}</td>
+                                <td style={{ padding: '16px' }}><a href={`https://sepolia.mantlescan.xyz/tx/${p.hash}`} target="_blank" style={{ color: '#65b3ad' }}>{p.hash.slice(0, 6)}...{p.hash.slice(-4)} ↗</a></td>
+                            </tr>
+                        )) : (
+                            <tr>
+                                <td colSpan={4} style={{ padding: '32px', textAlign: 'center', color: '#52525b' }}>
+                                    No withdrawals found yet.
+                                </td>
+                            </tr>
+                        )}
                     </tbody>
                 </table>
             </Card>
