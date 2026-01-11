@@ -10,6 +10,20 @@ export default function Home() {
   const router = useRouter();
   const { isConnected } = useAccount();
   const { connect } = useConnect();
+  const [featuredCreators, setFeaturedCreators] = require('react').useState([]);
+
+  require('react').useEffect(() => {
+    // Fetch top 3 featured creators
+    fetch('/api/creators')
+      .then(res => res.json())
+      .then(data => {
+        // For now just take first 3, or filter by some featured flag if we had one
+        if (Array.isArray(data)) {
+          setFeaturedCreators(data.slice(0, 3));
+        }
+      })
+      .catch(err => console.error("Failed to fetch featured creators", err));
+  }, []);
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-geist-sans)' }}>
