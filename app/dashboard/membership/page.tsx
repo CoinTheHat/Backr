@@ -15,6 +15,7 @@ import { useToast } from '../../components/Toast';
 
 export default function MembershipPage() {
     const { address } = useAccount();
+    const { showToast, ToastComponent } = useToast();
     const [tiers, setTiers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [contractAddress, setContractAddress] = useState<string | null>(null);
@@ -60,8 +61,14 @@ export default function MembershipPage() {
             }
         }
 
+        // Validate Contract Address
+        if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+            showToast('Contract not deployed or undefined. Please re-deploy from settings if needed.', 'error');
+            return;
+        }
+
         // If we have a contract address, try to create tier on chain
-        if (contractAddress && tier.active !== false) {
+        if (tier.active !== false) {
             try {
                 // Determine if this is a new tier or update?
                 // The smart contract simple adds new tiers with createTier.
@@ -83,6 +90,8 @@ export default function MembershipPage() {
                 });
             } catch (e) {
                 console.error("Chain write failed", e);
+                showToast('Failed to initiate transaction.', 'error');
+                return;
                 // Continues to save to DB anyway? Or stop?
                 // Let's continue so DB is updated at least.
             }
