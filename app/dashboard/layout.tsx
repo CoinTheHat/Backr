@@ -4,13 +4,14 @@ import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Button from '../components/Button';
 import WalletButton from '../components/WalletButton';
-import { useAccount } from 'wagmi';
+import { useAccount, useDisconnect } from 'wagmi';
 import { supabase } from '@/utils/supabase';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { address } = useAccount();
+    const { disconnect } = useDisconnect();
     const [mounted, setMounted] = useState(false);
     const [profile, setProfile] = useState<any>(null);
 
@@ -108,84 +109,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
                 </div>
 
-                {/* Creator Profile Preview */}
-                <div style={{
-                    marginBottom: '40px',
-                    padding: '16px',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
-                    borderRadius: '16px',
-                    border: '1px solid rgba(255,255,255,0.05)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                }}>
-                    {mounted && profile?.avatarUrl ? (
-                        <img
-                            src={profile.avatarUrl}
-                            alt="Avatar"
-                            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
-                        />
-                    ) : (
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#2e333d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            👻
-                        </div>
-                    )}
-                    <div style={{ overflow: 'hidden' }}>
-                        <p style={{ fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {mounted && profile?.name ? profile.name : 'Creator'}
-                        </p>
-                        <p style={{ fontSize: '0.75rem', color: '#a1a1aa', fontFamily: 'monospace' }}>
-                            {mounted && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
-                        </p>
-                    </div>
-                </div>
-
-                {/* Menu */}
-                <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {menuItems.map((item) => {
-                        const isActive = pathname === item.path;
-                        return (
-                            <div
-                                key={item.path}
-                                onClick={() => router.push(item.path)}
-                                style={{
-                                    padding: '14px 16px',
-                                    borderRadius: '12px',
-                                    cursor: 'pointer',
-                                    // Active state: Neon gradient background
-                                    background: isActive ? 'linear-gradient(90deg, rgba(157, 78, 221, 0.2), transparent)' : 'transparent',
-                                    borderLeft: isActive ? '4px solid #9d4edd' : '4px solid transparent',
-                                    color: isActive ? '#fff' : '#a1a1aa',
-                                    fontWeight: isActive ? '600' : '500',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '16px',
-                                    transition: 'all 0.3s',
-                                    boxShadow: isActive ? '0 0 20px rgba(157, 78, 221, 0.1)' : 'none'
-                                }}
-                                onMouseEnter={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                        e.currentTarget.style.color = '#fff';
-                                    }
-                                }}
-                                onMouseLeave={(e) => {
-                                    if (!isActive) {
-                                        e.currentTarget.style.background = 'transparent';
-                                        e.currentTarget.style.color = '#a1a1aa';
-                                    }
-                                }}
-                            >
-                                <span style={{ fontSize: '1.2rem', filter: isActive ? 'drop-shadow(0 0 5px rgba(157, 78, 221, 0.8))' : 'none' }}>{item.icon}</span>
-                                {item.label}
-                            </div>
-                        );
-                    })}
-                </nav>
-
                 <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ marginBottom: '16px' }}>
-                        <WalletButton />
+                    <div style={{ marginBottom: '16px', padding: '0 12px' }}>
+                        <button
+                            onClick={() => {
+                                disconnect();
+                                router.push('/');
+                            }}
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                borderRadius: '12px',
+                                color: '#ef4444',
+                                fontWeight: 'bold',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e: any) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
+                            onMouseLeave={(e: any) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                        >
+                            <span>🚪</span> Log Out
+                        </button>
                     </div>
                 </div>
             </aside>
