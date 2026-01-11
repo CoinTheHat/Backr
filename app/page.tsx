@@ -202,167 +202,174 @@ export default function Home() {
           </div>
 
           {/* Right: Actions */}
-          {isConnected ? (
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="pill-btn btn-primary"
-            >
-              Go to Dashboard
-            </button>
-          ) : (
-            <>
-              <span onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Log In</span>
-            </button>
-        </>
-          )}
-    </div>
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', alignItems: 'center' }}>
+            {isConnected ? (
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="pill-btn btn-primary"
+              >
+                Go to Dashboard
+              </button>
+            ) : (
+              <>
+                <span onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Log In</span>
+                <button
+                  onClick={() => router.push('/dashboard')}
+                  className="pill-btn btn-primary"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
+          </div>
+        </div>
       </nav >
 
-    <main>
-      {/* CENTERED HERO SECTION - Light */}
-      <section className="hero-section">
+      <main>
+        {/* CENTERED HERO SECTION - Light */}
+        <section className="hero-section">
 
-        {/* Background Atmosphere - Light */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: '80%', height: '80%',
-          background: 'radial-gradient(circle, rgba(2, 132, 199, 0.08) 0%, transparent 60%)',
-          filter: 'blur(100px)', zIndex: 0
-        }}></div>
+          {/* Background Atmosphere - Light */}
+          <div style={{
+            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+            width: '80%', height: '80%',
+            background: 'radial-gradient(circle, rgba(2, 132, 199, 0.08) 0%, transparent 60%)',
+            filter: 'blur(100px)', zIndex: 0
+          }}></div>
 
-        {/* Floating Visuals - Light Mode */}
-        <div className="hero-visual visual-left">
-          <div style={{ height: '180px', background: 'linear-gradient(45deg, #FF0080, #7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '3rem' }}>🎙️</span>
+          {/* Floating Visuals - Light Mode */}
+          <div className="hero-visual visual-left">
+            <div style={{ height: '180px', background: 'linear-gradient(45deg, #FF0080, #7928CA)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '3rem' }}>🎙️</span>
+            </div>
+            <div style={{ padding: '16px' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Future Talk</div>
+              <div style={{ fontSize: '0.8rem', color: '#52525b' }}>Podcast • 12k Members</div>
+            </div>
           </div>
-          <div style={{ padding: '16px' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Future Talk</div>
-            <div style={{ fontSize: '0.8rem', color: '#52525b' }}>Podcast • 12k Members</div>
+
+          <div className="hero-visual visual-right">
+            <div style={{ height: '200px', background: 'url(https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=260&auto=format&fit=crop) center/cover' }}></div>
+            <div style={{ padding: '16px' }}>
+              <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Neon City</div>
+              <div style={{ fontSize: '0.8rem', color: '#52525b' }}>Digital Art • 8.5k Members</div>
+            </div>
           </div>
-        </div>
 
-        <div className="hero-visual visual-right">
-          <div style={{ height: '200px', background: 'url(https://images.unsplash.com/photo-1614728263952-84ea256f9679?q=80&w=260&auto=format&fit=crop) center/cover' }}></div>
-          <div style={{ padding: '16px' }}>
-            <div style={{ fontWeight: 'bold', marginBottom: '4px' }}>Neon City</div>
-            <div style={{ fontSize: '0.8rem', color: '#52525b' }}>Digital Art • 8.5k Members</div>
+          <div className="hero-visual visual-bottom-left">
+            <div style={{ height: '140px', background: 'linear-gradient(to right, #00C9FF, #92FE9D)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '3rem' }}>🎮</span>
+            </div>
+            <div style={{ padding: '12px' }}>
+              <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Pro Gamer Tips</div>
+            </div>
           </div>
-        </div>
 
-        <div className="hero-visual visual-bottom-left">
-          <div style={{ height: '140px', background: 'linear-gradient(to right, #00C9FF, #92FE9D)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '3rem' }}>🎮</span>
+          {/* Central Content */}
+          <div style={{ position: 'relative', zIndex: 10, maxWidth: '800px' }}>
+            <h1 className="hero-headline">
+              Complete creative <br />
+              <span style={{ color: '#000' }}>control.</span>
+            </h1>
+            <p style={{ fontSize: '1.25rem', color: '#52525b', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
+              Join the thousands of creators on Backr who are building communities, sharing exclusive work, and getting paid directly.
+            </p>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+              <button className="pill-btn btn-primary" style={{ fontSize: '1.1rem', padding: '16px 48px' }} onClick={() => router.push('/dashboard')}>
+                Create on Backr
+              </button>
+              <button className="pill-btn btn-secondary" style={{ fontSize: '1.1rem', padding: '16px 48px', border: '1px solid #e5e7eb' }} onClick={() => router.push('/explore')}>
+                Find Creators
+              </button>
+            </div>
           </div>
-          <div style={{ padding: '12px' }}>
-            <div style={{ fontWeight: 'bold', fontSize: '0.9rem' }}>Pro Gamer Tips</div>
+        </section>
+
+        {/* Tabbed Interactive Section - Light */}
+        <section style={{ padding: '80px var(--padding-x)', background: '#f8fafc' }}>
+          <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '48px' }}>Who uses Backr?</h2>
+
+          <div className="tabs-wrapper">
+            {Object.keys(tabContent).map(tab => (
+              <button
+                key={tab}
+                className={`tab-pill ${activeTab === tab ? 'active' : ''}`}
+                onClick={() => setActiveTab(tab)}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
-        </div>
 
-        {/* Central Content */}
-        <div style={{ position: 'relative', zIndex: 10, maxWidth: '800px' }}>
-          <h1 className="hero-headline">
-            Complete creative <br />
-            <span style={{ color: '#000' }}>control.</span>
-          </h1>
-          <p style={{ fontSize: '1.25rem', color: '#52525b', marginBottom: '40px', maxWidth: '600px', margin: '0 auto 40px' }}>
-            Join the thousands of creators on Backr who are building communities, sharing exclusive work, and getting paid directly.
-          </p>
-          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-            <button className="pill-btn btn-primary" style={{ fontSize: '1.1rem', padding: '16px 48px' }} onClick={() => router.push('/dashboard')}>
-              Create on Backr
-            </button>
-            <button className="pill-btn btn-secondary" style={{ fontSize: '1.1rem', padding: '16px 48px', border: '1px solid #e5e7eb' }} onClick={() => router.push('/explore')}>
-              Find Creators
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* Tabbed Interactive Section - Light */}
-      <section style={{ padding: '80px var(--padding-x)', background: '#f8fafc' }}>
-        <h2 style={{ textAlign: 'center', fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '48px' }}>Who uses Backr?</h2>
-
-        <div className="tabs-wrapper">
-          {Object.keys(tabContent).map(tab => (
-            <button
-              key={tab}
-              className={`tab-pill ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-
-        <div className="content-display" style={{
-          maxWidth: '1200px', margin: '0 auto',
-          background: '#fff', borderRadius: '32px', overflow: 'hidden',
-          display: 'grid', gridTemplateColumns: '1fr 1fr',
-          boxShadow: '0 20px 40px -4px rgba(0,0,0,0.05)',
-          border: '1px solid rgba(0,0,0,0.05)'
-        }}>
-          <style dangerouslySetInnerHTML={{
-            __html: `
+          <div className="content-display" style={{
+            maxWidth: '1200px', margin: '0 auto',
+            background: '#fff', borderRadius: '32px', overflow: 'hidden',
+            display: 'grid', gridTemplateColumns: '1fr 1fr',
+            boxShadow: '0 20px 40px -4px rgba(0,0,0,0.05)',
+            border: '1px solid rgba(0,0,0,0.05)'
+          }}>
+            <style dangerouslySetInnerHTML={{
+              __html: `
                     @media (max-width: 768px) { .content-display { grid-template-columns: 1fr !important; } }
                  `}} />
 
-          {/* Image Side */}
-          <div style={{ minHeight: '400px', background: tabContent[activeTab].image, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <span style={{ fontSize: '8rem', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))' }}>{tabContent[activeTab].icon}</span>
-          </div>
+            {/* Image Side */}
+            <div style={{ minHeight: '400px', background: tabContent[activeTab].image, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '8rem', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))' }}>{tabContent[activeTab].icon}</span>
+            </div>
 
-          {/* Text Side */}
-          <div style={{ padding: '64px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            <h3 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '24px', lineHeight: 1.1, color: '#000' }}>{tabContent[activeTab].headline}</h3>
-            <p style={{ fontSize: '1.1rem', color: '#52525b', lineHeight: '1.6', marginBottom: '32px' }}>{tabContent[activeTab].text}</p>
-            <div style={{ fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#000' }} onClick={() => router.push('/explore')}>
-              See Example {activeTab} <span>→</span>
+            {/* Text Side */}
+            <div style={{ padding: '64px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <h3 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '24px', lineHeight: 1.1, color: '#000' }}>{tabContent[activeTab].headline}</h3>
+              <p style={{ fontSize: '1.1rem', color: '#52525b', lineHeight: '1.6', marginBottom: '32px' }}>{tabContent[activeTab].text}</p>
+              <div style={{ fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: '#000' }} onClick={() => router.push('/explore')}>
+                See Example {activeTab} <span>→</span>
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Pricing Section (Restored) */}
-      <section id="pricing" style={{ padding: '120px var(--padding-x)', background: '#fff' }}>
-        <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
-          <h2 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '64px' }}>Simple, transparent pricing.</h2>
+        {/* Pricing Section (Restored) */}
+        <section id="pricing" style={{ padding: '120px var(--padding-x)', background: '#fff' }}>
+          <div style={{ maxWidth: '1000px', margin: '0 auto', textAlign: 'center' }}>
+            <h2 style={{ fontSize: '3rem', fontWeight: 'bold', marginBottom: '64px' }}>Simple, transparent pricing.</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', alignItems: 'center' }}>
-            <div style={{ padding: '48px', background: '#f8fafc', borderRadius: '32px', border: '1px solid #e5e7eb' }}>
-              <div style={{ fontSize: '4rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>5%</div>
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px' }}>Platform Flat Fee</h3>
-              <p style={{ color: '#52525b', lineHeight: '1.6', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
-                We take a <b>flat 5%</b> fee from earnings. No hidden charges, no tiered plans. You keep 95% of what you make, plus direct control over your payouts via the Mantle blockchain.
-              </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '48px', alignItems: 'center' }}>
+              <div style={{ padding: '48px', background: '#f8fafc', borderRadius: '32px', border: '1px solid #e5e7eb' }}>
+                <div style={{ fontSize: '4rem', fontWeight: '800', marginBottom: '16px', color: '#000' }}>5%</div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px' }}>Platform Flat Fee</h3>
+                <p style={{ color: '#52525b', lineHeight: '1.6', fontSize: '1.1rem', maxWidth: '600px', margin: '0 auto' }}>
+                  We take a <b>flat 5%</b> fee from earnings. No hidden charges, no tiered plans. You keep 95% of what you make, plus direct control over your payouts via the Mantle blockchain.
+                </p>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '64px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', textAlign: 'left' }}>
+              <div>
+                <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Why 5%?</h4>
+                <p style={{ color: '#52525b' }}>Most platforms take 10-30%. We use efficient smart contracts to keep costs minimal.</p>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Withdrawals</h4>
+                <p style={{ color: '#52525b' }}>Instant withdrawals to your wallet. You don't have to wait for "payout day".</p>
+              </div>
+              <div>
+                <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Supporter Fees</h4>
+                <p style={{ color: '#52525b' }}>Supporters pay minimal gas fees (cents) for transactions on Mantle.</p>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div style={{ marginTop: '64px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', textAlign: 'left' }}>
-            <div>
-              <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Why 5%?</h4>
-              <p style={{ color: '#52525b' }}>Most platforms take 10-30%. We use efficient smart contracts to keep costs minimal.</p>
-            </div>
-            <div>
-              <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Withdrawals</h4>
-              <p style={{ color: '#52525b' }}>Instant withdrawals to your wallet. You don't have to wait for "payout day".</p>
-            </div>
-            <div>
-              <h4 style={{ fontWeight: 'bold', fontSize: '1.2rem', marginBottom: '8px' }}>Supporter Fees</h4>
-              <p style={{ color: '#52525b' }}>Supporters pay minimal gas fees (cents) for transactions on Mantle.</p>
-            </div>
+        <footer style={{ padding: '80px var(--padding-x)', borderTop: '1px solid #e5e7eb', textAlign: 'center', background: '#fff', color: '#000' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '24px' }}>Backr</h2>
+          <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', color: '#52525b', marginBottom: '48px' }}>
+            <span style={{ cursor: 'pointer' }}>Terms</span>
+            <span style={{ cursor: 'pointer' }}>Privacy</span>
+            <span style={{ cursor: 'pointer' }}>Community Guidelines</span>
           </div>
-        </div>
-      </section>
-
-      <footer style={{ padding: '80px var(--padding-x)', borderTop: '1px solid #e5e7eb', textAlign: 'center', background: '#fff', color: '#000' }}>
-        <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '24px' }}>Backr</h2>
-        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', color: '#52525b', marginBottom: '48px' }}>
-          <span style={{ cursor: 'pointer' }}>Terms</span>
-          <span style={{ cursor: 'pointer' }}>Privacy</span>
-          <span style={{ cursor: 'pointer' }}>Community Guidelines</span>
-        </div>
-        <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>© 2024 Backr Platform. Built on Mantle.</p>
-      </footer>
+          <p style={{ color: '#a1a1aa', fontSize: '0.9rem' }}>© 2024 Backr Platform. Built on Mantle.</p>
+        </footer>
     </div>
   );
 }
