@@ -14,7 +14,7 @@ export default function AudiencePage() {
     const fetchMembers = () => {
         if (!address) return;
         setLoading(true);
-        fetch(`/api/audience?creator=${address}`)
+        fetch(`/api/audience?creator=${address.toLowerCase()}`)
             .then(res => res.json())
             .then(data => {
                 setMembers(data);
