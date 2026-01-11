@@ -16,14 +16,25 @@ export default function PostsPage() {
     const [visibility, setVisibility] = useState('members'); // public, members
     const [minTier, setMinTier] = useState<number>(0);
     const [creatorTiers, setCreatorTiers] = useState<any[]>([]);
+    const [posts, setPosts] = useState<any[]>([]);
+    const [editingPostId, setEditingPostId] = useState<number | null>(null);
 
-    // Load tiers on mount
+    // Load tiers and posts on mount
     useState(() => {
         if (!address) return;
+
+        // Fetch tiers
         fetch(`/api/tiers?address=${address}`)
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) setCreatorTiers(data);
+            });
+
+        // Fetch posts
+        fetch(`/api/posts?creator=${address}`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setPosts(data);
             });
     });
 
@@ -31,31 +42,54 @@ export default function PostsPage() {
         if (!title || !content || !address) return;
         setSaving(true);
 
+        const method = editingPostId ? 'PUT' : 'POST';
+        const body: any = {
+            creatorAddress: address,
+            title,
+            content,
+            teaser,
+            image: postImage,
+            isPublic: visibility === 'public',
+            minTier: visibility === 'public' ? 0 : minTier,
+            createdAt: new Date().toISOString()
+        };
+
+        if (editingPostId) body.id = editingPostId;
+
         await fetch('/api/posts', {
-            method: 'POST',
+            method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                creatorAddress: address,
-                title,
-                content,
-                teaser,
-                image: postImage,
-                isPublic: visibility === 'public',
-                minTier: visibility === 'public' ? 0 : minTier,
-                createdAt: new Date().toISOString()
-            })
+            body: JSON.stringify(body)
         });
+
+        // Refresh posts
+        const res = await fetch(`/api/posts?creator=${address}`);
+        const data = await res.json();
+        if (Array.isArray(data)) setPosts(data);
 
         setSaving(false);
         setTitle('');
         setContent('');
         setTeaser('');
-        alert('Post created!');
+        setPostImage(''); // Clear image too
+        setEditingPostId(null);
+        alert(editingPostId ? 'Post updated!' : 'Post created!');
+    };
+
+    const handleEdit = (post: any) => {
+        setEditingPostId(post.id);
+        setTitle(post.title);
+        setContent(post.content);
+        setTeaser(post.teaser || '');
+        setPostImage(post.image || '');
+        setVisibility(post.isPublic ? 'public' : 'members');
+        setMinTier(post.minTier || 0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '32px' }}>Create Post</h1>
+            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '32px' }}>{editingPostId ? 'Edit Post' : 'Create Post'}</h1>
 
             <Card style={{ marginBottom: '48px' }}>
                 <div style={{ marginBottom: '16px' }}>
@@ -208,10 +242,30 @@ export default function PostsPage() {
                     />
                 </div>
 
-                <div style={{ textAlign: 'right' }}>
-                    <Button onClick={handleCreatePost} disabled={saving}>{saving ? 'Publishing...' : 'Publish Post'}</Button>
+                <div style={{ textAlign: 'right', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
+                    {editingPostId && <Button variant="outline" onClick={() => { setEditingPostId(null); setTitle(''); setContent(''); setTeaser(''); setPostImage(''); }}>Cancel Edit</Button>}
+                    <Button onClick={handleCreatePost} disabled={saving}>{saving ? 'Saving...' : (editingPostId ? 'Update Post' : 'Publish Post')}</Button>
                 </div>
             </Card>
+
+            {/* List of Previous Posts */}
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px' }}>Your Posts</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {posts.map((post) => (
+                    <Card key={post.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                            <div style={{ fontWeight: 'bold', fontSize: '1.1rem', marginBottom: '4px' }}>{post.title}</div>
+                            <div style={{ fontSize: '0.875rem', color: '#a1a1aa' }}>
+                                {new Date(post.createdAt).toLocaleDateString()} • {post.isPublic ? '🌍 Public' : `🔒 Members (Tier ${post.minTier || 0}+)`}
+                            </div>
+                        </div>
+                        <Button variant="outline" onClick={() => handleEdit(post)}>Edit</Button>
+                    </Card>
+                ))}
+                {posts.length === 0 && (
+                    <div style={{ textAlign: 'center', color: '#a1a1aa', padding: '32px' }}>No posts yet.</div>
+                )}
+            </div>
         </div>
     );
 }

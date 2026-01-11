@@ -26,6 +26,19 @@ export default function Dashboard() {
         args: [address],
     });
 
+    const [stats, setStats] = useState({ activeMembers: 0, monthlyRevenue: '0.00', totalWithdrawals: '0.00' });
+
+    // Fetch real stats
+    useEffect(() => {
+        if (!address) return;
+        fetch(`/api/stats?creator=${address}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data && !data.error) setStats(data);
+            })
+            .catch(err => console.error(err));
+    }, [address]);
+
     useEffect(() => {
         if (existingProfile && existingProfile !== '0x0000000000000000000000000000000000000000') {
             setDeployedAddress(existingProfile as Address);
@@ -194,15 +207,15 @@ export default function Dashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', marginBottom: '48px' }}>
                 <Card>
                     <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '8px' }}>Active Members</p>
-                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>0</h3>
+                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>{stats.activeMembers}</h3>
                 </Card>
                 <Card>
                     <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '8px' }}>Monthly Revenue</p>
-                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>$0.00</h3>
+                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>${stats.monthlyRevenue}</h3>
                 </Card>
                 <Card>
                     <p style={{ color: '#a1a1aa', fontSize: '0.875rem', marginBottom: '8px' }}>Total Withdrawals</p>
-                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>$0.00</h3>
+                    <h3 style={{ fontSize: '2.5rem', fontWeight: 'bold' }}>${stats.totalWithdrawals}</h3>
                 </Card>
             </div>
 
