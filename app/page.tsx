@@ -152,8 +152,8 @@ export default function Home() {
         </div>
 
         {/* Mobile Hamburger */}
-        <div className="mobile-only" style={{ zIndex: 51 }}>
-          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', padding: '8px' }}>
+        <div className="mobile-only" style={{ zIndex: 101 }}>
+          <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', padding: '8px', cursor: 'pointer' }}>
             {isMobileMenuOpen ? '✕' : '☰'}
           </button>
         </div>
@@ -161,7 +161,15 @@ export default function Home() {
         {/* Mobile Menu Overlay */}
         {isMobileMenuOpen && (
           <div className="mobile-menu">
-            <div style={{ marginTop: '60px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', paddingTop: '10px' }}>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', padding: '8px 16px', borderRadius: '20px', fontSize: '0.9rem' }}
+              >
+                Close
+              </button>
+            </div>
+            <div style={{ marginTop: '20px' }}>
               <input
                 type="text"
                 placeholder="Search creators..."

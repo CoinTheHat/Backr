@@ -3,6 +3,7 @@
 import { use, useState, useEffect } from 'react';
 import Button from '../components/Button';
 import Card from '../components/Card';
+import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
 import { SUBSCRIPTION_ABI } from '@/utils/abis';
@@ -286,20 +287,22 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto' }}>
             {ToastComponent}
             {ToastComponent}
-            <Button
-                variant="outline"
-                onClick={() => router.push('/')}
-                style={{
-                    marginBottom: '32px',
-                    borderRadius: '24px',
-                    padding: '12px 24px',
-                    fontSize: '1rem',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    background: 'rgba(255,255,255,0.03)'
-                }}
-            >
-                ← Back to Home
-            </Button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                <Button
+                    variant="outline"
+                    onClick={() => router.push('/')}
+                    style={{
+                        borderRadius: '24px',
+                        padding: '12px 24px',
+                        fontSize: '1rem',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        background: 'rgba(255,255,255,0.03)'
+                    }}
+                >
+                    ← Back to Home
+                </Button>
+                <WalletButton />
+            </div>
 
             <header style={{ textAlign: 'center', marginBottom: '64px' }}>
                 <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: avatarUrl ? `url(${avatarUrl}) center/cover` : '#2e333d', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', border: '4px solid #1a1d24' }}>
