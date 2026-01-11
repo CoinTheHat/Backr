@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     marginBottom: '40px',
                     padding: '16px',
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
-                    borderRadius: '16px',
+                    borderRadius: '32px',
                     border: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex',
                     alignItems: 'center',

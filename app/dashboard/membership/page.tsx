@@ -109,21 +109,21 @@ export default function MembershipPage() {
                         {editingIndex === index ? (
                             // Edit Mode
                             <div style={{ display: 'grid', gap: '20px', padding: '24px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
                                     <Input label="Tier Name" value={tier.name} onChange={(e: any) => {
                                         const newTiers = [...tiers];
                                         newTiers[index].name = e.target.value;
                                         setTiers(newTiers);
-                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)' }} />
+                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)', fontSize: '1.1rem', padding: '16px' }} />
                                     <Input label="Price (MNT)" value={tier.price} type="number" onChange={(e: any) => {
                                         const newTiers = [...tiers];
                                         newTiers[index].price = e.target.value;
                                         setTiers(newTiers);
-                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)' }} />
+                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)', fontSize: '1.1rem', padding: '16px' }} />
                                 </div>
 
                                 <div>
-                                    <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Benefits (Comma separated)</label>
+                                    <label style={{ fontSize: '1rem', color: '#a1a1aa', marginBottom: '12px', display: 'block' }}>Benefits (Comma separated)</label>
                                     <textarea
                                         value={tier.benefits.join(', ')}
                                         onChange={(e: any) => {
@@ -133,44 +133,45 @@ export default function MembershipPage() {
                                         }}
                                         style={{
                                             width: '100%',
-                                            padding: '16px',
+                                            padding: '20px',
                                             background: 'rgba(0,0,0,0.2)',
                                             border: '1px solid rgba(255, 255, 255, 0.1)',
                                             borderRadius: '16px',
                                             color: '#fff',
-                                            fontSize: '0.875rem',
+                                            fontSize: '1rem',
                                             fontFamily: 'inherit',
                                             resize: 'vertical',
-                                            minHeight: '100px',
-                                            outline: 'none'
+                                            minHeight: '120px',
+                                            outline: 'none',
+                                            lineHeight: '1.6'
                                         }}
                                         placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
                                     />
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginTop: '8px' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '12px 20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '1rem' }}>
                                         <input type="checkbox" checked={tier.recommended || false} onChange={(e) => {
                                             const newTiers = [...tiers];
                                             newTiers[index].recommended = e.target.checked;
                                             setTiers(newTiers);
-                                        }} />
+                                        }} style={{ transform: 'scale(1.2)' }} />
                                         Recommended Tier
                                     </label>
 
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '12px 20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)', fontSize: '1rem' }}>
                                         <input type="checkbox" checked={tier.active !== false} onChange={(e) => {
                                             const newTiers = [...tiers];
                                             newTiers[index].active = e.target.checked;
                                             setTiers(newTiers);
-                                        }} />
+                                        }} style={{ transform: 'scale(1.2)' }} />
                                         Active
                                     </label>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                                    <Button variant="secondary" onClick={() => setEditingIndex(null)} style={{ borderRadius: '12px' }}>Cancel</Button>
-                                    <Button onClick={() => handleSave(tier)} style={{ borderRadius: '12px' }}>Save & Create on Chain</Button>
+                                <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '24px' }}>
+                                    <Button variant="secondary" onClick={() => setEditingIndex(null)} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem' }}>Cancel</Button>
+                                    <Button onClick={() => handleSave(tier)} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem', fontWeight: 'bold' }}>Save & Create on Chain</Button>
                                 </div>
                             </div>
                         ) : (
