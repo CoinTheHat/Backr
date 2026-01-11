@@ -27,24 +27,7 @@ export default function AudiencePage() {
         fetchMembers();
     }, [address]);
 
-    const generateDemoData = async () => {
-        if (!address) return;
-        // Seed some specific dummy data for this user
-        const dummy = [
-            { subscriberAddress: '0x1010...1010', creatorAddress: address, tierName: 'Supporter', price: '10 MNT', status: 'Active', expiresAt: '2026-02-01', createdAt: new Date().toISOString() },
-            { subscriberAddress: '0x2020...2020', creatorAddress: address, tierName: 'VIP', price: '40 MNT', status: 'Active', expiresAt: '2026-02-15', createdAt: new Date().toISOString() },
-            { subscriberAddress: '0x3030...3030', creatorAddress: address, tierName: 'Supporter', price: '10 MNT', status: 'Expired', expiresAt: '2026-01-01', createdAt: new Date().toISOString() }
-        ];
-
-        for (const sub of dummy) {
-            await fetch('/api/audience', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(sub)
-            });
-        }
-        fetchMembers(); // refresh
-    };
+    // Demo data generation removed
 
     const [search, setSearch] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
