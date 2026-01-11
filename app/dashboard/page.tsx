@@ -155,11 +155,12 @@ export default function Dashboard() {
     }
 
     // Calculate progress
+    // Calculate progress
     const steps = [
-        { label: "Create Profile", done: !!profile },
-        { label: "Deploy Contract", done: !!deployedAddress },
-        { label: "Create First Tier", done: hasTiers }, // Check from Supabase
-        { label: "Customize Public Page", done: !!(profile && profile.description) }
+        { label: "Create Profile", done: true }, // Always true if they are on this dashboard
+        { label: "Deploy Contract", done: !!(profile?.contractAddress && profile.contractAddress.length > 0) },
+        { label: "Create First Tier", done: hasTiers === true },
+        { label: "Customize Public Page", done: !!(profile && profile.description && profile.description !== 'New Creator') }
     ];
 
     // Quick check for tiers if not loaded yet
