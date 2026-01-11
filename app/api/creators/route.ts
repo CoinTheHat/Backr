@@ -25,7 +25,8 @@ export async function POST(request: Request) {
         description,
         avatarUrl: body.avatarUrl,
         socials: body.socials,
-        payoutToken: body.payoutToken
+        payoutToken: body.payoutToken,
+        contractAddress: body.contractAddress
     }, { onConflict: 'address' }).select();
 
     if (error) {

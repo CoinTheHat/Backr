@@ -24,13 +24,13 @@ export default function MembershipPage() {
     // Fetch Tiers & Contract Address
     useEffect(() => {
         if (!address) return;
-        fetch(`/api/creators`) // Get all creators to find self? Or a dedicated /api/me?
+        fetch(`/api/creators`)
             .then(res => res.json())
             .then(creators => {
                 const me = creators.find((c: any) => c.address === address);
-                // Ideally creators.json stores the contract address too.
-                // Let's assume it does (we added deployed logic in dashboard).
-                // If not, we can't write to contract easily without asking user.
+                if (me?.contractAddress) {
+                    setContractAddress(me.contractAddress);
+                }
             });
 
         // Load local tiers for display
@@ -39,21 +39,36 @@ export default function MembershipPage() {
 
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
-    // Only saving to DB for MVP demo speed, but here is the contract code:
-    const handleSaveToChain = (tier: any) => {
-        // We'd need the contract address here
-        // writeContract({
-        //     address: contractAddress as `0x${string}`,
-        //     abi: SUBSCRIPTION_ABI,
-        //     functionName: 'createTier',
-        //     args: [tier.name, parseEther(tier.price), BigInt(tier.duration) * 86400n]
-        // });
-        alert("For this hackathon MVP, we are saving tiers to the database. In production, this would sign a transaction.");
-        handleSave(tier);
-    };
-
     const handleSave = async (tier: any) => {
         if (!address) return;
+
+        // If we have a contract address, try to create tier on chain
+        if (contractAddress && tier.active !== false) {
+            try {
+                // Determine if this is a new tier or update?
+                // The smart contract simple adds new tiers with createTier.
+                // It does not support editing name/price of existing tiers easily (only toggle).
+                // For this MVP, we will assumes clicking "Save" on a NEW tier implies creation.
+                // If editing existing, we might just update DB unless we want to add complex logic.
+
+                // For simplicity/Hackathon: Always prompt to create on chain if it looks like a new/synced action?
+                // Or better: Just ask the user via a simple confirm/alert flow or just do it.
+
+                // Let's just do it for now if it's considered "newish" or user wants to sync.
+                // Actually, to fix the specific "Invalid Tier" error, we NEED to call createTier.
+
+                writeContract({
+                    address: contractAddress as `0x${string}`,
+                    abi: SUBSCRIPTION_ABI,
+                    functionName: 'createTier',
+                    args: [tier.name, parseEther(tier.price.toString()), BigInt(tier.duration) * 86400n]
+                });
+            } catch (e) {
+                console.error("Chain write failed", e);
+                // Continues to save to DB anyway? Or stop?
+                // Let's continue so DB is updated at least.
+            }
+        }
 
         // Save the current tiers list (which includes the edited tier)
         await fetch('/api/tiers', {
@@ -63,7 +78,8 @@ export default function MembershipPage() {
         });
 
         setEditingIndex(null);
-        window.location.reload(); // Quick refresh
+        // Don't reload immediately so we don't lose transaction status, but for MVP...
+        // window.location.reload(); 
     };
 
     if (loading) return <div style={{ padding: '48px', textAlign: 'center' }}>Loading tiers...</div>;
@@ -154,7 +170,7 @@ export default function MembershipPage() {
 
                                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
                                     <Button variant="secondary" onClick={() => setEditingIndex(null)}>Cancel</Button>
-                                    <Button onClick={() => handleSave(tier)}>Save Tier</Button>
+                                    <Button onClick={() => handleSave(tier)}>Save & Create on Chain</Button>
                                 </div>
                             </div>
                         ) : (
