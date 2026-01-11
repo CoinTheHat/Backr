@@ -27,11 +27,29 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-geist-sans)' }}>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @media (max-width: 768px) {
+          .nav-container { padding: 16px !important; flex-wrap: wrap; gap: 16px; }
+          .hero-title { fontSize: 3rem !important; }
+          .hero-desc { fontSize: 1.1rem !important; }
+          .steps-container { flexDirection: column; alignItems: center; gap: 40px !important; }
+          .desktop-only { display: none !important; }
+          .hide-mobile { display: none !important; }
+          .nav-links { display: none !important; } /* Hide nav links on mobile for simplicity or use hamburger */
+        }
+        @keyframes gradientMove {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}} />
+
       {/* Navbar - Reference Match */}
-      <nav style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 10 }}>
+      <nav className="nav-container" style={{ padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1400px', margin: '0 auto', width: '100%', position: 'relative', zIndex: 10 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', background: 'linear-gradient(to right, #22d3ee, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', letterSpacing: '-0.02em', textShadow: '0 0 10px rgba(34, 211, 238, 0.5)' }}>Kinship</h1>
-          <div style={{ display: 'flex', gap: '32px', fontSize: '0.95rem', color: '#a1a1aa', fontWeight: '500' }}>
+          <div className="nav-links" style={{ display: 'flex', gap: '32px', fontSize: '0.95rem', color: '#a1a1aa', fontWeight: '500' }}>
             <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Explore</span>
             <span onClick={() => document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Featured</span>
             <span onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>How it Works</span>
@@ -40,7 +58,13 @@ export default function Home() {
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
           {/* Search Button */}
-          <button style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '1.25rem', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>
+          <button
+            onClick={() => router.push('/explore')}
+            style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '1.25rem', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}
+            aria-label="Search"
+          >
             <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
@@ -56,7 +80,7 @@ export default function Home() {
           {/* Glow behind text */}
           <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '800px', height: '400px', background: 'radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%)', filter: 'blur(80px)', zIndex: -1 }}></div>
 
-          <h2 style={{ fontSize: '6rem', fontWeight: '900', lineHeight: '1', marginBottom: '40px', letterSpacing: '-0.04em', color: '#fff', textShadow: '0 0 40px rgba(139,92,246,0.3)' }}>
+          <h2 className="hero-title" style={{ fontSize: '6rem', fontWeight: '900', lineHeight: '1', marginBottom: '40px', letterSpacing: '-0.04em', color: '#fff', textShadow: '0 0 40px rgba(139,92,246,0.3)' }}>
             Support Creators.<br />
             <span style={{
               background: 'linear-gradient(to right, #c084fc, #6366f1, #2dd4bf)',
@@ -66,19 +90,12 @@ export default function Home() {
               animation: 'gradientMove 5s ease infinite'
             }}>Directly. On-Chain.</span>
           </h2>
-          <style dangerouslySetInnerHTML={{
-            __html: `
-            @keyframes gradientMove {
-              0% { background-position: 0% 50%; }
-              50% { background-position: 100% 50%; }
-              100% { background-position: 0% 50%; }
-            }
-          `}} />
-          <p style={{ fontSize: '1.5rem', color: '#cbd5e1', marginBottom: '56px', maxWidth: '750px', margin: '0 auto 56px', lineHeight: '1.6', fontWeight: '400' }}>
+
+          <p className="hero-desc" style={{ fontSize: '1.5rem', color: '#cbd5e1', marginBottom: '56px', maxWidth: '750px', margin: '0 auto 56px', lineHeight: '1.6', fontWeight: '400' }}>
             The Web3 membership platform for communities that value <strong style={{ color: '#fff' }}>transparency</strong>, <strong style={{ color: '#fff' }}>ownership</strong>, and <strong style={{ color: '#fff' }}>culture</strong> over speculation. <span style={{ opacity: 0.8 }}>Built on Mantle.</span>
           </p>
 
-          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
             <Button onClick={() => router.push('/explore')} variant="primary" style={{ padding: '16px 40px', fontSize: '1.1rem', borderRadius: '24px' }}>
               Explore Creators
             </Button>
@@ -94,7 +111,7 @@ export default function Home() {
           <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '16px', color: '#fff' }}>How it Works</h2>
           <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '80px' }}>Join these top creators building communities on Mantle.</p>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', alignItems: 'flex-start', position: 'relative', paddingTop: '40px', flexWrap: 'wrap' }}>
+          <div className="steps-container" style={{ display: 'flex', justifyContent: 'center', gap: '48px', alignItems: 'flex-start', position: 'relative', paddingTop: '40px', flexWrap: 'wrap' }}>
             {/* Connecting Line (Hidden on mobile) */}
             <div className="desktop-only" style={{ position: 'absolute', top: '75px', left: '20%', right: '20%', height: '2px', background: 'linear-gradient(90deg, rgba(139,92,246,0.5), rgba(45,212,191,0.5))', zIndex: 0 }}></div>
 

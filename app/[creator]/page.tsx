@@ -98,10 +98,39 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const { data: hash, writeContract, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isSubscribedOnChain } = useWaitForTransactionReceipt({ hash });
 
+    import confetti from 'canvas-confetti';
+
+    // ... inside CreatorPage component
+
     useEffect(() => {
         if (isSubscribedOnChain) {
             setIsSubscribed(true);
             setLoading(false);
+
+            // Fire confetti!
+            const duration = 3000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: 5,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#22d3ee', '#c084fc', '#f472b6']
+                });
+                confetti({
+                    particleCount: 5,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#22d3ee', '#c084fc', '#f472b6']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
 
             // Save to Database for "My Memberships" page
             fetch('/api/subscriptions', {
@@ -115,7 +144,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 })
             });
 
-            alert('✅ Subscription successful! Welcome to the community!');
+            // We can replace system alert with our custom toast now if desired, but user likes native alerts sometimes or fireworks.
+            // Keeping alert for immediate feedback or Toast.
+            showToast('Subscription successful! Welcome to the community! 🎉', 'success');
         }
     }, [isSubscribedOnChain, address, creatorId]);
 
@@ -255,7 +286,21 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     return (
         <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto' }}>
             {ToastComponent}
-            <Button variant="outline" onClick={() => router.push('/')} style={{ marginBottom: '24px' }}>← Back to Home</Button>
+            {ToastComponent}
+            <Button
+                variant="outline"
+                onClick={() => router.push('/')}
+                style={{
+                    marginBottom: '32px',
+                    borderRadius: '24px',
+                    padding: '12px 24px',
+                    fontSize: '1rem',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.03)'
+                }}
+            >
+                ← Back to Home
+            </Button>
 
             <header style={{ textAlign: 'center', marginBottom: '64px' }}>
                 <div style={{ width: '120px', height: '120px', borderRadius: '50%', background: avatarUrl ? `url(${avatarUrl}) center/cover` : '#2e333d', margin: '0 auto 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', border: '4px solid #1a1d24' }}>
@@ -434,7 +479,13 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                         const hasAccess = canViewPost(post);
 
                         return (
-                            <Card key={i} style={{ marginBottom: '24px', position: 'relative', overflow: 'hidden' }}>
+                            <Card
+                                key={i}
+                                style={{ marginBottom: '24px', position: 'relative', overflow: 'hidden', cursor: 'pointer', transition: 'transform 0.2s' }}
+                                onClick={() => router.push(`/${creatorId}/posts/${post.id || i}`)} // Fallback to index if no ID for mock
+                                onMouseEnter={(e: any) => e.currentTarget.style.transform = 'translateY(-4px)'}
+                                onMouseLeave={(e: any) => e.currentTarget.style.transform = 'translateY(0)'}
+                            >
                                 <div style={{ marginBottom: '16px' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
                                         <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '8px' }}>{post.title}</h3>

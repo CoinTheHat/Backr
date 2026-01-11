@@ -8,7 +8,10 @@ export async function GET() {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    return NextResponse.json(creators);
+    // Filter out creators who haven't deployed a contract yet
+    const filteredCreators = creators?.filter(c => c.contractAddress && c.contractAddress.length > 0) || [];
+
+    return NextResponse.json(filteredCreators);
 }
 
 export async function POST(request: Request) {
