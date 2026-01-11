@@ -8,10 +8,12 @@ import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
 import { FACTORY_ABI, FACTORY_ADDRESS } from '@/utils/abis';
 import { Address } from 'viem';
+import { useToast } from '../components/Toast';
 
 export default function Dashboard() {
     const { address, isConnected } = useAccount();
     const router = useRouter();
+    const { showToast, ToastComponent } = useToast();
 
     const { data: hash, writeContract } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
@@ -116,6 +118,7 @@ export default function Dashboard() {
         // For MVP, lets just auto-initialize a profile in DB if not found, or show "Create Profile"
         return (
             <div style={{ maxWidth: '600px', margin: '48px auto', textAlign: 'center' }}>
+                {ToastComponent}
                 <h1 style={{ fontSize: '2.5rem', fontWeight: 'bold', marginBottom: '24px' }}>Welcome, Creator!</h1>
                 <p style={{ color: '#a1a1aa', marginBottom: '32px' }}>Let's set up your profile to start receiving payments on Mantle.</p>
                 <Card>
@@ -137,12 +140,12 @@ export default function Dashboard() {
                                     window.location.reload();
                                 } else {
                                     setIsInitializing(false);
-                                    alert('Failed to create profile. Please check console for details.');
+                                    showToast('Failed to create profile.', 'error');
                                 }
                             } catch (e) {
                                 console.error(e);
                                 setIsInitializing(false);
-                                alert('Error connecting to server. Please try again.');
+                                showToast('Error connecting to server. Please try again.', 'error');
                             }
                         }}
                         style={{ width: '100%', opacity: isInitializing ? 0.7 : 1 }}

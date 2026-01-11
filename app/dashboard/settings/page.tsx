@@ -5,9 +5,11 @@ import { useAccount } from 'wagmi';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
+import { useToast } from '../../components/Toast';
 
 export default function SettingsPage() {
     const { address, isConnected } = useAccount();
+    const { showToast, ToastComponent } = useToast();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
@@ -57,13 +59,13 @@ export default function SettingsPage() {
             });
 
             if (res.ok) {
-                alert('Profile updated successfully!');
+                showToast('Profile updated successfully!', 'success');
             } else {
-                alert('Failed to update profile.');
+                showToast('Failed to update profile.', 'error');
             }
         } catch (e) {
             console.error(e);
-            alert('Error updating profile.');
+            showToast('Error updating profile.', 'error');
         } finally {
             setSaving(false);
         }
@@ -74,6 +76,7 @@ export default function SettingsPage() {
 
     return (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+            {ToastComponent}
             <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '32px' }}>Settings</h1>
 
             <Card style={{ marginBottom: '24px' }}>
@@ -235,9 +238,9 @@ export default function SettingsPage() {
                                     if (res.ok) {
                                         window.location.reload();
                                     } else {
-                                        alert('Failed to reset.');
+                                        showToast('Failed to reset.', 'error');
                                     }
-                                } catch (e) { console.error(e); alert('Error resetting.'); }
+                                } catch (e) { console.error(e); showToast('Error resetting.', 'error'); }
                             }
                         }}
                         style={{ background: '#ef4444', color: '#fff', border: 'none' }}
