@@ -36,7 +36,7 @@ export const FACTORY_ABI = [
         ],
         "stateMutability": "view",
         "type": "function"
-    }
+    },
     {
         "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }],
         "name": "isMember",

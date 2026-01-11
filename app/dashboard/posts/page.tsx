@@ -14,6 +14,18 @@ export default function PostsPage() {
     const [postImage, setPostImage] = useState('');
     const [saving, setSaving] = useState(false);
     const [visibility, setVisibility] = useState('members'); // public, members
+    const [minTier, setMinTier] = useState<number>(0);
+    const [creatorTiers, setCreatorTiers] = useState<any[]>([]);
+
+    // Load tiers on mount
+    useState(() => {
+        if (!address) return;
+        fetch(`/api/tiers?address=${address}`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) setCreatorTiers(data);
+            });
+    });
 
     const handleCreatePost = async () => {
         if (!title || !content || !address) return;
@@ -29,6 +41,7 @@ export default function PostsPage() {
                 teaser,
                 image: postImage,
                 isPublic: visibility === 'public',
+                minTier: visibility === 'public' ? 0 : minTier,
                 createdAt: new Date().toISOString()
             })
         });
@@ -85,6 +98,31 @@ export default function PostsPage() {
                             <div style={{ fontSize: '0.875rem', color: '#a1a1aa' }}>Visible to everyone. Good for announcements.</div>
                         </div>
                     </div>
+
+                    {visibility === 'members' && creatorTiers.length > 0 && (
+                        <div style={{ marginTop: '16px' }}>
+                            <label style={{ display: 'block', fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px' }}>Minimum Tier Required</label>
+                            <select
+                                value={minTier}
+                                onChange={(e) => setMinTier(Number(e.target.value))}
+                                style={{
+                                    width: '100%',
+                                    padding: '12px',
+                                    background: '#1a1d24',
+                                    border: '1px solid #2e333d',
+                                    borderRadius: '8px',
+                                    color: '#fff',
+                                    fontSize: '0.875rem',
+                                    outline: 'none'
+                                }}
+                            >
+                                <option value={0}>All Tiers (Basic Access)</option>
+                                {creatorTiers.map((tier, index) => (
+                                    <option key={index} value={index + 1}>{tier.name} (Tier {index + 1})</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                 </div>
 
                 {visibility === 'members' && (
