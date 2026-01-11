@@ -109,18 +109,36 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
                 </div>
 
-                {/* Log Out Section */}
-                <div style={{ marginBottom: '40px' }}>
-                    <Button
-                        variant="secondary"
-                        onClick={() => {
-                            disconnect();
-                            router.push('/');
-                        }}
-                        style={{ width: '100%', justifyContent: 'center', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
-                    >
-                        Log Out
-                    </Button>
+                {/* Creator Profile Preview */}
+                <div style={{
+                    marginBottom: '40px',
+                    padding: '16px',
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
+                    borderRadius: '16px',
+                    border: '1px solid rgba(255,255,255,0.05)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px'
+                }}>
+                    {mounted && profile?.avatarUrl ? (
+                        <img
+                            src={profile.avatarUrl}
+                            alt="Avatar"
+                            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
+                        />
+                    ) : (
+                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#2e333d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            👻
+                        </div>
+                    )}
+                    <div style={{ overflow: 'hidden' }}>
+                        <p style={{ fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {mounted && profile?.name ? profile.name : 'Creator'}
+                        </p>
+                        <p style={{ fontSize: '0.75rem', color: '#a1a1aa', fontFamily: 'monospace' }}>
+                            {mounted && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                        </p>
+                    </div>
                 </div>
 
                 {/* Menu */}
@@ -168,7 +186,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                 <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
                     <div style={{ marginBottom: '16px' }}>
-                        <WalletButton />
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                disconnect();
+                                router.push('/');
+                            }}
+                            style={{ width: '100%', justifyContent: 'center', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                        >
+                            Log Out
+                        </Button>
                     </div>
                 </div>
             </aside>
