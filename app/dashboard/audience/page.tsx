@@ -40,8 +40,14 @@ export default function AudiencePage() {
     });
 
     const handleExportCSV = () => {
-        const headers = ["Member", "Tier", "Join Date", "Price", "Status"];
-        const rows = filteredMembers.map(m => [m.subscriberAddress, m.tierName, new Date(m.createdAt).toLocaleDateString(), m.price, m.status]);
+        const headers = ["Member", "Tier", "Join Date", "Expires", "Status"];
+        const rows = filteredMembers.map(m => [
+            m.subscriberAddress,
+            m.tierName,
+            new Date(m.createdAt).toLocaleDateString(),
+            new Date(m.expiresAt).toLocaleDateString(),
+            m.status
+        ]);
 
         const csvContent = "data:text/csv;charset=utf-8,"
             + headers.join(",") + "\n"
@@ -89,7 +95,7 @@ export default function AudiencePage() {
                             <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Member</th>
                             <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Tier</th>
                             <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Join Date</th>
-                            <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Lifetime</th>
+                            <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Expires</th>
                             <th style={{ padding: '16px', color: '#a1a1aa', fontWeight: '500' }}>Status</th>
                             <th style={{ padding: '16px' }}></th>
                         </tr>
@@ -105,7 +111,7 @@ export default function AudiencePage() {
                                     <td style={{ padding: '16px', fontFamily: 'monospace', color: '#65b3ad' }}>{m.subscriberAddress.slice(0, 6)}...{m.subscriberAddress.slice(-4)}</td>
                                     <td style={{ padding: '16px' }}>{m.tierName}</td>
                                     <td style={{ padding: '16px', color: '#a1a1aa' }}>{new Date(m.createdAt).toLocaleDateString()}</td>
-                                    <td style={{ padding: '16px' }}>{m.price}</td>
+                                    <td style={{ padding: '16px' }}>{new Date(m.expiresAt).toLocaleDateString()}</td>
                                     <td style={{ padding: '16px' }}>
                                         <span style={{
                                             background: m.status === 'Active' ? 'rgba(101, 179, 173, 0.2)' : 'rgba(239, 68, 68, 0.2)',
