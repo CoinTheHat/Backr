@@ -99,27 +99,27 @@ export default function MembershipPage() {
 
             <div style={{ display: 'grid', gap: '24px' }}>
                 {tiers.map((tier, index) => (
-                    <Card key={index} variant={tier.recommended ? 'neon-blue' : 'glass'} style={{ position: 'relative', overflow: 'hidden' }}>
+                    <Card key={index} variant={tier.recommended ? 'neon-blue' : 'glass'} style={{ position: 'relative', overflow: 'hidden', borderRadius: '32px', border: tier.recommended ? undefined : '1px solid rgba(255, 255, 255, 0.08)' }}>
                         {tier.recommended && (
-                            <div style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(76, 201, 240, 0.2)', color: '#4cc9f0', fontSize: '0.75rem', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '12px', borderLeft: '1px solid rgba(76, 201, 240, 0.3)', borderBottom: '1px solid rgba(76, 201, 240, 0.3)' }}>
+                            <div style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(76, 201, 240, 0.2)', color: '#4cc9f0', fontSize: '0.75rem', fontWeight: 'bold', padding: '6px 16px', borderBottomLeftRadius: '20px', borderLeft: '1px solid rgba(76, 201, 240, 0.3)', borderBottom: '1px solid rgba(76, 201, 240, 0.3)' }}>
                                 Recommended
                             </div>
                         )}
 
                         {editingIndex === index ? (
                             // Edit Mode
-                            <div style={{ display: 'grid', gap: '16px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                            <div style={{ display: 'grid', gap: '20px', padding: '8px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
                                     <Input label="Tier Name" value={tier.name} onChange={(e: any) => {
                                         const newTiers = [...tiers];
                                         newTiers[index].name = e.target.value;
                                         setTiers(newTiers);
-                                    }} />
+                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)' }} />
                                     <Input label="Price (MNT)" value={tier.price} type="number" onChange={(e: any) => {
                                         const newTiers = [...tiers];
                                         newTiers[index].price = e.target.value;
                                         setTiers(newTiers);
-                                    }} />
+                                    }} style={{ borderRadius: '16px', background: 'rgba(0,0,0,0.2)' }} />
                                 </div>
 
                                 <div>
@@ -133,65 +133,68 @@ export default function MembershipPage() {
                                         }}
                                         style={{
                                             width: '100%',
-                                            padding: '12px',
-                                            background: '#1a1d24',
-                                            border: '1px solid #2e333d',
-                                            borderRadius: '8px',
+                                            padding: '16px',
+                                            background: 'rgba(0,0,0,0.2)',
+                                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                                            borderRadius: '16px',
                                             color: '#fff',
                                             fontSize: '0.875rem',
                                             fontFamily: 'inherit',
                                             resize: 'vertical',
-                                            minHeight: '80px'
+                                            minHeight: '100px',
+                                            outline: 'none'
                                         }}
                                         placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
                                     />
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <input type="checkbox" checked={tier.recommended || false} onChange={(e) => {
                                             const newTiers = [...tiers];
                                             newTiers[index].recommended = e.target.checked;
-                                            // Ensure only one recommended? For now let multiple be fine.
                                             setTiers(newTiers);
                                         }} />
                                         Recommended Tier
                                     </label>
 
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#fff', cursor: 'pointer', background: 'rgba(255,255,255,0.03)', padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.05)' }}>
                                         <input type="checkbox" checked={tier.active !== false} onChange={(e) => {
                                             const newTiers = [...tiers];
                                             newTiers[index].active = e.target.checked;
                                             setTiers(newTiers);
                                         }} />
-                                        Active (Visible to Fans)
+                                        Active
                                     </label>
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                                    <Button variant="secondary" onClick={() => setEditingIndex(null)}>Cancel</Button>
-                                    <Button onClick={() => handleSave(tier)}>Save & Create on Chain</Button>
+                                    <Button variant="secondary" onClick={() => setEditingIndex(null)} style={{ borderRadius: '12px' }}>Cancel</Button>
+                                    <Button onClick={() => handleSave(tier)} style={{ borderRadius: '12px' }}>Save & Create on Chain</Button>
                                 </div>
                             </div>
                         ) : (
                             // View Mode
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: tier.active === false ? 0.5 : 1 }}>
                                 <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>{tier.name}</h3>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ background: '#2e333d', padding: '4px 12px', borderRadius: '16px', fontSize: '0.875rem', color: '#fff' }}>{tier.price} MNT / mo</span>
-                                            <span style={{ fontSize: '0.75rem', color: '#a1a1aa', border: '1px solid #2e333d', padding: '3px 8px', borderRadius: '12px' }}>Pay with MNT</span>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{tier.name}</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>{tier.price} MNT <span style={{ fontSize: '0.7em', fontWeight: 'normal', opacity: 0.7 }}>/ mo</span></span>
                                         </div>
                                     </div>
-                                    <ul style={{ paddingLeft: '20px', color: '#a1a1aa', fontSize: '0.875rem' }}>
-                                        {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((b: string, i: number) => <li key={i}>{b}</li>) : <li>No benefits listed</li>}
+                                    <ul style={{ paddingLeft: '0', listStyle: 'none', color: '#a1a1aa', fontSize: '0.95rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                                        {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((b: string, i: number) => (
+                                            <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ color: '#65b3ad' }}>✓</span> {b}
+                                            </li>
+                                        )) : <li style={{ fontStyle: 'italic', opacity: 0.6 }}>No benefits listed</li>}
                                     </ul>
                                 </div>
                                 <div style={{ display: 'flex', gap: '12px', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    {tier.active === false && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Paused</span>}
-                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                        <Button variant="secondary" onClick={() => setEditingIndex(index)}>Edit</Button>
+                                    {tier.active === false && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', background: 'rgba(239, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '8px' }}>Paused</span>}
+                                    <div style={{ display: 'flex', gap: '12px' }}>
+                                        <Button variant="secondary" onClick={() => setEditingIndex(index)} style={{ borderRadius: '16px', padding: '8px 20px' }}>Edit</Button>
                                         <Button
                                             variant="secondary"
                                             onClick={async () => {
@@ -206,9 +209,23 @@ export default function MembershipPage() {
                                                     window.location.reload();
                                                 }
                                             }}
-                                            style={{ background: '#991b1b', borderColor: '#991b1b' }}
+                                            style={{
+                                                background: 'rgba(239, 68, 68, 0.1)',
+                                                borderColor: 'rgba(239, 68, 68, 0.2)',
+                                                color: '#ef4444',
+                                                borderRadius: '16px',
+                                                padding: '8px 16px'
+                                            }}
+                                            onMouseEnter={(e: any) => {
+                                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                                                e.currentTarget.style.borderColor = '#ef4444';
+                                            }}
+                                            onMouseLeave={(e: any) => {
+                                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                                e.currentTarget.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                                            }}
                                         >
-                                            Delete
+                                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>🗑️</span>
                                         </Button>
                                     </div>
                                 </div>
