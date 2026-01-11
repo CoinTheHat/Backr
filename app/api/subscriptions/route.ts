@@ -29,11 +29,24 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { subscriberAddress, creatorAddress, tierId, expiry } = body;
 
+    // 1. Resolve Creator Address correctly (Handle Case Sensitivity for FK)
+    // We look for a creator that matches case-insensitively
+    const { data: creatorData } = await supabase
+        .from('creators')
+        .select('address')
+        .ilike('address', creatorAddress)
+        .single();
+
+    // If creator not found in DB, we can't link subscription (FK violation).
+    // Fallback: Use the original if not found (though it will likely fail constraints)
+    // or arguably, we should insert the creator dynamically, but that's risky.
+    const finalCreatorAddress = creatorData?.address || creatorAddress;
+
     const { data, error } = await supabase.from('subscriptions').upsert({
-        subscriberAddress: subscriberAddress.toLowerCase(),
-        creatorAddress: creatorAddress.toLowerCase(),
+        subscriberAddress: subscriberAddress.toLowerCase(), // Subscribers are just addresses, keep normalized
+        creatorAddress: finalCreatorAddress, // Must match creators.address exactly
         "tierId": tierId,
-        "expiresAt": new Date(expiry * 1000).toISOString(), // Convert unix timestamp to ISO
+        "expiresAt": new Date(expiry * 1000).toISOString(),
         "createdAt": new Date().toISOString()
     }, { onConflict: 'subscriberAddress, creatorAddress' }).select();
 
