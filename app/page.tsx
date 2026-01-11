@@ -214,7 +214,7 @@ export default function Home() {
           {featuredCreators.length > 0 ? (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '32px' }}>
               {featuredCreators.map((creator: any) => (
-                <div key={creator.id} onClick={() => router.push(`/${creator.address}`)} style={{ cursor: 'pointer', group: 'hover' }}>
+                <div key={creator.id} onClick={() => router.push(`/${creator.address}`)} style={{ cursor: 'pointer' }}>
                   <div style={{ position: 'relative', height: '240px', borderRadius: '24px', overflow: 'hidden', marginBottom: '16px' }}>
                     {/* Cover mock */}
                     <div style={{ width: '100%', height: '100%', background: creator.avatarUrl ? `url(${creator.avatarUrl}) center/cover` : 'linear-gradient(45deg, #1a1d24, #2e333d)' }}></div>
