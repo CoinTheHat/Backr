@@ -3,8 +3,11 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
+import { useAccount } from 'wagmi';
+
 export default function Home() {
   const router = useRouter();
+  const { isConnected } = useAccount();
 
   const [activeTab, setActiveTab] = useState('Podcasters');
 
@@ -177,15 +180,24 @@ export default function Home() {
           </div>
 
           {/* Right: Actions */}
-          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '16px', alignItems: 'center' }}>
-            <span onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Log In</span>
+          {isConnected ? (
             <button
               onClick={() => router.push('/dashboard')}
               className="pill-btn btn-primary"
             >
-              Get Started
+              Go to Dashboard
             </button>
-          </div>
+          ) : (
+            <>
+              <span onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer', fontWeight: 'bold' }}>Log In</span>
+              <button
+                onClick={() => router.push('/dashboard')}
+                className="pill-btn btn-primary"
+              >
+                Get Started
+              </button>
+            </>
+          )}
         </div>
       </nav>
 
