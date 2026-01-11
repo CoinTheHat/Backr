@@ -98,6 +98,11 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             return;
         }
 
+        if (!creatorContractAddress) {
+            alert("⚠️ Creator contract address not found!\nThe creator needs to re-sync their dashboard or the contract is not deployed yet.");
+            return;
+        }
+
         setLoading(true);
 
         try {
