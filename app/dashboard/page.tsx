@@ -27,6 +27,7 @@ export default function Dashboard() {
     });
 
     const [stats, setStats] = useState({ activeMembers: 0, monthlyRevenue: '0.00', totalWithdrawals: '0.00' });
+    const [isInitializing, setIsInitializing] = useState(false);
 
     // Fetch real stats
     useEffect(() => {
@@ -122,24 +123,31 @@ export default function Dashboard() {
                         <p style={{ marginBottom: '8px', fontWeight: 'bold' }}>Wallet Connected</p>
                         <p style={{ fontFamily: 'monospace', color: '#65b3ad' }}>{address}</p>
                     </div>
-                    <Button onClick={async () => {
-                        try {
-                            const res = await fetch('/api/creators', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ address, name: `Creator ${address?.slice(0, 6)}`, description: 'New Creator' })
-                            });
-                            if (res.ok) {
-                                window.location.reload();
-                            } else {
-                                alert('Failed to create profile. Please try again.');
+                    <Button
+                        disabled={isInitializing}
+                        onClick={async () => {
+                            setIsInitializing(true);
+                            try {
+                                const res = await fetch('/api/creators', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ address, name: `Creator ${address?.slice(0, 6)}`, description: 'New Creator' })
+                                });
+                                if (res.ok) {
+                                    window.location.reload();
+                                } else {
+                                    setIsInitializing(false);
+                                    alert('Failed to create profile. Please check console for details.');
+                                }
+                            } catch (e) {
+                                console.error(e);
+                                setIsInitializing(false);
+                                alert('Error connecting to server. Please try again.');
                             }
-                        } catch (e) {
-                            console.error(e);
-                            alert('Error connecting to server.');
-                        }
-                    }} style={{ width: '100%' }}>
-                        Initialize Dashboard
+                        }}
+                        style={{ width: '100%', opacity: isInitializing ? 0.7 : 1 }}
+                    >
+                        {isInitializing ? 'Initializing...' : 'Initialize Dashboard'}
                     </Button>
                 </Card>
             </div>

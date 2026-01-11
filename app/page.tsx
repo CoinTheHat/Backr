@@ -316,8 +316,8 @@ export default function Home() {
           <div style={{ display: 'flex', gap: '32px', justifyContent: 'center', flexWrap: 'wrap', flexDirection: 'row' }} className="hero-cta">
             <Card variant="glass" style={{ flex: 1, minWidth: '280px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#94a3b8' }}>Platform Fee</h3>
-              <p style={{ fontSize: '3.5rem', fontWeight: '800', color: '#fff', marginBottom: '16px' }}>0%</p>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>We only make money if you do.</p>
+              <p style={{ fontSize: '3.5rem', fontWeight: '800', color: '#fff', marginBottom: '16px' }}>5%</p>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Fair pricing to support development.</p>
             </Card>
             <Card variant="neon-blue" style={{ flex: 1, minWidth: '280px' }}>
               <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#fff' }}>Gas Fees</h3>
