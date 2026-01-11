@@ -200,8 +200,8 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subscriberAddress: address,
-                    creatorAddress: creatorContractAddress,
-                    tierId: memberTierId, // Sync the correct tier from chain
+                    creatorAddress: creatorId, // Use the Creator's Wallet Address (PK), not Contract Address
+                    tierId: memberTierId,
                     expiry: memberExpiry
                 })
             }).then(res => {
