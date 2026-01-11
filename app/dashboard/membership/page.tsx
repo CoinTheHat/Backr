@@ -7,6 +7,7 @@ import Card from '../../components/Card';
 import Input from '../../components/Input';
 import { SUBSCRIPTION_ABI } from '@/utils/abis';
 import { parseEther } from 'viem';
+import { useToast } from '../../components/Toast';
 
 // NOTE: We need the deployed contract address. In a real app we'd fetch it from the graph or Factory.
 // For now, we will ask user to input it or try to fetch from an API if we stored it?
@@ -103,6 +104,7 @@ export default function MembershipPage() {
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+            {ToastComponent}
             <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h1 style={{ fontSize: '2rem', fontWeight: 'bold' }}>Membership Tiers</h1>
