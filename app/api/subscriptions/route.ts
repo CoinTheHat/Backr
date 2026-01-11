@@ -32,8 +32,8 @@ export async function POST(request: Request) {
     const { data, error } = await supabase.from('subscriptions').upsert({
         subscriberAddress: subscriberAddress.toLowerCase(),
         creatorAddress: creatorAddress.toLowerCase(),
-        tierId,
-        expiry: new Date(expiry * 1000).toISOString(), // Convert unix timestamp to ISO
+        "tierId": tierId,
+        "expiresAt": new Date(expiry * 1000).toISOString(), // Convert unix timestamp to ISO
         "createdAt": new Date().toISOString()
     }, { onConflict: 'subscriberAddress, creatorAddress' }).select();
 
