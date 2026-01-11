@@ -163,7 +163,7 @@ export default function EarningsPage() {
             )}
 
             <Card variant="glass" style={{ marginBottom: '48px', padding: '0', overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', divideX: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
                     {/* Available Balance */}
                     <div style={{ padding: '32px', position: 'relative' }}>
                         <div style={{ position: 'relative', zIndex: 1 }}>

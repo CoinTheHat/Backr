@@ -201,9 +201,9 @@ export default function SettingsPage() {
                 </div>
             </Card>
 
-            <Card>
+            <Card variant="glass">
                 <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#fff' }}>Wallet Connection</h2>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#1a1d24', padding: '16px', borderRadius: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
                     <div>
                         <p style={{ color: '#a1a1aa', fontSize: '0.875rem' }}>Connected Address</p>
                         <p style={{ fontFamily: 'monospace', color: '#65b3ad' }}>{address}</p>
