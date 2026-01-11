@@ -14,7 +14,8 @@ export async function GET(request: Request) {
     const { data: subs, error } = await supabase
         .from('subscriptions')
         .select('*')
-        .eq('creatorAddress', creator)
+        .select('*')
+        .ilike('creatorAddress', creator)
         .order('createdAt', { ascending: false });
 
     if (error) {
