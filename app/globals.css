@@ -21,15 +21,21 @@
 }
 
 body {
-  background-color: var(--background);
+  background-color: #030014;
   color: var(--foreground);
-  /* Premium Cosmic Mesh Gradient */
+  /* Galaxy Nebula Background */
   background-image:
-    radial-gradient(circle at 15% 50%, rgba(72, 12, 168, 0.15), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(67, 97, 238, 0.15), transparent 25%),
-    radial-gradient(circle at 50% 50%, rgba(247, 37, 133, 0.05), transparent 50%);
-  background-size: 100% 100%;
-  /* Static or slow moving */
+    radial-gradient(circle at 10% 20%, rgba(76, 29, 149, 0.4) 0%, transparent 40%),
+    /* Deep Purple Top Left */
+    radial-gradient(circle at 90% 80%, rgba(13, 148, 136, 0.2) 0%, transparent 40%),
+    /* Teal Bottom Right */
+    radial-gradient(circle at 50% 50%, rgba(219, 39, 119, 0.1) 0%, transparent 60%),
+    /* Pink Center */
+    radial-gradient(circle at 80% 10%, rgba(79, 70, 229, 0.3) 0%, transparent 50%),
+    /* Indigo Top Right */
+    url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFF' fill-opacity='0.4'%3E%3Ccircle cx='20' cy='30' r='1'/%3E%3Ccircle cx='90' cy='80' r='0.5'/%3E%3Ccircle cx='150' cy='20' r='0.8'/%3E%3Ccircle cx='40' cy='150' r='0.6'/%3E%3Ccircle cx='180' cy='180' r='0.9'/%3E%3Ccircle cx='100' cy='120' r='0.4'/%3E%3C/g%3E%3C/svg%3E");
+  /* Stars */
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 400px 400px;
   background-attachment: fixed;
   min-height: 100vh;
   font-family: var(--font-geist-sans), sans-serif;

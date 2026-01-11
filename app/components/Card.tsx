@@ -12,24 +12,25 @@ export default function Card({ children, className = '', noHover = false, varian
 
     const variants: any = {
         glass: {
-            background: 'rgba(18, 18, 26, 0.6)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.1)',
+            background: 'rgba(13, 13, 18, 0.6)',
+            border: '1px solid rgba(255, 255, 255, 0.05)',
+            boxShadow: '0 4px 30px rgba(0, 0, 0, 0.2)',
         },
         'neon-blue': {
-            background: 'linear-gradient(135deg, rgba(76, 201, 240, 0.1), rgba(0,0,0,0.4))',
-            border: '1px solid rgba(76, 201, 240, 0.3)',
-            boxShadow: '0 0 15px rgba(76, 201, 240, 0.2), inset 0 0 20px rgba(76, 201, 240, 0.05)',
+            // Gradient from bottom accent to transparent top
+            background: 'linear-gradient(180deg, rgba(13, 13, 18, 0.8) 0%, rgba(56, 189, 248, 0.15) 100%)',
+            border: '1px solid rgba(56, 189, 248, 0.4)',
+            boxShadow: '0 0 20px rgba(56, 189, 248, 0.15), inset 0 0 0 1px rgba(56, 189, 248, 0.1)',
         },
         'neon-pink': {
-            background: 'linear-gradient(135deg, rgba(247, 37, 133, 0.1), rgba(0,0,0,0.4))',
-            border: '1px solid rgba(247, 37, 133, 0.3)',
-            boxShadow: '0 0 15px rgba(247, 37, 133, 0.2), inset 0 0 20px rgba(247, 37, 133, 0.05)',
+            background: 'linear-gradient(180deg, rgba(13, 13, 18, 0.8) 0%, rgba(236, 72, 153, 0.15) 100%)',
+            border: '1px solid rgba(236, 72, 153, 0.4)',
+            boxShadow: '0 0 20px rgba(236, 72, 153, 0.15), inset 0 0 0 1px rgba(236, 72, 153, 0.1)',
         },
         'neon-green': {
-            background: 'linear-gradient(135deg, rgba(56, 176, 0, 0.1), rgba(0,0,0,0.4))',
-            border: '1px solid rgba(56, 176, 0, 0.3)',
-            boxShadow: '0 0 15px rgba(56, 176, 0, 0.2), inset 0 0 20px rgba(56, 176, 0, 0.05)',
+            background: 'linear-gradient(180deg, rgba(13, 13, 18, 0.8) 0%, rgba(34, 197, 94, 0.15) 100%)',
+            border: '1px solid rgba(34, 197, 94, 0.4)',
+            boxShadow: '0 0 20px rgba(34, 197, 94, 0.15), inset 0 0 0 1px rgba(34, 197, 94, 0.1)',
         }
     };
 

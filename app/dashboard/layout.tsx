@@ -66,24 +66,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <aside style={{
                 width: '280px',
                 borderRight: '1px solid rgba(255,255,255,0.05)',
-                padding: '24px',
+                padding: '32px 24px',
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'rgba(5, 5, 10, 0.6)',
+                background: 'rgba(5, 5, 10, 0.5)',
                 backdropFilter: 'blur(20px)',
-                position: 'fixed', // Fixed sidebar
+                position: 'fixed',
                 height: '100vh',
                 zIndex: 50
             }}>
-                <div style={{ marginBottom: '40px', paddingLeft: '12px' }}>
+                <div style={{ marginBottom: '40px', paddingLeft: '12px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ fontSize: '1.8rem' }}>💜</div>
                     <h2 style={{
                         fontSize: '1.8rem',
-                        fontWeight: '900',
-                        background: 'linear-gradient(to right, #22d3ee, #67e8f9)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        cursor: 'pointer',
-                        textShadow: '0 0 20px rgba(34, 211, 238, 0.5)'
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        letterSpacing: '-0.02em',
+                        cursor: 'pointer'
                     }} onClick={() => router.push('/')}>Kinship</h2>
                 </div>
 
@@ -95,16 +94,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         style={{
                             width: '100%',
                             padding: '12px 12px 12px 40px',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '12px',
+                            background: 'rgba(255,255,255,0.05)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                            borderRadius: '16px',
                             color: '#fff',
                             fontSize: '0.875rem',
                             outline: 'none',
                             transition: 'all 0.3s'
                         }}
-                        onFocus={(e) => e.target.style.borderColor = '#22d3ee'}
-                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
+                        onFocus={(e) => {
+                            e.target.style.borderColor = 'rgba(157, 78, 221, 0.5)';
+                            e.currentTarget.style.boxShadow = '0 0 15px rgba(157, 78, 221, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                            e.target.style.borderColor = 'rgba(255,255,255,0.08)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
                     />
                     <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
                 </div>
@@ -112,31 +117,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 {/* Creator Profile Preview */}
                 <div style={{
                     marginBottom: '40px',
-                    padding: '16px',
-                    background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
+                    padding: '12px 16px',
+                    background: 'rgba(255,255,255,0.03)',
                     borderRadius: '9999px',
                     border: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px'
-                }}>
+                    gap: '12px',
+                    cursor: 'pointer',
+                    transition: 'background 0.2s'
+                }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}>
                     {mounted && profile?.avatarUrl ? (
                         <img
                             src={profile.avatarUrl}
                             alt="Avatar"
-                            style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }}
+                            style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
                         />
                     ) : (
-                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: '#2e333d', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            👻
+                        <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
+                            🦄
                         </div>
                     )}
                     <div style={{ overflow: 'hidden' }}>
-                        <p style={{ fontWeight: 'bold', fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        <p style={{ fontWeight: 'bold', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>
                             {mounted && profile?.name ? profile.name : 'Creator'}
                         </p>
-                        <p style={{ fontSize: '0.75rem', color: '#a1a1aa', fontFamily: 'monospace' }}>
-                            {mounted && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect Wallet'}
+                        <p style={{ fontSize: '0.7rem', color: '#65b3ad', fontFamily: 'monospace' }}>
+                            {mounted && address ? `${address.slice(0, 6)}...${address.slice(-4)}` : 'Connect'}
                         </p>
                     </div>
                 </div>
@@ -150,34 +157,33 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 key={item.path}
                                 onClick={() => router.push(item.path)}
                                 style={{
-                                    padding: '14px 16px',
+                                    padding: '12px 16px',
                                     borderRadius: '12px',
                                     cursor: 'pointer',
-                                    // Active state: Neon gradient background
-                                    background: isActive ? 'linear-gradient(90deg, rgba(157, 78, 221, 0.2), transparent)' : 'transparent',
-                                    borderLeft: isActive ? '4px solid #9d4edd' : '4px solid transparent',
+                                    // Active state: Gradient background like reference
+                                    background: isActive ? 'linear-gradient(90deg, rgba(88, 28, 135, 0.6) 0%, rgba(139, 92, 246, 0.1) 100%)' : 'transparent',
                                     color: isActive ? '#fff' : '#a1a1aa',
                                     fontWeight: isActive ? '600' : '500',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '16px',
-                                    transition: 'all 0.3s',
-                                    boxShadow: isActive ? '0 0 20px rgba(157, 78, 221, 0.1)' : 'none'
+                                    transition: 'all 0.2s',
+                                    boxShadow: isActive ? '0 4px 12px rgba(88, 28, 135, 0.3)' : 'none'
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isActive) {
-                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                                         e.currentTarget.style.color = '#fff';
+                                        e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!isActive) {
-                                        e.currentTarget.style.background = 'transparent';
                                         e.currentTarget.style.color = '#a1a1aa';
+                                        e.currentTarget.style.background = 'transparent';
                                     }
                                 }}
                             >
-                                <span style={{ fontSize: '1.2rem', filter: isActive ? 'drop-shadow(0 0 5px rgba(157, 78, 221, 0.8))' : 'none' }}>{item.icon}</span>
+                                <span style={{ fontSize: '1.1rem', opacity: isActive ? 1 : 0.7 }}>{item.icon}</span>
                                 {item.label}
                             </div>
                         );
