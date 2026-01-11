@@ -72,20 +72,20 @@ export default function AudiencePage() {
                 <Button variant="outline" onClick={handleExportCSV}>Export CSV</Button>
             </header>
 
-            <Card style={{ padding: '0', overflow: 'hidden' }}>
+            <Card variant="glass" style={{ padding: '0', overflow: 'hidden', borderRadius: '32px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                 {/* Filters */}
-                <div style={{ padding: '16px', borderBottom: '1px solid #2e333d', display: 'flex', gap: '16px' }}>
+                <div style={{ padding: '24px', borderBottom: '1px solid rgba(255, 255, 255, 0.05)', display: 'flex', gap: '16px' }}>
                     <div style={{ flex: 1 }}>
-                        <Input placeholder="Search by address..." value={search} onChange={(e: any) => setSearch(e.target.value)} />
+                        <Input placeholder="Search by address..." value={search} onChange={(e: any) => setSearch(e.target.value)} style={{ borderRadius: '24px', background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)' }} />
                     </div>
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
-                        style={{ background: '#1a1d24', border: '1px solid #2e333d', borderRadius: '8px', color: '#fff', padding: '0 16px', outline: 'none', cursor: 'pointer' }}
+                        style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '24px', color: '#fff', padding: '0 24px', outline: 'none', cursor: 'pointer', height: '48px' }}
                     >
-                        <option value="All">All Status</option>
-                        <option value="Active">Active</option>
-                        <option value="Expired">Expired</option>
+                        <option value="All" style={{ background: '#1a1d24' }}>All Status</option>
+                        <option value="Active" style={{ background: '#1a1d24' }}>Active</option>
+                        <option value="Expired" style={{ background: '#1a1d24' }}>Expired</option>
                     </select>
                 </div>
 

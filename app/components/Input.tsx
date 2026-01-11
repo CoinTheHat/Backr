@@ -28,7 +28,7 @@ export default function Input({ label, ...props }: any) {
         <div style={containerStyle as any}>
             {label && <label style={labelStyle}>{label}</label>}
             <input
-                style={inputStyle}
+                style={{ ...inputStyle, ...props.style }}
                 onFocus={(e) => e.target.style.borderColor = '#65b3ad'}
                 onBlur={(e) => e.target.style.borderColor = '#2e333d'}
                 {...props}
