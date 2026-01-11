@@ -37,6 +37,30 @@ export const FACTORY_ABI = [
         "stateMutability": "view",
         "type": "function"
     }
+    {
+        "inputs": [{ "internalType": "address", "name": "_user", "type": "address" }],
+        "name": "isMember",
+        "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getTiers",
+        "outputs": [{
+            "components": [
+                { "internalType": "string", "name": "name", "type": "string" },
+                { "internalType": "uint256", "name": "price", "type": "uint256" },
+                { "internalType": "uint256", "name": "duration", "type": "uint256" },
+                { "internalType": "bool", "name": "isActive", "type": "bool" }
+            ],
+            "internalType": "struct SubscriptionContract.Tier[]",
+            "name": "",
+            "type": "tuple[]"
+        }],
+        "stateMutability": "view",
+        "type": "function"
+    },
 ];
 
 export const SUBSCRIPTION_ABI = [

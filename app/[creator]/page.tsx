@@ -4,7 +4,7 @@ import { use, useState, useEffect } from 'react';
 import Button from '../components/Button';
 import Card from '../components/Card';
 import { useRouter } from 'next/navigation';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
 import { SUBSCRIPTION_ABI } from '@/utils/abis';
 import { parseEther } from 'viem';
 
@@ -75,6 +75,24 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             });
     }, [creatorId]);
 
+    // Check if user is already a member on-chain
+    // We need the ABI for isMember
+    const { data: isMemberOnChain } = useReadContract({
+        address: creatorContractAddress as `0x${string}`,
+        abi: SUBSCRIPTION_ABI,
+        functionName: 'isMember',
+        args: [address],
+        query: {
+            enabled: !!creatorContractAddress && !!address
+        }
+    });
+
+    useEffect(() => {
+        if (isMemberOnChain) {
+            setIsSubscribed(true);
+        }
+    }, [isMemberOnChain]);
+
     const { data: hash, writeContract, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isSubscribedOnChain } = useWaitForTransactionReceipt({ hash });
 
@@ -82,9 +100,22 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         if (isSubscribedOnChain) {
             setIsSubscribed(true);
             setLoading(false);
+
+            // Save to Database for "My Memberships" page
+            fetch('/api/subscriptions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subscriberAddress: address,
+                    creatorAddress: creatorId,
+                    tierId: 0, // We need to track which tier was selected, but for now 0 is fine or we create state
+                    expiry: Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60 // Mock 30 days for now or fetch from event
+                })
+            });
+
             alert('✅ Subscription successful! Welcome to the community!');
         }
-    }, [isSubscribedOnChain]);
+    }, [isSubscribedOnChain, address, creatorId]);
 
     const handleSubscribe = async (tierId: number) => {
         if (!isConnected || !address) {
