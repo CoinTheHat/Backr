@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 
 export default function WalletButton() {
     const { address, isConnected, chain } = useAccount();
-    const { connect } = useConnect();
+    const { connect, connectors } = useConnect();
     const { disconnect } = useDisconnect();
     const { switchChain } = useSwitchChain();
 
@@ -16,11 +16,13 @@ export default function WalletButton() {
     // We'll rely on wagmi chain definitions.
 
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showConnectModal, setShowConnectModal] = useState(false);
     const [profile, setProfile] = useState<any>(null);
 
     // Fetch user profile on connect
     useEffect(() => {
         if (address) {
+            setShowConnectModal(false); // Close modal on connect
             fetch('/api/creators?includePending=true')
                 .then(res => res.json())
                 .then(creators => {
@@ -36,9 +38,64 @@ export default function WalletButton() {
 
     if (!isConnected) {
         return (
-            <Button onClick={() => connect({ connector: injected() })} style={{ fontSize: '0.875rem', padding: '8px 16px' }} variant="primary">
-                Connect Wallet
-            </Button>
+            <>
+                <Button onClick={() => setShowConnectModal(true)} style={{ fontSize: '0.875rem', padding: '8px 16px' }} variant="primary">
+                    Connect Wallet
+                </Button>
+
+                {showConnectModal && (
+                    <div style={{
+                        position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                        background: 'rgba(0,0,0,0.7)', zIndex: 100,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        backdropFilter: 'blur(5px)'
+                    }} onClick={() => setShowConnectModal(false)}>
+                        <div style={{
+                            background: '#1a1d24', border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px',
+                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                        }} onClick={e => e.stopPropagation()}>
+                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px', textAlign: 'center' }}>Connect Wallet</h3>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                {connectors.map((connector) => (
+                                    <button
+                                        key={connector.uid}
+                                        onClick={() => connect({ connector })}
+                                        style={{
+                                            padding: '16px',
+                                            borderRadius: '16px',
+                                            background: 'rgba(255,255,255,0.03)',
+                                            border: '1px solid rgba(255,255,255,0.05)',
+                                            color: '#fff',
+                                            fontSize: '1rem',
+                                            fontWeight: 'bold',
+                                            cursor: 'pointer',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'space-between',
+                                            transition: 'all 0.2s'
+                                        }}
+                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                    >
+                                        {connector.name}
+                                        {connector.name === 'WalletConnect' && <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Mobile</span>}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                onClick={() => setShowConnectModal(false)}
+                                style={{
+                                    marginTop: '24px', width: '100%', padding: '12px',
+                                    background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer'
+                                }}
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
+            </>
         );
     }
 
