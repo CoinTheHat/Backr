@@ -89,6 +89,44 @@ export default function Home() {
           <p style={{ marginTop: '24px', fontSize: '0.875rem', color: '#64748b' }}>Payments settle on Mantle • Withdraw anytime • No platform lock-in</p>
         </div>
 
+        {/* How It Works - Visual Reference Match (Moved Up) */}
+        <div id="how-it-works" style={{ width: '100%', maxWidth: '1400px', marginBottom: '140px', position: 'relative' }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '16px', color: '#fff' }}>How it Works</h2>
+          <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '80px' }}>Join these top creators building communities on Mantle.</p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', alignItems: 'flex-start', position: 'relative', paddingTop: '40px', flexWrap: 'wrap' }}>
+            {/* Connecting Line (Hidden on mobile) */}
+            <div className="desktop-only" style={{ position: 'absolute', top: '75px', left: '20%', right: '20%', height: '2px', background: 'linear-gradient(90deg, rgba(139,92,246,0.5), rgba(45,212,191,0.5))', zIndex: 0 }}></div>
+
+            {/* Step 1 */}
+            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}>
+                🛠️
+              </div>
+              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Create Tier</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Set prices & perks in minutes.</p>
+            </div>
+
+            {/* Step 2 */}
+            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 0 30px rgba(255,255,255,0.1)' }}>
+                ⛓️
+              </div>
+              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Fans Join on Mantle</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Approve + Pay (MNT or USDC)</p>
+            </div>
+
+            {/* Step 3 */}
+            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(45,212,191,0.3)', boxShadow: '0 0 20px rgba(45,212,191,0.2)' }}>
+                🔓
+              </div>
+              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Exclusive Content Unlocks</h3>
+              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Instant access verified on-chain.</p>
+            </div>
+          </div>
+        </div>
+
         {/* Featured Section (With Real Data) */}
         <div id="featured" style={{ width: '100%', maxWidth: '1400px', marginBottom: '140px', position: 'relative' }}>
           <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '48px', color: '#fff' }}>Featured Creators</h2>
@@ -126,44 +164,6 @@ export default function Home() {
 
           <div style={{ textAlign: 'center', marginTop: '48px' }}>
             <Button variant="secondary" onClick={() => router.push('/explore')} style={{ borderRadius: '24px' }}>View All Creators</Button>
-          </div>
-        </div>
-
-        {/* How It Works - Visual Reference Match (Moved Down) */}
-        <div id="how-it-works" style={{ width: '100%', maxWidth: '1400px', marginBottom: '140px', position: 'relative' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '16px', color: '#fff' }}>How it Works</h2>
-          <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '80px' }}>Join these top creators building communities on Mantle.</p>
-
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', alignItems: 'flex-start', position: 'relative', paddingTop: '40px', flexWrap: 'wrap' }}>
-            {/* Connecting Line (Hidden on mobile) */}
-            <div className="desktop-only" style={{ position: 'absolute', top: '75px', left: '20%', right: '20%', height: '2px', background: 'linear-gradient(90deg, rgba(139,92,246,0.5), rgba(45,212,191,0.5))', zIndex: 0 }}></div>
-
-            {/* Step 1 */}
-            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(139,92,246,0.3)', boxShadow: '0 0 20px rgba(139,92,246,0.2)' }}>
-                🛠️
-              </div>
-              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Create Tier</h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Set prices & perks in minutes.</p>
-            </div>
-
-            {/* Step 2 */}
-            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(255,255,255,0.2)', boxShadow: '0 0 30px rgba(255,255,255,0.1)' }}>
-                ⛓️
-              </div>
-              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Fans Join on Mantle</h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Approve + Pay (MNT or USDC)</p>
-            </div>
-
-            {/* Step 3 */}
-            <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-              <div style={{ width: '70px', height: '70px', margin: '0 auto 24px', background: '#1e293b', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', border: '1px solid rgba(45,212,191,0.3)', boxShadow: '0 0 20px rgba(45,212,191,0.2)' }}>
-                🔓
-              </div>
-              <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Exclusive Content Unlocks</h3>
-              <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Instant access verified on-chain.</p>
-            </div>
           </div>
         </div>
 

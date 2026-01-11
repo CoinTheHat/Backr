@@ -177,8 +177,8 @@ export default function MembershipPage() {
                             // View Mode
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: tier.active === false ? 0.5 : 1 }}>
                                 <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px', paddingLeft: '8px' }}>
-                                        <h3 style={{ fontSize: '1.5rem', fontWeight: '900', color: '#fff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{tier.name}</h3>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
+                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff' }}>{tier.name}</h3>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 16px', borderRadius: '20px', fontSize: '0.9rem', color: '#fff', fontWeight: 'bold' }}>{tier.price} MNT <span style={{ fontSize: '0.7em', fontWeight: 'normal', opacity: 0.7 }}>/ mo</span></span>
                                         </div>
