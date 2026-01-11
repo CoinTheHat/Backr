@@ -123,11 +123,21 @@ export default function Dashboard() {
                         <p style={{ fontFamily: 'monospace', color: '#65b3ad' }}>{address}</p>
                     </div>
                     <Button onClick={async () => {
-                        await fetch('/api/creators', {
-                            method: 'POST',
-                            body: JSON.stringify({ address, name: `Creator ${address?.slice(0, 6)}`, description: 'New Creator' })
-                        });
-                        window.location.reload();
+                        try {
+                            const res = await fetch('/api/creators', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ address, name: `Creator ${address?.slice(0, 6)}`, description: 'New Creator' })
+                            });
+                            if (res.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Failed to create profile. Please try again.');
+                            }
+                        } catch (e) {
+                            console.error(e);
+                            alert('Error connecting to server.');
+                        }
                     }} style={{ width: '100%' }}>
                         Initialize Dashboard
                     </Button>

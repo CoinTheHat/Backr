@@ -11,6 +11,8 @@ export default function Home() {
   const { isConnected } = useAccount();
   const { connect } = useConnect();
   const [featuredCreators, setFeaturedCreators] = require('react').useState([]);
+  const [isSearchOpen, setIsSearchOpen] = require('react').useState(false);
+  const [searchQuery, setSearchQuery] = require('react').useState('');
 
   require('react').useEffect(() => {
     // Fetch top 3 featured creators
@@ -81,18 +83,51 @@ export default function Home() {
           </div>
         </div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-          {/* Search Button */}
-          <button
-            onClick={() => router.push('/explore')}
-            style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '1.25rem', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}
-            aria-label="Search"
-          >
-            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
+          {/* Search Component */}
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            {isSearchOpen && (
+              <input
+                autoFocus
+                type="text"
+                placeholder="Search creators..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
+                  }
+                }}
+                style={{
+                  background: 'rgba(0,0,0,0.5)',
+                  border: '1px solid rgba(255,255,255,0.2)',
+                  borderRadius: '20px',
+                  padding: '8px 16px',
+                  color: '#fff',
+                  outline: 'none',
+                  marginRight: '8px',
+                  width: '200px',
+                  fontSize: '0.9rem'
+                }}
+              />
+            )}
+            <button
+              onClick={() => {
+                if (isSearchOpen && searchQuery) {
+                  router.push(`/explore?q=${encodeURIComponent(searchQuery)}`);
+                } else {
+                  setIsSearchOpen(!isSearchOpen);
+                }
+              }}
+              style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '1.25rem', cursor: 'pointer', padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'color 0.2s' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#fff'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}
+              aria-label="Search"
+            >
+              <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+          </div>
           <WalletButton />
         </div>
       </nav>
