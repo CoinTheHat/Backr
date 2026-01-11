@@ -8,6 +8,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadCont
 import { SUBSCRIPTION_ABI } from '@/utils/abis';
 import { parseEther, Address } from 'viem';
 import { useToast } from '../components/Toast';
+import confetti from 'canvas-confetti';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
     // Unwrap params using React.use() or await in async component. 
@@ -98,9 +99,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const { data: hash, writeContract, isPending } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isSubscribedOnChain } = useWaitForTransactionReceipt({ hash });
 
-    import confetti from 'canvas-confetti';
 
-    // ... inside CreatorPage component
 
     useEffect(() => {
         if (isSubscribedOnChain) {
