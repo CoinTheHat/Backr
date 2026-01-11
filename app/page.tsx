@@ -47,7 +47,7 @@ export default function Home() {
         .steps-container { flex-direction: row; gap: 48px; }
         .step-item { width: 280px; }
         .nav-container { padding: 24px var(--padding-x); }
-        .feature-grid { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+        .feature-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
         .w-full-mobile { width: auto; }
         
         @media (max-width: 768px) {
