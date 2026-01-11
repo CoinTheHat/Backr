@@ -36,17 +36,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }, [address]);
 
 
-    if (!mounted) return null; // or a skeleton loader
+    if (!mounted) return null;
 
     const isCreator = profile?.contractAddress;
+    const displayName = profile?.name || 'Creator';
 
     const menuItems = [
-        { label: 'Home', path: '/dashboard', icon: '🏠' },
+        { label: 'Overview', path: '/dashboard', icon: '📊' },
         ...(isCreator ? [
-            { label: 'Membership', path: '/dashboard/membership', icon: '💎' },
-            { label: 'Posts', path: '/dashboard/posts', icon: '📝' },
+            { label: 'My Page', path: `/${address}`, icon: '🎨', external: true },
             { label: 'Audience', path: '/dashboard/audience', icon: '👥' },
-            { label: 'Earnings', path: '/dashboard/earnings', icon: '💰' },
+            { label: 'Posts', path: '/dashboard/posts', icon: '📝' },
+            { label: 'Membership', path: '/dashboard/membership', icon: '💎' },
+            { label: 'Payouts', path: '/dashboard/earnings', icon: '💰' },
         ] : []),
         { label: 'Settings', path: '/dashboard/settings', icon: '⚙️' },
     ];
@@ -56,13 +58,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return (
             <div style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100vh', background: '#11141a', color: '#fff', textAlign: 'center'
+                height: '100vh', background: '#0f1115', color: '#fff', textAlign: 'center'
             }}>
-                <div style={{ marginBottom: '24px', padding: '24px', background: '#1a1d24', borderRadius: '16px', border: '1px solid #2e333d', maxWidth: '400px', margin: '16px' }}>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '16px' }}>Access Restricted 🔒</h1>
-                    <p style={{ color: '#a1a1aa', marginBottom: '24px' }}>You must connect your wallet to access the Creator Dashboard.</p>
+                <div style={{ marginBottom: '24px', padding: '32px', background: '#13151a', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', maxWidth: '400px', margin: '16px' }}>
+                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '16px' }}>Dashboard Access</h1>
+                    <p style={{ color: '#a1a1aa', marginBottom: '32px' }}>Connect your wallet to manage your creator page.</p>
                     <WalletButton />
-                    <Button variant="outline" style={{ marginTop: '16px', width: '100%', justifyContent: 'center' }} onClick={() => router.push('/')}>
+                    <Button variant="outline" style={{ marginTop: '24px', width: '100%', justifyContent: 'center', borderRadius: '12px' }} onClick={() => router.push('/')}>
                         Return Home
                     </Button>
                 </div>
@@ -71,245 +73,166 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#0f1115', color: '#fff', fontFamily: 'var(--font-geist-sans)' }}>
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .mobile-header { display: none; }
-                .dashboard-sidebar { transition: transform 0.3s ease; }
+                .dashboard-sidebar {
+                    width: 260px;
+                    border-right: 1px solid rgba(255,255,255,0.05);
+                    background: #0f1115;
+                    display: flex;
+                    flex-direction: column;
+                    position: fixed;
+                    top: 0;
+                    bottom: 0;
+                    z-index: 50;
+                    transition: transform 0.3s ease;
+                }
                 
-                @media (min-width: 1024px) {
-                  .dashboard-sidebar { transform: none !important; }
-                  .main-content { flex-direction: row; }
-                  .main-content-spacer { display: block; width: 280px; flex-shrink: 0; }
+                .main-content {
+                    flex: 1;
+                    margin-left: 260px;
+                    min-height: 100vh;
+                    display: flex;
+                    flex-direction: column;
                 }
 
-                @media (max-width: 1023px) {
-                  .main-content-spacer { display: none; }
-                  .dashboard-sidebar { 
-                    transform: translateX(-100%); 
-                    z-index: 100;
-                    width: 100%;
-                    max-width: 320px;
-                    border-right: 1px solid rgba(255,255,255,0.1);
-                    background: #0b0d11; 
-                  }
-                  .dashboard-sidebar.open { transform: translateX(0); }
-                  .mobile-header { 
-                    display: flex; 
-                    padding: 16px 24px; 
-                    background: rgba(5, 5, 10, 0.8); 
-                    backdrop-filter: blur(10px); 
-                    border-bottom: 1px solid rgba(255,255,255,0.05);
-                    justify-content: space-between;
-                    align-items: center;
-                    position: sticky;
-                    top: 0;
-                    z-index: 40;
-                  }
-                  .backdrop {
-                    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-                    background: rgba(0,0,0,0.6);
-                    z-index: 90;
-                    backdrop-filter: blur(4px);
-                  }
-                  .dashboard-main { padding: 24px 16px !important; }
+                @media (max-width: 1024px) {
+                    .dashboard-sidebar { transform: translateX(-100%); }
+                    .dashboard-sidebar.open { transform: translateX(0); }
+                    .main-content { margin-left: 0; }
                 }
+
+                .nav-item {
+                    padding: 10px 16px;
+                    margin: 2px 12px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    color: #a1a1aa;
+                    font-weight: 500;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    font-size: 0.95rem;
+                    transition: all 0.2s;
+                }
+                .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
+                .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; font-weight: 600; }
             `}} />
 
             {/* Mobile Header */}
-            <header className="mobile-header">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'transparent', border: 'none', color: '#fff', fontSize: '1.5rem', cursor: 'pointer', padding: '4px' }}>☰</button>
-                    <span style={{ fontWeight: 'bold', fontSize: '1.2rem', background: 'linear-gradient(to right, #22d3ee, #67e8f9)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Backr</span>
+            <div style={{ display: 'none' }} className="mobile-header-trigger">
+                <style dangerouslySetInnerHTML={{
+                    __html: `
+                    @media (max-width: 1024px) {
+                        .mobile-header-trigger {
+                            display: flex !important;
+                            padding: 16px 24px;
+                            justify-content: space-between;
+                            align-items: center;
+                            border-bottom: 1px solid rgba(255,255,255,0.05);
+                            position: sticky;
+                            top: 0;
+                            background: #0f1115;
+                            z-index: 40;
+                        }
+                    }
+                 `}} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem' }}>☰</button>
+                    <span style={{ fontWeight: 'bold' }}>Backr Dashboard</span>
                 </div>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1a1d24', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    {profile?.avatarUrl ? <img src={profile.avatarUrl} style={{ width: '100%', height: '100%', borderRadius: '50%' }} /> : '👤'}
-                </div>
-            </header>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#22d3ee' }}></div>
+            </div>
 
-            <div style={{ display: 'flex', flex: 1, position: 'relative' }}>
-                {/* Mobile Backdrop */}
-                {isSidebarOpen && <div className="backdrop" onClick={() => setIsSidebarOpen(false)}></div>}
-
-                {/* Sidebar */}
-                <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`} style={{
-                    width: '280px',
-                    borderRight: '1px solid rgba(255,255,255,0.05)',
-                    padding: '32px 24px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    background: 'rgba(5, 5, 10, 0.5)',
-                    backdropFilter: 'blur(20px)',
-                    position: 'fixed',
-                    height: '100vh',
-                    top: 0,
-                    left: 0,
-                    zIndex: 100
-                }}>
-                    <div style={{ marginBottom: '40px', paddingLeft: '12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ fontSize: '1.8rem' }}>💜</div>
-                            <h2 style={{
-                                fontSize: '1.8rem',
-                                fontWeight: 'bold',
-                                color: '#fff',
-                                letterSpacing: '-0.02em',
-                                cursor: 'pointer'
-                            }} onClick={() => router.push('/')}>Backr</h2>
-                        </div>
-                        {/* Close button for mobile */}
-                        <button className="mobile-only" onClick={() => setIsSidebarOpen(false)} style={{ background: 'transparent', border: 'none', color: '#a1a1aa', fontSize: '1.5rem', display: 'none' }}>✕</button>
+            {/* Sidebar */}
+            <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
+                <div style={{ padding: '24px' }}>
+                    <div
+                        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '32px' }}
+                        onClick={() => router.push('/')}
+                    >
+                        {/* Logo */}
+                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Backr</div>
+                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', color: '#a1a1aa' }}>STUDIO</span>
                     </div>
 
-                    {/* Global Search Bar */}
-                    <div style={{ marginBottom: '32px', position: 'relative' }}>
-                        <input
-                            type="text"
-                            placeholder="Search creators..."
-                            style={{
-                                width: '100%',
-                                padding: '12px 12px 12px 40px',
-                                background: 'rgba(255,255,255,0.05)',
-                                border: '1px solid rgba(255,255,255,0.08)',
-                                borderRadius: '16px',
-                                color: '#fff',
-                                fontSize: '0.875rem',
-                                outline: 'none',
-                                transition: 'all 0.3s'
-                            }}
-                            onFocus={(e) => {
-                                e.target.style.borderColor = 'rgba(157, 78, 221, 0.5)';
-                                e.currentTarget.style.boxShadow = '0 0 15px rgba(157, 78, 221, 0.1)';
-                            }}
-                            onBlur={(e) => {
-                                e.target.style.borderColor = 'rgba(255,255,255,0.08)';
-                                e.currentTarget.style.boxShadow = 'none';
-                            }}
-                        />
-                        <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
-                    </div>
-
-                    {/* Creator Profile Preview */}
-                    <div style={{
-                        marginBottom: '40px',
-                        padding: '12px 16px',
-                        background: 'rgba(255,255,255,0.03)',
-                        borderRadius: '9999px',
-                        border: '1px solid rgba(255,255,255,0.05)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        cursor: 'pointer',
-                        transition: 'background 0.2s'
-                    }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.06)'} onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}>
-                        {mounted && profile?.avatarUrl ? (
-                            <img
-                                src={profile.avatarUrl}
-                                alt="Avatar"
-                                style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }}
-                            />
-                        ) : (
-                            <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem' }}>
-                                🦄
-                            </div>
-                        )}
-                        <div style={{ overflow: 'hidden' }}>
-                            <p style={{ fontWeight: 'bold', fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#fff' }}>
-                                {mounted && profile?.name ? profile.name : 'Guest'}
-                            </p>
-                            <p style={{ fontSize: '0.7rem', color: isCreator ? '#65b3ad' : '#f59e0b', fontFamily: 'monospace' }}>
-                                {mounted && address
-                                    ? (isCreator ? 'Verified Creator' : 'Setup Required')
-                                    : 'Connect'}
-                            </p>
-                        </div>
-                    </div>
+                    {/* Quick Action */}
+                    <Button
+                        onClick={() => router.push('/dashboard/posts')}
+                        style={{ width: '100%', justifyContent: 'center', borderRadius: '8px', marginBottom: '24px', fontWeight: '600' }}
+                    >
+                        + Create Post
+                    </Button>
 
                     {/* Menu */}
-                    <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {menuItems.map((item) => {
-                            const isActive = pathname === item.path;
-                            return (
-                                <div
-                                    key={item.path}
-                                    onClick={() => router.push(item.path)}
-                                    style={{
-                                        padding: '12px 16px',
-                                        borderRadius: '12px',
-                                        cursor: 'pointer',
-                                        // Active state: Gradient background like reference
-                                        background: isActive ? 'linear-gradient(90deg, rgba(88, 28, 135, 0.6) 0%, rgba(139, 92, 246, 0.1) 100%)' : 'transparent',
-                                        color: isActive ? '#fff' : '#a1a1aa',
-                                        fontWeight: isActive ? '600' : '500',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        gap: '16px',
-                                        transition: 'all 0.2s',
-                                        boxShadow: isActive ? '0 4px 12px rgba(88, 28, 135, 0.3)' : 'none'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        if (!isActive) {
-                                            e.currentTarget.style.color = '#fff';
-                                            e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (!isActive) {
-                                            e.currentTarget.style.color = '#a1a1aa';
-                                            e.currentTarget.style.background = 'transparent';
-                                        }
-                                    }}
-                                >
-                                    <span style={{ fontSize: '1.1rem', opacity: isActive ? 1 : 0.7 }}>{item.icon}</span>
-                                    {item.label}
-                                </div>
-                            );
-                        })}
-                    </nav>
-
-                    <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-                        <div style={{ marginBottom: '16px' }}>
-                            <Button
-                                variant="secondary"
-                                onClick={() => {
-                                    disconnect();
-                                    router.push('/');
-                                }}
-                                style={{
-                                    width: '100%',
-                                    justifyContent: 'center',
-                                    background: 'rgba(239, 68, 68, 0.1)',
-                                    color: '#ef4444',
-                                    border: '1px solid rgba(239, 68, 68, 0.2)',
-                                    borderRadius: '24px',
-                                    transition: 'all 0.2s',
-                                    fontSize: '1rem',
-                                    fontWeight: 'bold',
-                                    padding: '14px'
-                                }}
-                                onMouseEnter={(e: any) => {
-                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
-                                    e.currentTarget.style.transform = 'translateY(-1px)';
-                                }}
-                                onMouseLeave={(e: any) => {
-                                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                }}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {menuItems.map(item => (
+                            <div
+                                key={item.path}
+                                className={`nav-item ${pathname === item.path ? 'active' : ''}`}
+                                onClick={() => router.push(item.path)}
                             >
-                                Log Out
-                            </Button>
+                                <span style={{ opacity: 0.7 }}>{item.icon}</span>
+                                {item.label}
+                                {item.external && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.5 }}>↗</span>}
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* User Profile at Bottom */}
+                <div style={{ marginTop: 'auto', padding: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : '#22d3ee' }}></div>
+                        <div style={{ overflow: 'hidden' }}>
+                            <div style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{address.slice(0, 6)}...{address.slice(-4)}</div>
                         </div>
                     </div>
-                </aside>
+                    <button
+                        onClick={() => { disconnect(); router.push('/'); }}
+                        style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.85rem', cursor: 'pointer', padding: 0 }}
+                    >
+                        Log Out
+                    </button>
 
-                {/* Main Content Spacer for Fixed Sidebar */}
-                <div className="main-content-spacer"></div>
+                    {/* Mobile Close */}
+                    <button
+                        onClick={() => setIsSidebarOpen(false)}
+                        style={{ display: 'none', marginTop: '16px', width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '8px' }}
+                        className="mobile-close"
+                    >
+                        Close Menu
+                    </button>
+                    <style dangerouslySetInnerHTML={{ __html: `@media(max-width: 1024px) { .mobile-close { display: block !important; } }` }} />
+                </div>
+            </aside>
 
-                {/* Main Content */}
-                <main className="dashboard-main" style={{ flex: 1, padding: '48px', overflowY: 'auto' }}>
+            {/* Backdrop */}
+            {isSidebarOpen && (
+                <div
+                    onClick={() => setIsSidebarOpen(false)}
+                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 45 }}
+                ></div>
+            )}
+
+            {/* Content Area */}
+            <main className="main-content">
+                <header style={{ padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+                        {menuItems.find(i => i.path === pathname)?.label || 'Dashboard'}
+                    </h2>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                        {/* Network Status / Etc */}
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
+                        <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Mantle Network</span>
+                    </div>
+                </header>
+                <div style={{ padding: '40px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
                     {children}
-                </main>
-            </div>
+                </div>
+            </main>
         </div>
     );
 }

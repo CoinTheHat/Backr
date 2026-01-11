@@ -157,103 +157,99 @@ export default function Dashboard() {
         );
     }
 
-    // Calculate progress
+    // ... imports and logic same ...
+
     // Calculate progress
     const steps = [
         { label: "Create Profile", done: true }, // Always true if they are on this dashboard
         { label: "Deploy Contract", done: !!(profile?.contractAddress && profile.contractAddress.length > 0) },
         { label: "Create First Tier", done: hasTiers === true },
-        { label: "Customize Public Page", done: !!(profile && profile.description && profile.description !== 'New Creator') }
+        { label: "Preview Public Page", done: !!(profile && profile.description && profile.description !== 'New Creator') }
     ];
-
-    // Quick check for tiers if not loaded yet
-    // In real app we use a smarter hook. For MVP we can just check if we have tiers state or fetch logic.
-    // Let's assume done if we are here for now or force check? 
-    // We didn't load tiers in this component yet. 
-    // Let's rely on simple localstorage or just 'false' to encourage them to click it?
-    // Actually we can just hardcode 'false' for 'Create First Tier' to nudge them, or fetch.
 
     const completedSteps = steps.filter(s => s.done).length;
     const progress = (completedSteps / steps.length) * 100;
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '32px' }}>Dashboard</h1>
-
-            {/* Onboarding Progress */}
-            {(progress < 100 || !profile?.contractAddress) && (
-                <Card style={{ marginBottom: '48px', border: '1px solid #2e333d', background: '#1a1d24' }}>
-                    <div style={{ marginBottom: '24px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '8px' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Setup Progress</h2>
-                            <span style={{ color: '#65b3ad', fontWeight: 'bold' }}>{completedSteps}/{steps.length} Completed</span>
-                        </div>
-                        <div style={{ width: '100%', height: '8px', background: '#2e333d', borderRadius: '4px', overflow: 'hidden' }}>
-                            <div style={{ width: `${progress}%`, height: '100%', background: '#65b3ad', transition: 'width 0.5s ease-out' }}></div>
-                        </div>
+            {/* Warning if no contract */}
+            {!profile?.contractAddress && !isConfirming && (
+                <div style={{ marginBottom: '32px', padding: '16px 24px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '12px', color: '#fef08a', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+                    <div>
+                        <div style={{ fontWeight: 'bold' }}>Action Required</div>
+                        <div style={{ fontSize: '0.9rem', opacity: 0.9 }}>You need to deploy your contract to start accepting memberships.</div>
                     </div>
+                    <Button onClick={handleDeploy} style={{ marginLeft: 'auto', background: '#eab308', color: '#000', border: 'none' }}>Deploy Now</Button>
+                </div>
+            )}
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px' }}>
+            {/* Stats Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
+                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>Active Members</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>{stats.activeMembers}</div>
+                </Card>
+                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>Monthly Income</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>${stats.monthlyRevenue}</div>
+                </Card>
+                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>30-Day Growth</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em', color: '#22c55e' }}>+0%</div>
+                </Card>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
+                {/* Main: Getting Started */}
+                <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '24px' }}>Getting Started</h3>
+                    <div style={{ background: '#13151a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' }}>
                         {steps.map((step, i) => (
-                            <div key={i} style={{
-                                padding: '16px',
-                                borderRadius: '8px',
-                                background: step.done ? 'rgba(101, 179, 173, 0.1)' : 'rgba(255,255,255,0.02)',
-                                border: step.done ? '1px solid #65b3ad' : '1px solid transparent',
-                                opacity: step.done ? 1 : 0.6
-                            }}>
-                                <div style={{ fontSize: '0.875rem', fontWeight: 'bold', marginBottom: '4px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                    {step.done ? '✅' : '○'} {step.label}
+                            <div key={i} style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '16px', opacity: step.done ? 0.5 : 1 }}>
+                                <div style={{
+                                    width: '24px', height: '24px', borderRadius: '50%',
+                                    border: step.done ? 'none' : '2px solid #a1a1aa',
+                                    background: step.done ? '#22c55e' : 'transparent',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    color: '#000', fontSize: '14px', fontWeight: 'bold'
+                                }}>
+                                    {step.done && '✓'}
                                 </div>
+                                <div style={{ flex: 1, fontWeight: step.done ? 'normal' : '600', textDecoration: step.done ? 'line-through' : 'none' }}>{step.label}</div>
                                 {!step.done && (
                                     <Button
                                         variant="outline"
-                                        style={{ marginTop: '12px', width: '100%', fontSize: '0.75rem', padding: '6px' }}
+                                        style={{ fontSize: '0.8rem', padding: '6px 16px' }}
                                         onClick={() => {
                                             if (i === 1) handleDeploy();
                                             if (i === 2) router.push('/dashboard/membership');
-                                            if (i === 3) router.push('/dashboard/settings');
+                                            if (i === 3) router.push(`/${address}`);
                                         }}
                                         disabled={i === 1 && isConfirming}
                                     >
-                                        {i === 1 && isConfirming ? 'Deploying...' : 'Complete Now'}
+                                        {i === 1 && isConfirming ? 'Working...' : 'Start'}
                                     </Button>
                                 )}
                             </div>
                         ))}
+                        <div style={{ padding: '20px 24px', background: 'rgba(255,255,255,0.01)', textAlign: 'center', color: '#a1a1aa', fontSize: '0.9rem' }}>
+                            {Math.round(progress)}% Complete
+                        </div>
                     </div>
-                </Card>
-            )}
+                </div>
 
-            {/* Quick Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '48px' }}>
-                <Card variant="neon-blue" noHover>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', marginBottom: '8px' }}>Active Members</p>
-                    <p style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(76, 201, 240, 0.5)' }}>
-                        {stats.activeMembers}
-                    </p>
-                </Card>
-                <Card variant="neon-pink" noHover>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', marginBottom: '8px' }}>Monthly Revenue</p>
-                    <p style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(247, 37, 133, 0.5)' }}>
-                        ${stats.monthlyRevenue}
-                    </p>
-                </Card>
-                <Card variant="neon-green" noHover>
-                    <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.875rem', marginBottom: '8px' }}>Total Withdrawals</p>
-                    <p style={{ fontSize: '2.5rem', fontWeight: 'bold', textShadow: '0 0 20px rgba(56, 176, 0, 0.5)' }}>
-                        ${stats.totalWithdrawals}
-                    </p>
-                </Card>
-            </div>
-
-            {/* Activity Feed Placeholder */}
-            <div style={{ marginTop: '48px' }}>
-                <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '24px' }}>Recent Activity</h3>
-                <div style={{ padding: '32px', textAlign: 'center', border: '1px dashed #2e333d', borderRadius: '12px', color: '#52525b' }}>
-                    No activity yet. Share your page to get started!
+                {/* Side: Quick Links */}
+                <div>
+                    <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '24px' }}>Quick Actions</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                        <Button variant="secondary" onClick={() => router.push('/dashboard/posts')} style={{ justifyContent: 'flex-start', padding: '16px' }}>📝 Write a Post</Button>
+                        <Button variant="secondary" onClick={() => router.push('/dashboard/membership')} style={{ justifyContent: 'flex-start', padding: '16px' }}>💎 Edit Tiers</Button>
+                        <Button variant="secondary" onClick={() => router.push(`/${address}`)} style={{ justifyContent: 'flex-start', padding: '16px' }}>👀 View Public Page</Button>
+                    </div>
                 </div>
             </div>
+
         </div>
     );
 }
