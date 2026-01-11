@@ -42,6 +42,23 @@ export default function MembershipPage() {
     const handleSave = async (tier: any) => {
         if (!address) return;
 
+        // Commit raw benefits edits if they exist
+        if (tier.benefitsRaw !== undefined) {
+            tier.benefits = tier.benefitsRaw.split(',').map((b: string) => b.trim()).filter((b: string) => b);
+            delete tier.benefitsRaw;
+            // Update state to reflect commit (optional since we reload or save, but good for UX)
+            const newTiers = [...tiers];
+            // find index of passed tier? We don't have index passed here easily unless we search or pass it.
+            // But 'tier' is a reference to the object in the array if we are lucky? 
+            // Actually React state objects treat them as immutable usually, but let's assume `tier` is the object from the map loop.
+            // Safer to update the tiers array in state.
+            const tierIndex = tiers.findIndex(t => t === tier);
+            if (tierIndex >= 0) {
+                newTiers[tierIndex] = tier;
+                setTiers(newTiers);
+            }
+        }
+
         // If we have a contract address, try to create tier on chain
         if (contractAddress && tier.active !== false) {
             try {
@@ -125,10 +142,10 @@ export default function MembershipPage() {
                                 <div>
                                     <label style={{ fontSize: '1rem', color: '#a1a1aa', marginBottom: '12px', display: 'block' }}>Benefits (Comma separated)</label>
                                     <textarea
-                                        value={tier.benefits.join(', ')}
+                                        value={tier.benefitsRaw !== undefined ? tier.benefitsRaw : tier.benefits.join(', ')}
                                         onChange={(e: any) => {
                                             const newTiers = [...tiers];
-                                            newTiers[index].benefits = e.target.value.split(',').map((b: string) => b.trim()).filter((b: string) => b);
+                                            newTiers[index].benefitsRaw = e.target.value;
                                             setTiers(newTiers);
                                         }}
                                         style={{
@@ -170,7 +187,16 @@ export default function MembershipPage() {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                                    <Button variant="secondary" onClick={() => setEditingIndex(null)} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem' }}>Cancel</Button>
+                                    <Button variant="secondary" onClick={() => {
+                                        // Revert changes on cancel if desired, or just close
+                                        // For benefits, we can clear the raw buffer to reset
+                                        if (tier.benefitsRaw !== undefined) {
+                                            const newTiers = [...tiers];
+                                            delete newTiers[index].benefitsRaw;
+                                            setTiers(newTiers);
+                                        }
+                                        setEditingIndex(null);
+                                    }} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem' }}>Cancel</Button>
                                     <Button onClick={() => handleSave(tier)} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem', fontWeight: 'bold' }}>Save & Create on Chain</Button>
                                 </div>
                             </div>
