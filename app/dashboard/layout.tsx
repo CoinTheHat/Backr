@@ -114,7 +114,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     marginBottom: '40px',
                     padding: '16px',
                     background: 'linear-gradient(135deg, rgba(255,255,255,0.05), transparent)',
-                    borderRadius: '32px',
+                    borderRadius: '9999px',
                     border: '1px solid rgba(255,255,255,0.05)',
                     display: 'flex',
                     alignItems: 'center',
@@ -199,7 +199,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 color: '#ef4444',
                                 border: '1px solid rgba(239, 68, 68, 0.2)',
                                 borderRadius: '24px',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
+                                fontSize: '1.2rem',
+                                fontWeight: 'bold',
+                                padding: '16px'
                             }}
                             onMouseEnter={(e: any) => {
                                 e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
