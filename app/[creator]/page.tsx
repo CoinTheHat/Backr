@@ -226,6 +226,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
     const canViewPost = (post: any) => {
         if (post.isPublic) return true;
+        // Check if the current user is the creator (Owner override)
+        if (address && creatorId && address.toLowerCase() === creatorId.toLowerCase()) return true;
+
         if (!isSubscribed) return false;
         // If subscribed, check minTier
         const minTier = post.minTier || 0;

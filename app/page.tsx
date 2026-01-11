@@ -33,8 +33,8 @@ export default function Home() {
           <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#fff', letterSpacing: '-0.02em' }}>Kinship</h1>
           <div style={{ display: 'flex', gap: '32px', fontSize: '0.95rem', color: '#a1a1aa', fontWeight: '500' }}>
             <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Explore</span>
-            <span onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>How it Works</span>
             <span onClick={() => document.getElementById('featured')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Featured</span>
+            <span onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>How it Works</span>
             <span onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })} style={{ cursor: 'pointer', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#fff'} onMouseLeave={(e) => e.currentTarget.style.color = '#a1a1aa'}>Pricing</span>
           </div>
         </div>
@@ -65,10 +65,10 @@ export default function Home() {
           </p>
 
           <div style={{ display: 'flex', gap: '20px', justifyContent: 'center', alignItems: 'center' }}>
-            <Button onClick={() => router.push('/explore')} variant="primary" style={{ padding: '16px 40px', fontSize: '1.1rem' }}>
+            <Button onClick={() => router.push('/explore')} variant="primary" style={{ padding: '16px 40px', fontSize: '1.1rem', borderRadius: '24px' }}>
               Explore Creators
             </Button>
-            <Button onClick={() => router.push('/dashboard')} variant="secondary" style={{ padding: '16px 40px', fontSize: '1.1rem' }}>
+            <Button onClick={() => router.push('/dashboard')} variant="secondary" style={{ padding: '16px 40px', fontSize: '1.1rem', borderRadius: '24px' }}>
               Start Creating
             </Button>
           </div>
