@@ -5,8 +5,8 @@ import Button from '../components/Button';
 import Card from '../components/Card';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
-import { SUBSCRIPTION_ABI } from '@/utils/abis';
 import { parseEther, Address } from 'viem';
+import { useToast } from '../components/Toast';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
     // Unwrap params using React.use() or await in async component. 
@@ -18,6 +18,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
     const { isConnected, address } = useAccount();
     const router = useRouter();
+    const { showToast, ToastComponent } = useToast();
 
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -208,6 +209,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
     return (
         <div style={{ padding: '48px', maxWidth: '800px', margin: '0 auto' }}>
+            {ToastComponent}
             <Button variant="outline" onClick={() => router.push('/')} style={{ marginBottom: '24px' }}>← Back to Home</Button>
 
             <header style={{ textAlign: 'center', marginBottom: '64px' }}>
