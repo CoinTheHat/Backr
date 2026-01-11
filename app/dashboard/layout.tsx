@@ -192,7 +192,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 disconnect();
                                 router.push('/');
                             }}
-                            style={{ width: '100%', justifyContent: 'center', background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+                            style={{
+                                width: '100%',
+                                justifyContent: 'center',
+                                background: 'rgba(239, 68, 68, 0.1)',
+                                color: '#ef4444',
+                                border: '1px solid rgba(239, 68, 68, 0.2)',
+                                borderRadius: '24px',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e: any) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)';
+                                e.currentTarget.style.transform = 'translateY(-1px)';
+                            }}
+                            onMouseLeave={(e: any) => {
+                                e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}
                         >
                             Log Out
                         </Button>
