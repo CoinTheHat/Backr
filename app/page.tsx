@@ -75,40 +75,14 @@ export default function Home() {
           <p style={{ marginTop: '24px', fontSize: '0.875rem', color: '#64748b' }}>Payments settle on Mantle • Withdraw anytime • No platform lock-in</p>
         </div>
 
-        {/* Featured Section */}
-        <div id="featured" style={{ width: '100%', maxWidth: '1200px', marginBottom: '140px', position: 'relative' }}>
-          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '48px', color: '#fff' }}>Featured Creators</h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '32px' }}>
-            {/* Mock Featured Cards for MVP */}
-            {[1, 2, 3].map((i) => (
-              <Card key={i} variant="glass" style={{ cursor: 'pointer' }} onClick={() => router.push('/explore')}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '16px' }}>
-                  <div style={{ width: '50px', height: '50px', borderRadius: '50%', background: 'linear-gradient(45deg, #8b5cf6, #2dd4bf)' }}></div>
-                  <div>
-                    <h4 style={{ fontWeight: 'bold', color: '#fff' }}>Creator {i}</h4>
-                    <p style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Creating Web3 Art</p>
-                  </div>
-                </div>
-                <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: '1.6' }}>
-                  Exclusive behind-the-scenes content and NFT drops for my inner circle. Join the movement.
-                </p>
-              </Card>
-            ))}
-          </div>
-          <div style={{ textAlign: 'center', marginTop: '40px' }}>
-            <Button variant="outline" onClick={() => router.push('/explore')}>View All Creators</Button>
-          </div>
-        </div>
-
-        {/* How It Works - Visual Reference Match */}
-        <div id="how-it-works" style={{ width: '100%', maxWidth: '1200px', marginBottom: '140px', position: 'relative' }}>
+        {/* How It Works - Visual Reference Match (Moved Up) */}
+        <div id="how-it-works" style={{ width: '100%', maxWidth: '1400px', marginBottom: '140px', position: 'relative' }}>
           <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '16px', color: '#fff' }}>How it Works</h2>
           <p style={{ textAlign: 'center', color: '#94a3b8', marginBottom: '80px' }}>Join these top creators building communities on Mantle.</p>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', position: 'relative', paddingTop: '40px' }}>
-            {/* Connecting Line */}
-            <div style={{ position: 'absolute', top: '75px', left: '150px', right: '150px', height: '2px', background: 'linear-gradient(90deg, rgba(139,92,246,0.5), rgba(45,212,191,0.5))', zIndex: 0 }}></div>
-            <div style={{ position: 'absolute', top: '75px', left: '150px', right: '150px', height: '2px', background: 'linear-gradient(90deg, #8b5cf6, #2dd4bf)', filter: 'blur(4px)', zIndex: 0, opacity: 0.6 }}></div>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '48px', alignItems: 'flex-start', position: 'relative', paddingTop: '40px', flexWrap: 'wrap' }}>
+            {/* Connecting Line (Hidden on mobile) */}
+            <div className="desktop-only" style={{ position: 'absolute', top: '75px', left: '20%', right: '20%', height: '2px', background: 'linear-gradient(90deg, rgba(139,92,246,0.5), rgba(45,212,191,0.5))', zIndex: 0 }}></div>
 
             {/* Step 1 */}
             <div style={{ width: '280px', textAlign: 'center', position: 'relative', zIndex: 1 }}>
@@ -136,6 +110,46 @@ export default function Home() {
               <h3 style={{ fontWeight: 'bold', fontSize: '1.25rem', marginBottom: '8px', color: '#fff' }}>Exclusive Content Unlocks</h3>
               <p style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Instant access verified on-chain.</p>
             </div>
+          </div>
+        </div>
+
+        {/* Featured Section (With Real Data) */}
+        <div id="featured" style={{ width: '100%', maxWidth: '1400px', marginBottom: '140px', position: 'relative' }}>
+          <h2 style={{ fontSize: '2.5rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '48px', color: '#fff' }}>Featured Creators</h2>
+
+          {featuredCreators.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '32px' }}>
+              {featuredCreators.map((creator: any) => (
+                <Card key={creator.id} variant="glass" style={{ cursor: 'pointer', height: '100%', display: 'flex', flexDirection: 'column', borderRadius: '32px' }} onClick={() => router.push(`/${creator.address}`)}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '20px' }}>
+                    {creator.avatarUrl ? (
+                      <img src={creator.avatarUrl} alt={creator.name} style={{ width: '60px', height: '60px', borderRadius: '50%', objectFit: 'cover', border: '2px solid rgba(255,255,255,0.1)' }} />
+                    ) : (
+                      <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'linear-gradient(45deg, #8b5cf6, #2dd4bf)' }}></div>
+                    )}
+                    <div>
+                      <h4 style={{ fontWeight: 'bold', fontSize: '1.1rem', color: '#fff' }}>{creator.name || 'Unnamed Creator'}</h4>
+                      <p style={{ fontSize: '0.85rem', color: '#65b3ad', fontFamily: 'monospace' }}>{creator.address?.slice(0, 6)}...{creator.address?.slice(-4)}</p>
+                    </div>
+                  </div>
+                  <p style={{ color: '#cbd5e1', fontSize: '0.95rem', lineHeight: '1.6', flex: 1, marginBottom: '24px' }}>
+                    {creator.description ? (creator.description.length > 100 ? creator.description.slice(0, 100) + '...' : creator.description) : 'Creating exclusive content for the Web3 community.'}
+                  </p>
+                  <Button variant="outline" style={{ width: '100%', justifyContent: 'center', borderRadius: '16px' }} onClick={(e: any) => {
+                    e.stopPropagation();
+                    router.push(`/${creator.address}`);
+                  }}>View Profile</Button>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '40px', color: '#94a3b8', background: 'rgba(255,255,255,0.02)', borderRadius: '32px' }}>
+              Loading top creators...
+            </div>
+          )}
+
+          <div style={{ textAlign: 'center', marginTop: '48px' }}>
+            <Button variant="secondary" onClick={() => router.push('/explore')} style={{ borderRadius: '24px' }}>View All Creators</Button>
           </div>
         </div>
 
