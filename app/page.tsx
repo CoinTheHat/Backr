@@ -131,6 +131,8 @@ export default function Home() {
             transition: transform 0.2s;
         }
         .cta-button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        .desktop-only { display: none; }
+        @media (min-width: 768px) { .desktop-only { display: block !important; } }
       `}} />
 
       {/* Navigation - Strict Patreon Layout */}
@@ -143,7 +145,7 @@ export default function Home() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           {/* Search removed as requested for homepage */}
-          <div style={{ display: 'none', md: { display: 'block' } }}>
+          <div className="desktop-only" style={{ display: 'none' }}>
             <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>Find Creators</span>
           </div>
           <span onClick={() => router.push('/dashboard')} style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '0.95rem' }}>Log In</span>
@@ -279,14 +281,16 @@ export default function Home() {
           </div>
         </section>
 
-        <footer style={{ padding: '64px var(--padding-x)', borderTop: '1px solid #222', background: '#0a0a0a' }}>
-          <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
-            <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '24px' }}>Ready to start?</h2>
-            <button className="cta-button" onClick={() => router.push('/dashboard')}>
-              Create your page
-            </button>
-          </div>
-        </footer>
+      </main>
+
+      <footer style={{ padding: '64px var(--padding-x)', borderTop: '1px solid #222', background: '#0a0a0a' }}>
+        <div style={{ textAlign: 'center', maxWidth: '600px', margin: '0 auto' }}>
+          <h2 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '24px' }}>Ready to start?</h2>
+          <button className="cta-button" onClick={() => router.push('/dashboard')}>
+            Create your page
+          </button>
+        </div>
+      </footer>
 
     </div>
   );
