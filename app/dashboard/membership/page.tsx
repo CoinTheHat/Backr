@@ -98,127 +98,126 @@ export default function MembershipPage() {
             </header>
 
             <div style={{ display: 'grid', gap: '24px' }}>
-                <div style={{ display: 'grid', gap: '24px' }}>
-                    {tiers.map((tier, index) => (
-                        <Card key={index} variant={tier.recommended ? 'neon-blue' : 'glass'} style={{ position: 'relative', overflow: 'hidden' }}>
-                            {tier.recommended && (
-                                <div style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(76, 201, 240, 0.2)', color: '#4cc9f0', fontSize: '0.75rem', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '12px', borderLeft: '1px solid rgba(76, 201, 240, 0.3)', borderBottom: '1px solid rgba(76, 201, 240, 0.3)' }}>
-                                    Recommended
-                                </div>
-                            )}
+                {tiers.map((tier, index) => (
+                    <Card key={index} variant={tier.recommended ? 'neon-blue' : 'glass'} style={{ position: 'relative', overflow: 'hidden' }}>
+                        {tier.recommended && (
+                            <div style={{ position: 'absolute', top: 0, right: 0, background: 'rgba(76, 201, 240, 0.2)', color: '#4cc9f0', fontSize: '0.75rem', fontWeight: 'bold', padding: '4px 12px', borderBottomLeftRadius: '12px', borderLeft: '1px solid rgba(76, 201, 240, 0.3)', borderBottom: '1px solid rgba(76, 201, 240, 0.3)' }}>
+                                Recommended
+                            </div>
+                        )}
 
-                            {editingIndex === index ? (
-                                // Edit Mode
-                                <div style={{ display: 'grid', gap: '16px' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
-                                        <Input label="Tier Name" value={tier.name} onChange={(e: any) => {
+                        {editingIndex === index ? (
+                            // Edit Mode
+                            <div style={{ display: 'grid', gap: '16px' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '16px' }}>
+                                    <Input label="Tier Name" value={tier.name} onChange={(e: any) => {
+                                        const newTiers = [...tiers];
+                                        newTiers[index].name = e.target.value;
+                                        setTiers(newTiers);
+                                    }} />
+                                    <Input label="Price (MNT)" value={tier.price} type="number" onChange={(e: any) => {
+                                        const newTiers = [...tiers];
+                                        newTiers[index].price = e.target.value;
+                                        setTiers(newTiers);
+                                    }} />
+                                </div>
+
+                                <div>
+                                    <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Benefits (Comma separated)</label>
+                                    <textarea
+                                        value={tier.benefits.join(', ')}
+                                        onChange={(e: any) => {
                                             const newTiers = [...tiers];
-                                            newTiers[index].name = e.target.value;
+                                            newTiers[index].benefits = e.target.value.split(',').map((b: string) => b.trim()).filter((b: string) => b);
+                                            setTiers(newTiers);
+                                        }}
+                                        style={{
+                                            width: '100%',
+                                            padding: '12px',
+                                            background: '#1a1d24',
+                                            border: '1px solid #2e333d',
+                                            borderRadius: '8px',
+                                            color: '#fff',
+                                            fontSize: '0.875rem',
+                                            fontFamily: 'inherit',
+                                            resize: 'vertical',
+                                            minHeight: '80px'
+                                        }}
+                                        placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
+                                    />
+                                </div>
+
+                                <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={tier.recommended || false} onChange={(e) => {
+                                            const newTiers = [...tiers];
+                                            newTiers[index].recommended = e.target.checked;
+                                            // Ensure only one recommended? For now let multiple be fine.
                                             setTiers(newTiers);
                                         }} />
-                                        <Input label="Price (MNT)" value={tier.price} type="number" onChange={(e: any) => {
+                                        Recommended Tier
+                                    </label>
+
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
+                                        <input type="checkbox" checked={tier.active !== false} onChange={(e) => {
                                             const newTiers = [...tiers];
-                                            newTiers[index].price = e.target.value;
+                                            newTiers[index].active = e.target.checked;
                                             setTiers(newTiers);
                                         }} />
-                                    </div>
-
-                                    <div>
-                                        <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Benefits (Comma separated)</label>
-                                        <textarea
-                                            value={tier.benefits.join(', ')}
-                                            onChange={(e: any) => {
-                                                const newTiers = [...tiers];
-                                                newTiers[index].benefits = e.target.value.split(',').map((b: string) => b.trim()).filter((b: string) => b);
-                                                setTiers(newTiers);
-                                            }}
-                                            style={{
-                                                width: '100%',
-                                                padding: '12px',
-                                                background: '#1a1d24',
-                                                border: '1px solid #2e333d',
-                                                borderRadius: '8px',
-                                                color: '#fff',
-                                                fontSize: '0.875rem',
-                                                fontFamily: 'inherit',
-                                                resize: 'vertical',
-                                                minHeight: '80px'
-                                            }}
-                                            placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
-                                        />
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
-                                            <input type="checkbox" checked={tier.recommended || false} onChange={(e) => {
-                                                const newTiers = [...tiers];
-                                                newTiers[index].recommended = e.target.checked;
-                                                // Ensure only one recommended? For now let multiple be fine.
-                                                setTiers(newTiers);
-                                            }} />
-                                            Recommended Tier
-                                        </label>
-
-                                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fff', cursor: 'pointer' }}>
-                                            <input type="checkbox" checked={tier.active !== false} onChange={(e) => {
-                                                const newTiers = [...tiers];
-                                                newTiers[index].active = e.target.checked;
-                                                setTiers(newTiers);
-                                            }} />
-                                            Active (Visible to Fans)
-                                        </label>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
-                                        <Button variant="secondary" onClick={() => setEditingIndex(null)}>Cancel</Button>
-                                        <Button onClick={() => handleSave(tier)}>Save & Create on Chain</Button>
-                                    </div>
+                                        Active (Visible to Fans)
+                                    </label>
                                 </div>
-                            ) : (
-                                // View Mode
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: tier.active === false ? 0.5 : 1 }}>
-                                    <div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-                                            <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>{tier.name}</h3>
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                                <span style={{ background: '#2e333d', padding: '4px 12px', borderRadius: '16px', fontSize: '0.875rem', color: '#fff' }}>{tier.price} MNT / mo</span>
-                                                <span style={{ fontSize: '0.75rem', color: '#a1a1aa', border: '1px solid #2e333d', padding: '3px 8px', borderRadius: '12px' }}>Pay with MNT</span>
-                                            </div>
-                                        </div>
-                                        <ul style={{ paddingLeft: '20px', color: '#a1a1aa', fontSize: '0.875rem' }}>
-                                            {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((b: string, i: number) => <li key={i}>{b}</li>) : <li>No benefits listed</li>}
-                                        </ul>
-                                    </div>
-                                    <div style={{ display: 'flex', gap: '12px', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                        {tier.active === false && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Paused</span>}
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <Button variant="secondary" onClick={() => setEditingIndex(index)}>Edit</Button>
-                                            <Button
-                                                variant="secondary"
-                                                onClick={async () => {
-                                                    if (confirm('Delete this tier?')) {
-                                                        const newTiers = tiers.filter((_, i) => i !== index);
-                                                        setTiers(newTiers);
-                                                        await fetch('/api/tiers', {
-                                                            method: 'POST',
-                                                            headers: { 'Content-Type': 'application/json' },
-                                                            body: JSON.stringify({ address, tiers: newTiers })
-                                                        });
-                                                        window.location.reload();
-                                                    }
-                                                }}
-                                                style={{ background: '#991b1b', borderColor: '#991b1b' }}
-                                            >
-                                                Delete
-                                            </Button>
+
+                                <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', marginTop: '16px' }}>
+                                    <Button variant="secondary" onClick={() => setEditingIndex(null)}>Cancel</Button>
+                                    <Button onClick={() => handleSave(tier)}>Save & Create on Chain</Button>
+                                </div>
+                            </div>
+                        ) : (
+                            // View Mode
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: tier.active === false ? 0.5 : 1 }}>
+                                <div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                                        <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#fff' }}>{tier.name}</h3>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ background: '#2e333d', padding: '4px 12px', borderRadius: '16px', fontSize: '0.875rem', color: '#fff' }}>{tier.price} MNT / mo</span>
+                                            <span style={{ fontSize: '0.75rem', color: '#a1a1aa', border: '1px solid #2e333d', padding: '3px 8px', borderRadius: '12px' }}>Pay with MNT</span>
                                         </div>
                                     </div>
+                                    <ul style={{ paddingLeft: '20px', color: '#a1a1aa', fontSize: '0.875rem' }}>
+                                        {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((b: string, i: number) => <li key={i}>{b}</li>) : <li>No benefits listed</li>}
+                                    </ul>
                                 </div>
-                            )}
-                        </Card>
-                    ))
-                    }
-                </div>
+                                <div style={{ display: 'flex', gap: '12px', flexDirection: 'column', alignItems: 'flex-end' }}>
+                                    {tier.active === false && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase' }}>Paused</span>}
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <Button variant="secondary" onClick={() => setEditingIndex(index)}>Edit</Button>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={async () => {
+                                                if (confirm('Delete this tier?')) {
+                                                    const newTiers = tiers.filter((_, i) => i !== index);
+                                                    setTiers(newTiers);
+                                                    await fetch('/api/tiers', {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ address, tiers: newTiers })
+                                                    });
+                                                    window.location.reload();
+                                                }
+                                            }}
+                                            style={{ background: '#991b1b', borderColor: '#991b1b' }}
+                                        >
+                                            Delete
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </Card>
+                ))
+                }
             </div>
-            );
+        </div>
+    );
 }
