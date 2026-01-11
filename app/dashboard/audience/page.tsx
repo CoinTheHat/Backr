@@ -142,7 +142,6 @@ export default function AudiencePage() {
                                     {loading ? 'Loading...' : (
                                         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
                                             <p>{address ? "No supporters found yet." : "Please connect your wallet."}</p>
-                                            <p>{address ? "No supporters found yet." : "Please connect your wallet."}</p>
                                         </div>
                                     )}
                                 </td>

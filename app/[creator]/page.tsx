@@ -6,7 +6,7 @@ import Card from '../components/Card';
 import { useRouter } from 'next/navigation';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
 import { SUBSCRIPTION_ABI } from '@/utils/abis';
-import { parseEther } from 'viem';
+import { parseEther, Address } from 'viem';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
     // Unwrap params using React.use() or await in async component. 
