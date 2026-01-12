@@ -350,7 +350,7 @@ export default function PostsPage() {
                                                 color: post.status === 'published' ? 'var(--color-success)' : 'var(--color-text-secondary)',
                                                 border: post.status === 'published' ? 'none' : '1px solid var(--color-border)'
                                             }}>
-                                                {post.status.toUpperCase()}
+                                                {(post.status || 'draft').toUpperCase()}
                                             </span>
                                         </td>
                                         <td style={{ padding: '16px 24px', textAlign: 'right' }}>
