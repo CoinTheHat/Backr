@@ -62,7 +62,8 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         query: { enabled: !!creatorContractAddress && !!address }
     });
 
-    const isSubscribed = memberData && Number((memberData as any)[0]) > Math.floor(Date.now() / 1000);
+    // Fix Type Error: Force boolean cast
+    const isSubscribed = memberData ? Number((memberData as any)[0]) > Math.floor(Date.now() / 1000) : false;
     const memberTierId = memberData ? Number((memberData as any)[1]) : -1;
 
     // Subscription Transaction
