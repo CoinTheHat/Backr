@@ -6,13 +6,10 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
+import Dropdown from '../../components/Dropdown';
 import { SUBSCRIPTION_ABI, FACTORY_ABI, FACTORY_ADDRESS } from '@/utils/abis';
 import { parseEther } from 'viem';
 import { useToast } from '../../components/Toast';
-
-// NOTE: We need the deployed contract address. In a real app we'd fetch it from the graph or Factory.
-// For now, we will ask user to input it or try to fetch from an API if we stored it?
-// Let's assume we store it in our JSON DB in previous step!
 
 export default function MembershipPage() {
     const { address } = useAccount();
@@ -20,9 +17,12 @@ export default function MembershipPage() {
     const [tiers, setTiers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [contractAddress, setContractAddress] = useState<string | null>(null);
-    const [pendingTier, setPendingTier] = useState<any>(null);
 
-    // Fallback: Read from Factory if DB is slow
+    // Editor Modal State
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [editingTier, setEditingTier] = useState<any>(null); // { ...tierData, index: number } | null
+
+    // Fallback: Read from Factory
     const { data: factoryProfile } = useReadContract({
         address: FACTORY_ADDRESS as `0x${string}`,
         abi: FACTORY_ABI,
@@ -33,7 +33,7 @@ export default function MembershipPage() {
     const { data: hash, writeContract } = useWriteContract();
     const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
-    // Fetch Tiers & Contract Address
+    // Fetch Data
     useEffect(() => {
         if (!address) return;
 
@@ -46,7 +46,6 @@ export default function MembershipPage() {
                 if (me?.contractAddress) {
                     setContractAddress(me.contractAddress);
                 } else if (factoryProfile && factoryProfile !== '0x0000000000000000000000000000000000000000') {
-                    // Fallback to Factory data
                     setContractAddress(factoryProfile as string);
                 }
             } catch (e) {
@@ -55,245 +54,275 @@ export default function MembershipPage() {
         };
 
         fetchProfile();
-
-        // Load local tiers for display
         fetch(`/api/tiers?address=${address}`).then(res => res.json()).then(setTiers).finally(() => setLoading(false));
     }, [address, factoryProfile]);
 
-    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const handleCreate = () => {
+        setEditingTier({ name: '', price: '', benefits: [], active: true, index: -1 });
+        setIsModalOpen(true);
+    };
 
-    const handleSave = async (tier: any) => {
+    const handleEdit = (tier: any, index: number) => {
+        setEditingTier({ ...tier, index });
+        setIsModalOpen(true);
+    };
+
+    const handleDelete = async (index: number) => {
+        if (!confirm('Are you sure you want to delete this tier? This cannot be undone.')) return;
+        const newTiers = tiers.filter((_, i) => i !== index);
+        setTiers(newTiers);
+        await saveTiersToBackend(newTiers);
+    };
+
+    const handleMove = async (index: number, direction: 'up' | 'down') => {
+        if (direction === 'up' && index === 0) return;
+        if (direction === 'down' && index === tiers.length - 1) return;
+
+        const newTiers = [...tiers];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        [newTiers[index], newTiers[targetIndex]] = [newTiers[targetIndex], newTiers[index]];
+
+        setTiers(newTiers);
+        await saveTiersToBackend(newTiers);
+    };
+
+    const saveTiersToBackend = async (newTiers: any[]) => {
+        try {
+            await fetch('/api/tiers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address, tiers: newTiers })
+            });
+        } catch (e) {
+            console.error("Failed to save tiers", e);
+            showToast('Failed to save changes', 'error');
+        }
+    };
+
+    const onSaveModal = async () => {
         if (!address) return;
 
-        // Commit raw benefits edits if they exist
-        if (tier.benefitsRaw !== undefined) {
-            tier.benefits = tier.benefitsRaw.split(',').map((b: string) => b.trim()).filter((b: string) => b);
-            delete tier.benefitsRaw;
-            // Update state to reflect commit (optional since we reload or save, but good for UX)
-            const newTiers = [...tiers];
-            // find index of passed tier? We don't have index passed here easily unless we search or pass it.
-            // But 'tier' is a reference to the object in the array if we are lucky? 
-            // Actually React state objects treat them as immutable usually, but let's assume `tier` is the object from the map loop.
-            // Safer to update the tiers array in state.
-            const tierIndex = tiers.findIndex(t => t === tier);
-            if (tierIndex >= 0) {
-                newTiers[tierIndex] = tier;
-                setTiers(newTiers);
-            }
-        }
-
-        // Validate Contract Address
-        if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
-            showToast('Contract not deployed or undefined. Please re-deploy from settings if needed.', 'error');
+        // simple validation
+        if (!editingTier.name || !editingTier.price) {
+            alert("Name and Price are required");
             return;
         }
 
-        // If we have a contract address, try to create tier on chain
-        if (tier.active !== false) {
+        // Construct updated tier object
+        const tierToSave = {
+            name: editingTier.name,
+            price: editingTier.price,
+            duration: editingTier.duration || '30', // default to 30 days
+            benefits: editingTier.benefits.filter((b: string) => b.trim() !== ''),
+            active: editingTier.active,
+            recommended: editingTier.recommended
+        };
+
+        // Chain Interaction for NEW tiers or updates if feasible
+        // Current logic: We only create on chain if we think it's new-ish or explicitly wanted?
+        // Reuse previous logic: If active, try createTier. 
+        // Note: Real production apps would track chainId to avoid duplicates.
+        if (tierToSave.active) {
             try {
-                // Determine if this is a new tier or update?
-                // The smart contract simple adds new tiers with createTier.
-                // It does not support editing name/price of existing tiers easily (only toggle).
-                // For this MVP, we will assumes clicking "Save" on a NEW tier implies creation.
-                // If editing existing, we might just update DB unless we want to add complex logic.
-
-                // For simplicity/Hackathon: Always prompt to create on chain if it looks like a new/synced action?
-                // Or better: Just ask the user via a simple confirm/alert flow or just do it.
-
-                // Let's just do it for now if it's considered "newish" or user wants to sync.
-                // Actually, to fix the specific "Invalid Tier" error, we NEED to call createTier.
-
-                writeContract({
-                    address: contractAddress as `0x${string}`,
-                    abi: SUBSCRIPTION_ABI,
-                    functionName: 'createTier',
-                    args: [tier.name, parseEther(tier.price.toString()), BigInt(tier.duration) * BigInt(86400)]
-                });
+                if (!contractAddress || contractAddress === '0x0000000000000000000000000000000000000000') {
+                    showToast('Contract not deployed. Please check settings.', 'error');
+                } else {
+                    // Only write if it's considered a "significant" update or new? 
+                    // For safety in this demo, we ALWAYS attempt to create on chain if user saves active tier,
+                    // BUT this duplicates tiers on chain. 
+                    // Let's assume the user knows what they are doing for this MVP tool.
+                    // Ideally we check if `index === -1`.
+                    if (editingTier.index === -1) {
+                        writeContract({
+                            address: contractAddress as `0x${string}`,
+                            abi: SUBSCRIPTION_ABI,
+                            functionName: 'createTier',
+                            args: [tierToSave.name, parseEther(tierToSave.price.toString()), BigInt(tierToSave.duration) * BigInt(86400)]
+                        });
+                    }
+                }
             } catch (e) {
-                console.error("Chain write failed", e);
-                showToast('Failed to initiate transaction.', 'error');
-                return;
-                // Continues to save to DB anyway? Or stop?
-                // Let's continue so DB is updated at least.
+                console.error("Chain interaction failed", e);
             }
         }
 
-        // Save the current tiers list (which includes the edited tier)
-        await fetch('/api/tiers', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ address, tiers })
-        });
+        // Update Local State
+        let newTiers = [...tiers];
+        if (editingTier.index === -1) {
+            newTiers.push(tierToSave);
+        } else {
+            newTiers[editingTier.index] = tierToSave;
+        }
 
-        setEditingIndex(null);
-        // Don't reload immediately so we don't lose transaction status, but for MVP...
-        // window.location.reload(); 
+        setTiers(newTiers);
+        await saveTiersToBackend(newTiers);
+        setIsModalOpen(false);
     };
 
-    if (loading) return <div style={{ padding: '48px', textAlign: 'center' }}>Loading tiers...</div>;
-
     return (
-        <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+        <div className="page-container" style={{ paddingBottom: '100px' }}>
             {ToastComponent}
-            <header style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                    <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#000' }}>Membership Tiers</h1>
-                    <p style={{ color: '#52525b' }}>Manage your subscription plans and benefits.</p>
-                </div>
-                <Button onClick={() => {
-                    setTiers([...tiers, { name: 'New Tier', price: '10', duration: '30', benefits: [], active: true }]);
-                    setEditingIndex(tiers.length);
-                }}>+ Create Tier</Button>
-            </header>
+            <SectionHeader
+                title="Membership Tiers"
+                description="Manage your subscription plans. Tiers appear on your public page."
+                action={{ label: 'Create Tier', onClick: handleCreate, icon: '＋' }}
+            />
 
-            <div style={{ display: 'grid', gap: '24px' }}>
-                {tiers.map((tier, index) => (
-                    <Card key={index} variant={tier.recommended ? 'neon-blue' : 'glass'} style={{ position: 'relative', overflow: 'hidden', borderRadius: '32px', background: '#fff', border: tier.recommended ? '2px solid #65b3ad' : '1px solid #e4e4e7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)', color: '#000' }}>
-                        {tier.recommended && (
-                            <div style={{ position: 'absolute', top: 0, right: 0, background: '#65b3ad', color: '#fff', fontSize: '0.75rem', fontWeight: 'bold', padding: '6px 16px', borderBottomLeftRadius: '20px' }}>
-                                Recommended
-                            </div>
-                        )}
-
-                        {editingIndex === index ? (
-                            // Edit Mode
-                            <div style={{ display: 'grid', gap: '20px', padding: '24px' }}>
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
-                                    <Input label="Tier Name" value={tier.name} onChange={(e: any) => {
-                                        const newTiers = [...tiers];
-                                        newTiers[index].name = e.target.value;
-                                        setTiers(newTiers);
-                                    }} style={{ fontSize: '1.1rem', padding: '16px' }} />
-                                    <Input label="Price (MNT)" value={tier.price} type="number" onChange={(e: any) => {
-                                        const newTiers = [...tiers];
-                                        newTiers[index].price = e.target.value;
-                                        setTiers(newTiers);
-                                    }} style={{ fontSize: '1.1rem', padding: '16px' }} />
+            {/* Loading / Empty / Grid */}
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '64px', color: 'var(--color-text-tertiary)' }}>Loading tiers...</div>
+            ) : tiers.length === 0 ? (
+                <Card style={{ textAlign: 'center', padding: '64px 24px' }}>
+                    <div style={{ fontSize: '3rem', marginBottom: '24px' }}>💎</div>
+                    <h3 className="text-h3" style={{ marginBottom: '12px' }}>Create your first tier</h3>
+                    <p className="text-body" style={{ color: 'var(--color-text-secondary)', marginBottom: '32px', maxWidth: '400px', margin: '0 auto 32px' }}>
+                        Start earning by offering exclusive content. Simple tiers like "Supporter" (5 MNT) work best to start.
+                    </p>
+                    <Button onClick={handleCreate}>Create Tier</Button>
+                </Card>
+            ) : (
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+                    gap: '24px'
+                }}>
+                    {tiers.map((tier, index) => (
+                        <Card key={index} variant={tier.recommended ? 'neon-blue' : 'surface'} padding="none" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+                            {/* Card Header */}
+                            <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)', background: tier.recommended ? 'var(--color-primary-light)' : 'transparent' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                                    <h3 className="text-h3">{tier.name || 'Untitled Tier'}</h3>
+                                    {tier.active === false && <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: 'var(--color-error)', color: '#fff' }}>HIDDEN</span>}
+                                    {tier.recommended && tier.active !== false && <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', background: 'var(--color-primary)', color: '#fff' }}>TOP</span>}
                                 </div>
-
-                                <div>
-                                    <label style={{ fontSize: '1rem', color: '#52525b', marginBottom: '12px', display: 'block', fontWeight: '600' }}>Benefits (Comma separated)</label>
-                                    <textarea
-                                        value={tier.benefitsRaw !== undefined ? tier.benefitsRaw : tier.benefits.join(', ')}
-                                        onChange={(e: any) => {
-                                            const newTiers = [...tiers];
-                                            newTiers[index].benefitsRaw = e.target.value;
-                                            setTiers(newTiers);
-                                        }}
-                                        style={{
-                                            width: '100%',
-                                            padding: '20px',
-                                            background: '#fff',
-                                            border: '1px solid #e4e4e7',
-                                            borderRadius: '16px',
-                                            color: '#000',
-                                            fontSize: '1rem',
-                                            fontFamily: 'inherit',
-                                            resize: 'vertical',
-                                            minHeight: '120px',
-                                            outline: 'none',
-                                            lineHeight: '1.6'
-                                        }}
-                                        placeholder="e.g., Access to exclusive posts, Monthly Q&A sessions, Discord access"
-                                    />
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '24px', alignItems: 'center', marginTop: '8px' }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#000', cursor: 'pointer', background: '#f4f4f5', padding: '12px 20px', borderRadius: '16px', border: '1px solid #e4e4e7', fontSize: '1rem' }}>
-                                        <input type="checkbox" checked={tier.recommended || false} onChange={(e) => {
-                                            const newTiers = [...tiers];
-                                            newTiers[index].recommended = e.target.checked;
-                                            setTiers(newTiers);
-                                        }} style={{ transform: 'scale(1.2)' }} />
-                                        Recommended Tier
-                                    </label>
-
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#000', cursor: 'pointer', background: '#f4f4f5', padding: '12px 20px', borderRadius: '16px', border: '1px solid #e4e4e7', fontSize: '1rem' }}>
-                                        <input type="checkbox" checked={tier.active !== false} onChange={(e) => {
-                                            const newTiers = [...tiers];
-                                            newTiers[index].active = e.target.checked;
-                                            setTiers(newTiers);
-                                        }} style={{ transform: 'scale(1.2)' }} />
-                                        Active
-                                    </label>
-                                </div>
-
-                                <div style={{ display: 'flex', gap: '16px', justifyContent: 'flex-end', marginTop: '24px' }}>
-                                    <Button variant="secondary" onClick={() => {
-                                        // Revert changes on cancel if desired, or just close
-                                        // For benefits, we can clear the raw buffer to reset
-                                        if (tier.benefitsRaw !== undefined) {
-                                            const newTiers = [...tiers];
-                                            delete newTiers[index].benefitsRaw;
-                                            setTiers(newTiers);
-                                        }
-                                        setEditingIndex(null);
-                                    }} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem' }}>Cancel</Button>
-                                    <Button onClick={() => handleSave(tier)} style={{ borderRadius: '16px', padding: '12px 32px', fontSize: '1rem', fontWeight: 'bold' }}>Save & Create on Chain</Button>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '4px' }}>
+                                    <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-text-primary)' }}>{tier.price} MNT</span>
+                                    <span style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>/ month</span>
                                 </div>
                             </div>
-                        ) : (
-                            // View Mode
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: tier.active === false ? 0.5 : 1, padding: '24px', color: '#000' }}>
-                                <div>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '12px' }}>
-                                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: '#000' }}>{tier.name}</h3>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                            <span style={{ background: '#f4f4f5', padding: '6px 16px', borderRadius: '20px', fontSize: '0.9rem', color: '#000', fontWeight: 'bold', border: '1px solid #e4e4e7' }}>{tier.price} MNT <span style={{ fontSize: '0.7em', fontWeight: 'normal', opacity: 0.7 }}>/ mo</span></span>
-                                        </div>
-                                    </div>
-                                    <ul style={{ paddingLeft: '0', listStyle: 'none', color: '#52525b', fontSize: '0.95rem', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                                        {tier.benefits && tier.benefits.length > 0 ? tier.benefits.map((b: string, i: number) => (
-                                            <li key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                <span style={{ color: '#65b3ad' }}>✓</span> {b}
+
+                            {/* Benefits */}
+                            <div style={{ padding: '24px', flex: 1 }}>
+                                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--color-text-tertiary)', marginBottom: '12px', letterSpacing: '0.05em' }}>Includes</div>
+                                {tier.benefits && tier.benefits.length > 0 ? (
+                                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        {tier.benefits.slice(0, 5).map((b: string, i: number) => (
+                                            <li key={i} style={{ display: 'flex', alignItems: 'start', gap: '10px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
+                                                <span style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>✓</span> {b}
                                             </li>
-                                        )) : <li style={{ fontStyle: 'italic', opacity: 0.6 }}>No benefits listed</li>}
+                                        ))}
+                                        {tier.benefits.length > 5 && <li style={{ fontSize: '0.8rem', color: 'var(--color-text-tertiary)', paddingLeft: '20px' }}>+ {tier.benefits.length - 5} more...</li>}
                                     </ul>
-                                </div>
-                                <div style={{ display: 'flex', gap: '12px', flexDirection: 'column', alignItems: 'flex-end' }}>
-                                    {tier.active === false && <span style={{ color: '#ef4444', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', background: '#fef2f2', padding: '4px 8px', borderRadius: '8px', border: '1px solid #fecaca' }}>Paused</span>}
-                                    <div style={{ display: 'flex', gap: '12px' }}>
-                                        <Button variant="secondary" onClick={() => setEditingIndex(index)} style={{ borderRadius: '16px', padding: '8px 20px' }}>Edit</Button>
-                                        <Button
-                                            variant="secondary"
-                                            onClick={async () => {
-                                                if (confirm('Delete this tier?')) {
-                                                    const newTiers = tiers.filter((_, i) => i !== index);
-                                                    setTiers(newTiers);
-                                                    await fetch('/api/tiers', {
-                                                        method: 'POST',
-                                                        headers: { 'Content-Type': 'application/json' },
-                                                        body: JSON.stringify({ address, tiers: newTiers })
-                                                    });
-                                                    window.location.reload();
-                                                }
-                                            }}
-                                            style={{
-                                                background: '#fef2f2',
-                                                borderColor: '#fecaca',
-                                                color: '#ef4444',
-                                                borderRadius: '16px',
-                                                padding: '8px 16px'
-                                            }}
-                                            onMouseEnter={(e: any) => {
-                                                e.currentTarget.style.background = '#fee2e2';
-                                                e.currentTarget.style.borderColor = '#ef4444';
-                                            }}
-                                            onMouseLeave={(e: any) => {
-                                                e.currentTarget.style.background = '#fef2f2';
-                                                e.currentTarget.style.borderColor = '#fecaca';
-                                            }}
-                                        >
-                                            <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>🗑️</span>
-                                        </Button>
-                                    </div>
-                                </div>
+                                ) : (
+                                    <div style={{ fontStyle: 'italic', color: 'var(--color-text-tertiary)', fontSize: '0.9rem' }}>No benefits added yet.</div>
+                                )}
                             </div>
-                        )}
-                    </Card>
-                ))
+
+                            {/* Actions Footer */}
+                            <div style={{ padding: '16px 24px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                <Button variant="secondary" size="sm" onClick={() => handleEdit(tier, index)} style={{ flex: 1 }}>Edit Tier</Button>
+
+                                <Dropdown trigger={<Button variant="ghost" size="sm" style={{ padding: '8px' }}>•••</Button>}>
+                                    <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', minWidth: '140px' }}>
+                                        <button className="dropdown-item" onClick={() => handleMove(index, 'up')} disabled={index === 0}>Move Up</button>
+                                        <button className="dropdown-item" onClick={() => handleMove(index, 'down')} disabled={index === tiers.length - 1}>Move Down</button>
+                                        <div style={{ height: '1px', background: 'var(--color-border)', margin: '4px 0' }}></div>
+                                        <button className="dropdown-item text-error" onClick={() => handleDelete(index)}>Delete</button>
+                                    </div>
+                                </Dropdown>
+                            </div>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
+            {/* EDIT MODAL OVERLAY */}
+            {isModalOpen && editingTier && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)',
+                    zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+                }}>
+                    <div className="card-surface" style={{ width: '100%', maxWidth: '600px', maxHeight: '90vh', overflowY: 'auto', padding: '32px', position: 'relative' }}>
+                        <h2 className="text-h2" style={{ marginBottom: '24px' }}>{editingTier.index === -1 ? 'Create New Tier' : 'Edit Tier'}</h2>
+
+                        <div style={{ display: 'grid', gap: '24px' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                <Input label="Name" value={editingTier.name} onChange={(e) => setEditingTier({ ...editingTier, name: e.target.value })} placeholder="e.g. VIP" />
+                                <Input label="Price (MNT)" type="number" value={editingTier.price} onChange={(e) => setEditingTier({ ...editingTier, price: e.target.value })} placeholder="0.0" />
+                            </div>
+
+                            {/* Benefits Builder */}
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '12px' }}>Member Benefits</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px' }}>
+                                    {editingTier.benefits.map((benefit: string, i: number) => (
+                                        <div key={i} style={{ display: 'flex', gap: '8px' }}>
+                                            <input
+                                                className="focus-ring"
+                                                value={benefit}
+                                                onChange={(e) => {
+                                                    const newBenefits = [...editingTier.benefits];
+                                                    newBenefits[i] = e.target.value;
+                                                    setEditingTier({ ...editingTier, benefits: newBenefits });
+                                                }}
+                                                style={{ flex: 1, padding: '10px 16px', borderRadius: '8px', border: '1px solid var(--color-border)' }}
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    const newBenefits = editingTier.benefits.filter((_: any, idx: number) => idx !== i);
+                                                    setEditingTier({ ...editingTier, benefits: newBenefits });
+                                                }}
+                                                style={{ padding: '0 12px', color: 'var(--color-text-tertiary)', background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.2rem' }}
+                                            >
+                                                ×
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <Button variant="secondary" size="sm" onClick={() => setEditingTier({ ...editingTier, benefits: [...editingTier.benefits, ''] })}>
+                                    + Add Benefit
+                                </Button>
+                            </div>
+
+                            {/* Toggles */}
+                            <div style={{ display: 'flex', gap: '24px', padding: '16px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-md)' }}>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 500 }}>
+                                    <input type="checkbox" checked={editingTier.recommended} onChange={(e) => setEditingTier({ ...editingTier, recommended: e.target.checked })} />
+                                    Recommended Tier
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 500 }}>
+                                    <input type="checkbox" checked={editingTier.active} onChange={(e) => setEditingTier({ ...editingTier, active: e.target.checked })} />
+                                    Active (Visible)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', marginTop: '32px' }}>
+                            <Button variant="ghost" onClick={() => setIsModalOpen(false)}>Cancel</Button>
+                            <Button onClick={onSaveModal}>Save Tier</Button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .dropdown-item {
+                    text-align: left;
+                    padding: 8px 12px;
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    border-radius: 4px;
+                    color: var(--color-text-primary);
+                    font-size: 0.875rem;
                 }
-            </div>
+                .dropdown-item:hover { background: var(--color-bg-page); }
+                .dropdown-item:disabled { opacity: 0.5; cursor: not-allowed; }
+                .dropdown-item.text-error { color: var(--color-error); }
+                .dropdown-item.text-error:hover { background: #fee2e2; }
+            `}} />
         </div>
     );
 }
