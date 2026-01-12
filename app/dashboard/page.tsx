@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import Button from '../components/Button';
 import Card from '../components/Card';
-import SectionHeader from '../components/SectionHeader';
 import StatCard from '../components/StatCard';
 import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
@@ -105,7 +104,13 @@ export default function Dashboard() {
     const completedSteps = steps.filter(s => s.done).length;
     const progress = (completedSteps / steps.length) * 100;
     const isSetupComplete = progress === 100;
+    // Default collapsed if complete
     const [showChecklist, setShowChecklist] = useState(!isSetupComplete);
+
+    useEffect(() => {
+        // If complete, ensure it starts hidden
+        if (isSetupComplete) setShowChecklist(false);
+    }, [isSetupComplete]);
 
     if (!isConnected) {
         return (
@@ -161,13 +166,15 @@ export default function Dashboard() {
     return (
         <div className="page-container">
             {ToastComponent}
-            <SectionHeader
-                title="Overview"
-                description="Track members, revenue, and quick actions."
-            >
-                <Button variant="secondary" onClick={() => window.open(`/${address}`, '_blank')}>View Public Page ↗</Button>
-                <Button onClick={() => router.push('/dashboard/posts')}>Write a Post</Button>
-            </SectionHeader>
+
+            {/* Header - Simplified to avoid duplication with Layout Header */}
+            <div style={{ marginBottom: '32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                    <h1 className="text-h2" style={{ color: 'var(--color-text-primary)' }}>Welcome back, {profile.name || 'Creator'}</h1>
+                    <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)' }}>Here's what's happening with your page today.</p>
+                </div>
+                <Button onClick={() => router.push('/dashboard/posts')}>+ Create Post</Button>
+            </div>
 
             {/* Warning if no contract */}
             {!profile?.contractAddress && !isConfirming && (
@@ -215,24 +222,18 @@ export default function Dashboard() {
 
             <div className="dashboard-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '32px' }}>
 
-                {/* Left Column: Getting Started */}
-                <div>
-                    {isSetupComplete && !showChecklist ? (
-                        <Card padding="md" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--color-primary-light)', borderColor: 'var(--color-primary)' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <span style={{ fontSize: '1.5rem' }}>🎉</span>
-                                <div style={{ color: 'var(--color-primary-hover)' }}>
-                                    <div style={{ fontWeight: 700 }}>You're all set up!</div>
-                                    <div className="text-caption" style={{ color: 'var(--color-primary-hover)' }}>Your page is ready to accept members.</div>
-                                </div>
-                            </div>
-                            <Button variant="ghost" size="sm" onClick={() => setShowChecklist(true)}>View Checklist</Button>
-                        </Card>
-                    ) : (
+                {/* Left Column: Activity & Insights */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+
+                    {/* Getting Started (Collapsable) */}
+                    {!isSetupComplete || showChecklist ? (
                         <Card padding="none" style={{ overflow: 'hidden' }}>
                             <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <h3 className="text-h3" style={{ color: 'var(--color-text-primary)' }}>Getting Started</h3>
-                                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{Math.round(progress)}% Complete</div>
+                                <div>
+                                    <h3 className="text-h3" style={{ color: 'var(--color-text-primary)' }}>Getting Started</h3>
+                                    <p className="text-caption">Complete these steps to launch.</p>
+                                </div>
+                                <div style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>{Math.round(progress)}%</div>
                             </div>
 
                             {/* Progress Bar */}
@@ -242,21 +243,19 @@ export default function Dashboard() {
 
                             {steps.map((step, i) => (
                                 <div key={i} style={{
-                                    padding: '24px',
+                                    padding: '20px 24px',
                                     borderBottom: i < steps.length - 1 ? '1px solid var(--color-border)' : 'none',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '16px',
                                     background: step.done ? 'var(--color-bg-surface-hover)' : 'transparent',
-                                    transition: 'background 0.2s'
                                 }}>
-                                    {/* Icon/Check */}
                                     <div style={{
-                                        width: '32px', height: '32px', borderRadius: '50%',
+                                        width: '24px', height: '24px', borderRadius: '50%',
                                         border: step.done ? 'none' : '2px solid var(--color-border)',
                                         background: step.done ? 'var(--color-success)' : 'transparent',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: '#fff', fontSize: '16px', fontWeight: 'bold',
+                                        color: '#fff', fontSize: '12px', fontWeight: 'bold',
                                         flexShrink: 0
                                     }}>
                                         {step.done ? '✓' : i + 1}
@@ -265,18 +264,16 @@ export default function Dashboard() {
                                     <div style={{ flex: 1 }}>
                                         <div style={{
                                             fontWeight: 600,
+                                            fontSize: '0.95rem',
                                             textDecoration: step.done ? 'line-through' : 'none',
                                             color: step.done ? 'var(--color-text-secondary)' : 'var(--color-text-primary)'
                                         }}>
                                             {step.label}
                                         </div>
-                                        <div className="text-body-sm" style={{ color: 'var(--color-text-tertiary)' }}>{step.description}</div>
                                     </div>
 
                                     <div>
-                                        {step.done ? (
-                                            <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '4px 12px', borderRadius: '12px', background: 'var(--color-bg-page)', color: 'var(--color-text-secondary)' }}>DONE</span>
-                                        ) : (
+                                        {!step.done && (
                                             <Button
                                                 variant="outline"
                                                 size="sm"
@@ -287,115 +284,146 @@ export default function Dashboard() {
                                                 }}
                                                 disabled={i === 1 && isConfirming}
                                             >
-                                                {i === 1 && isConfirming ? 'Working...' : 'Start'}
+                                                Start
                                             </Button>
                                         )}
                                     </div>
                                 </div>
                             ))}
-                            {isSetupComplete && (
-                                <div style={{ padding: '16px', textAlign: 'center' }}>
-                                    <Button variant="ghost" size="sm" onClick={() => setShowChecklist(false)}>Hide Checklist</Button>
-                                </div>
-                            )}
+                        </Card>
+                    ) : null}
+
+                    {/* Revenue Insight Chart (Placeholder) */}
+                    {isSetupComplete && (
+                        <Card padding="lg">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                                <h3 className="text-h3" style={{ color: 'var(--color-text-primary)' }}>Revenue</h3>
+                                <select style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-page)', fontSize: '0.85rem' }}>
+                                    <option>Last 30 Days</option>
+                                    <option>All Time</option>
+                                </select>
+                            </div>
+                            <div style={{ height: '200px', width: '100%', background: 'linear-gradient(180deg, var(--color-bg-page) 0%, transparent 100%)', borderRadius: '12px', display: 'flex', alignItems: 'flex-end', justifyContent: 'space-around', paddingBottom: '0', overflow: 'hidden' }}>
+                                {/* Mock Chart Bars */}
+                                {[40, 60, 30, 80, 50, 90, 70, 40, 60, 80, 50, 75].map((h, i) => (
+                                    <div key={i} style={{ width: '6%', height: `${h}%`, background: i === 11 ? 'var(--color-primary)' : 'var(--color-primary-light)', borderRadius: '4px 4px 0 0', opacity: i === 11 ? 1 : 0.6 }}></div>
+                                ))}
+                            </div>
                         </Card>
                     )}
 
                     {/* Recent Activity */}
-                    <div style={{ marginTop: '32px' }}>
-                        <h3 className="text-h3" style={{ marginBottom: '16px' }}>Recent Activity</h3>
-                        <Card padding="lg" style={{ textAlign: 'center', color: 'var(--color-text-secondary)' }}>
-                            <div style={{ marginBottom: '16px', fontSize: '2rem' }}>📭</div>
-                            <p>No recent activity yet.</p>
-                            <p className="text-body-sm">When you get new members or publish posts, they'll show up here.</p>
-                        </Card>
-                    </div>
+                    <Card padding="lg">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                            <h3 className="text-h3" style={{ color: 'var(--color-text-primary)' }}>Recent Activity</h3>
+                            <Button variant="ghost" size="sm">View All</Button>
+                        </div>
+
+                        {/* Empty State */}
+                        <div style={{ textAlign: 'center', padding: '32px 0' }}>
+                            <div style={{ width: '48px', height: '48px', background: 'var(--color-bg-page)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: '1.5rem', color: 'var(--color-text-secondary)' }}>
+                                🔔
+                            </div>
+                            <p style={{ fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>No recent activity</p>
+                            <p className="text-body-sm" style={{ color: 'var(--color-text-secondary)', marginBottom: '16px' }}>New memberships and purchases will appear here.</p>
+                            <Button variant="outline" size="sm">Refresh</Button>
+                        </div>
+                    </Card>
+
                 </div>
 
                 {/* Right Column: Quick Actions */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-                    <Card padding="md">
-                        <h3 className="text-h3" style={{ marginBottom: '16px' }}>Quick Actions</h3>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                            {/* Write Post Tile */}
-                            <div
-                                onClick={() => router.push('/dashboard/posts')}
-                                style={{
-                                    padding: '16px',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '12px',
-                                    transition: 'all 0.2s',
-                                    background: 'var(--color-bg-surface)'
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.background = 'var(--color-bg-surface-hover)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.background = 'var(--color-bg-surface)'; }}
-                            >
-                                <span style={{ fontSize: '1.2rem', background: 'var(--color-primary-light)', padding: '8px', borderRadius: '8px' }}>✍️</span>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Write a Post</div>
-                                    <div className="text-caption">Share updates with fans</div>
-                                </div>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>→</span>
-                            </div>
+                    <Card padding="md" style={{ background: 'var(--color-bg-surface)' }}>
+                        <h3 className="text-h3" style={{ marginBottom: '16px', color: 'var(--color-text-primary)' }}>Quick Actions</h3>
 
-                            {/* Edit Tiers Tile */}
-                            <div
-                                onClick={() => router.push('/dashboard/membership')}
-                                style={{
-                                    padding: '16px',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '12px',
-                                    transition: 'all 0.2s',
-                                    background: 'var(--color-bg-surface)'
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.background = 'var(--color-bg-surface-hover)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.background = 'var(--color-bg-surface)'; }}
-                            >
-                                <span style={{ fontSize: '1.2rem', background: 'var(--color-accent-light)', padding: '8px', borderRadius: '8px' }}>💎</span>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Edit Tiers</div>
-                                    <div className="text-caption">Manage prices & benefits</div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {[
+                                {
+                                    label: 'Write a Post',
+                                    desc: 'Share updates',
+                                    icon: '✍️',
+                                    bg: 'var(--color-primary-light)',
+                                    action: () => router.push('/dashboard/posts')
+                                },
+                                {
+                                    label: 'Edit Tiers',
+                                    desc: 'Manage memberships',
+                                    icon: '💎',
+                                    bg: 'var(--color-accent-light)',
+                                    action: () => router.push('/dashboard/membership')
+                                },
+                                {
+                                    label: 'Public Page',
+                                    desc: 'View storefront',
+                                    icon: '👀',
+                                    bg: 'var(--color-bg-page)',
+                                    action: () => window.open(`/${address}`, '_blank')
+                                }
+                            ].map((item, i) => (
+                                <div
+                                    key={i}
+                                    onClick={item.action}
+                                    className="quick-action-item"
+                                    style={{
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '16px',
+                                        padding: '12px',
+                                        borderRadius: 'var(--radius-md)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s',
+                                        border: '1px solid transparent'
+                                    }}
+                                >
+                                    <div style={{
+                                        width: '40px', height: '40px',
+                                        borderRadius: '10px',
+                                        background: item.bg,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '1.2rem'
+                                    }}>
+                                        {item.icon}
+                                    </div>
+                                    <div style={{ flex: 1 }}>
+                                        <div style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--color-text-primary)' }}>{item.label}</div>
+                                        <div className="text-caption">{item.desc}</div>
+                                    </div>
+                                    <span style={{ color: 'var(--color-text-tertiary)', fontSize: '1.2rem' }}>→</span>
                                 </div>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>→</span>
-                            </div>
-
-                            {/* View Public Page Tile */}
-                            <div
-                                onClick={() => window.open(`/${address}`, '_blank')}
-                                style={{
-                                    padding: '16px',
-                                    border: '1px solid var(--color-border)',
-                                    borderRadius: 'var(--radius-md)',
-                                    cursor: 'pointer',
-                                    display: 'flex', alignItems: 'center', gap: '12px',
-                                    transition: 'all 0.2s',
-                                    background: 'var(--color-bg-surface)'
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.background = 'var(--color-bg-surface-hover)'; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.background = 'var(--color-bg-surface)'; }}
-                            >
-                                <span style={{ fontSize: '1.2rem', background: 'var(--color-bg-page)', padding: '8px', borderRadius: '8px' }}>👀</span>
-                                <div style={{ flex: 1 }}>
-                                    <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>Public Page</div>
-                                    <div className="text-caption">See what others see</div>
-                                </div>
-                                <span style={{ color: 'var(--color-text-tertiary)' }}>→</span>
-                            </div>
+                            ))}
                         </div>
+                        <style jsx>{`
+                            .quick-action-item:hover {
+                                background: var(--color-bg-page) !important;
+                                transform: translateY(-2px);
+                                box-shadow: var(--shadow-sm);
+                                border-color: var(--color-border) !important;
+                            }
+                        `}</style>
                     </Card>
 
-                    {/* Resources/Help (Optional extra placeholder) */}
-                    <Card padding="md" style={{ background: 'linear-gradient(135deg, var(--color-primary-light) 0%, var(--color-bg-surface) 100%)', border: '1px solid var(--color-primary-light)' }}>
-                        <h4 style={{ fontWeight: 600, marginBottom: '8px', color: 'var(--color-text-primary)' }}>Need Help?</h4>
-                        <p className="text-body-sm" style={{ marginBottom: '12px', color: 'var(--color-text-secondary)' }}>Check out our creator guide to grow your audience.</p>
-                        <Button variant="outline" size="sm" style={{ background: 'var(--color-bg-surface)' }}>Read Guide</Button>
-                    </Card>
-
+                    {/* Minimized Checklist Link if Hidden */}
+                    {isSetupComplete && !showChecklist && (
+                        <div
+                            onClick={() => setShowChecklist(true)}
+                            style={{
+                                cursor: 'pointer',
+                                padding: '16px',
+                                borderRadius: 'var(--radius-md)',
+                                border: '1px dashed var(--color-border)',
+                                textAlign: 'center',
+                                color: 'var(--color-text-secondary)',
+                                fontSize: '0.9rem',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; e.currentTarget.style.color = 'var(--color-primary)'; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; e.currentTarget.style.color = 'var(--color-text-secondary)'; }}
+                        >
+                            Open Setup Checklist (100% Complete)
+                        </div>
+                    )}
                 </div>
             </div>
 
