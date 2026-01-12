@@ -5,6 +5,7 @@ import { useAccount } from 'wagmi';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
+import SectionHeader from '../../components/SectionHeader';
 import { useToast } from '../../components/Toast';
 
 export default function SettingsPage() {
@@ -13,12 +14,19 @@ export default function SettingsPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
 
+    // Initial State (for comparison)
+    const [initialState, setInitialState] = useState<any>(null);
+
     // Form State
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [socials, setSocials] = useState({ twitter: '', website: '' });
     const [payoutToken, setPayoutToken] = useState('MNT');
+
+    // Danger Zone Modal
+    const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+    const [resetConfirmation, setResetConfirmation] = useState('');
 
     useEffect(() => {
         if (!address) return;
@@ -27,11 +35,19 @@ export default function SettingsPage() {
             .then(creators => {
                 const me = creators.find((c: any) => c.address === address);
                 if (me) {
-                    setName(me.name || '');
-                    setDescription(me.description || '');
-                    setAvatarUrl(me.avatarUrl || '');
-                    setSocials(me.socials || { twitter: '', website: '' });
-                    setPayoutToken(me.payoutToken || 'MNT');
+                    const data = {
+                        name: me.name || '',
+                        description: me.description || '',
+                        avatarUrl: me.avatarUrl || '',
+                        socials: me.socials || { twitter: '', website: '' },
+                        payoutToken: me.payoutToken || 'MNT'
+                    };
+                    setName(data.name);
+                    setDescription(data.description);
+                    setAvatarUrl(data.avatarUrl);
+                    setSocials(data.socials);
+                    setPayoutToken(data.payoutToken);
+                    setInitialState(data);
                 }
                 setLoading(false);
             })
@@ -40,6 +56,16 @@ export default function SettingsPage() {
                 setLoading(false);
             });
     }, [address]);
+
+    // Check for changes
+    const hasChanges = initialState && (
+        name !== initialState.name ||
+        description !== initialState.description ||
+        avatarUrl !== initialState.avatarUrl ||
+        socials.twitter !== initialState.socials.twitter ||
+        socials.website !== initialState.socials.website ||
+        payoutToken !== initialState.payoutToken
+    );
 
     const handleSave = async () => {
         if (!address) return;
@@ -60,6 +86,13 @@ export default function SettingsPage() {
 
             if (res.ok) {
                 showToast('Profile updated successfully!', 'success');
+                setInitialState({
+                    name,
+                    description,
+                    avatarUrl,
+                    socials: { ...socials },
+                    payoutToken
+                });
             } else {
                 showToast('Failed to update profile.', 'error');
             }
@@ -71,184 +104,253 @@ export default function SettingsPage() {
         }
     };
 
+    const handleResetContract = async () => {
+        if (resetConfirmation !== 'RESET') return;
+
+        try {
+            const res = await fetch('/api/creators', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    address,
+                    contractAddress: null // Reset contract address
+                })
+            });
+            if (res.ok) {
+                window.location.reload();
+            } else {
+                showToast('Failed to reset.', 'error');
+            }
+        } catch (e) { console.error(e); showToast('Error resetting.', 'error'); }
+    };
+
     if (!isConnected) return <div style={{ padding: '48px', textAlign: 'center' }}>Please connect wallet.</div>;
     if (loading) return <div style={{ padding: '48px', textAlign: 'center' }}>Loading settings...</div>;
 
     return (
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <div className="page-container" style={{ paddingBottom: '100px' }}>
             {ToastComponent}
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '32px' }}>Settings</h1>
 
-            <Card style={{ marginBottom: '24px' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '24px', color: '#fff' }}>Public Profile</h2>
+            {/* STICKY UNSAVED CHANGES INDICATOR (Overlay style or top bar) */}
+            {hasChanges && (
+                <div style={{
+                    position: 'fixed', top: '80px', left: '50%', transform: 'translateX(-50%)',
+                    background: 'var(--color-warning)', color: '#000', padding: '8px 24px',
+                    borderRadius: '20px', fontWeight: 'bold', fontSize: '0.875rem', zIndex: 90,
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                }}>
+                    Unsaved Changes
+                </div>
+            )}
 
-                <div style={{ display: 'grid', gap: '24px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 3fr', gap: '24px' }}>
-                        <div>
-                            <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Avatar</label>
-                            <div style={{ width: '100px', height: '100px', borderRadius: '50%', background: avatarUrl ? `url(${avatarUrl}) center/cover` : '#2e333d', marginBottom: '12px', border: '2px solid #2e333d', position: 'relative', overflow: 'hidden' }}>
-                                <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) => {
-                                        const file = e.target.files?.[0];
-                                        if (file) {
-                                            const reader = new FileReader();
-                                            reader.onloadend = () => {
-                                                setAvatarUrl(reader.result as string);
-                                            };
-                                            reader.readAsDataURL(file);
-                                        }
-                                    }}
-                                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
+            <SectionHeader
+                title="Settings"
+                description="Manage your profile, payout methods, and account connection."
+                action={{
+                    label: saving ? 'Saving...' : 'Save Changes',
+                    onClick: handleSave,
+                    disabled: !hasChanges || saving,
+                    variant: hasChanges ? 'primary' : 'secondary'
+                }}
+            />
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '24px' }}>
+
+                {/* 1. PUBLIC PROFILE (Left Column on Desktop) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <Card variant="surface">
+                        <h3 className="text-h3" style={{ marginBottom: '24px' }}>Public Profile</h3>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '24px' }}>
+                            {/* Avatar */}
+                            <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', overflow: 'hidden', background: 'var(--color-bg-page)', border: '1px solid var(--color-border)' }}>
+                                <img
+                                    src={avatarUrl || 'https://via.placeholder.com/150'}
+                                    alt="Avatar"
+                                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                                 />
-                                <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: '0.7rem', textAlign: 'center', padding: '4px', pointerEvents: 'none' }}>
-                                    Change
+                                <div className="avatar-overlay" style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: 0, transition: 'opacity 0.2s', cursor: 'pointer' }}>
+                                    <span style={{ color: '#fff', fontSize: '0.75rem', fontWeight: 600 }}>Change</span>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                const reader = new FileReader();
+                                                reader.onloadend = () => { setAvatarUrl(reader.result as string); };
+                                                reader.readAsDataURL(file);
+                                            }
+                                        }}
+                                        style={{ position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' }}
+                                    />
                                 </div>
                             </div>
-                            <p style={{ fontSize: '0.75rem', color: '#64748b' }}>Click to upload (Max 1MB)</p>
+                            <div style={{ flex: 1 }}>
+                                <div className="text-body" style={{ fontWeight: 600 }}>Profile Picture</div>
+                                <div className="text-caption">Supports JPG, PNG, WEBP (Max 1MB)</div>
+                            </div>
                         </div>
-                        <div style={{ display: 'grid', gap: '16px' }}>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <Input
                                 label="Display Name"
                                 value={name}
-                                onChange={(e: any) => setName(e.target.value)}
-                                placeholder="e.g. The Mantle Gamer"
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Display Name"
                             />
                             <div>
-                                <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Bio / Description</label>
+                                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '8px' }}>Bio</label>
                                 <textarea
+                                    className="focus-ring"
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="Tell your fans what you create..."
+                                    placeholder="Tell your story..."
                                     style={{
-                                        width: '100%',
-                                        padding: '16px',
-                                        background: 'rgba(0, 0, 0, 0.2)',
-                                        border: '1px solid rgba(255,255,255,0.1)',
-                                        borderRadius: '16px',
-                                        color: '#fff',
-                                        minHeight: '120px',
-                                        fontFamily: 'inherit',
-                                        fontSize: '1rem',
-                                        resize: 'vertical',
-                                        outline: 'none',
-                                        transition: 'all 0.2s'
-                                    }}
-                                    onFocus={(e) => {
-                                        e.target.style.borderColor = 'rgba(157, 78, 221, 0.5)';
-                                        e.target.style.boxShadow = '0 0 15px rgba(157, 78, 221, 0.1)';
-                                    }}
-                                    onBlur={(e) => {
-                                        e.target.style.borderColor = 'rgba(255,255,255,0.1)';
-                                        e.target.style.boxShadow = 'none';
+                                        width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                                        border: '1px solid var(--color-border)', background: 'var(--color-bg-page)',
+                                        color: 'var(--color-text-primary)', minHeight: '100px', resize: 'vertical'
                                     }}
                                 />
                             </div>
                         </div>
-                    </div>
+                    </Card>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-                        <Input
-                            label="Twitter / X"
-                            value={socials.twitter}
-                            onChange={(e: any) => setSocials({ ...socials, twitter: e.target.value })}
-                            placeholder="@handle"
-                            style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '14px' }}
-                        />
-                        <Input
-                            label="Website"
-                            value={socials.website}
-                            onChange={(e: any) => setSocials({ ...socials, website: e.target.value })}
-                            placeholder="https://..."
-                            style={{ background: 'rgba(0,0,0,0.2)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '14px' }}
-                        />
-                    </div>
-
-                    <div style={{ paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'flex-end' }}>
-                        <Button onClick={handleSave} disabled={saving} style={{ borderRadius: '16px', padding: '12px 32px' }}>
-                            {saving ? 'Saving...' : 'Save Changes'}
-                        </Button>
-                    </div>
+                    <Card variant="surface">
+                        <h3 className="text-h3" style={{ marginBottom: '24px' }}>Links</h3>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div style={{ position: 'relative' }}>
+                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1rem' }}>🐦</span>
+                                <Input
+                                    label="Twitter / X"
+                                    value={socials.twitter}
+                                    onChange={(e) => setSocials({ ...socials, twitter: e.target.value })}
+                                    placeholder="@username"
+                                    style={{ paddingLeft: '44px' }}
+                                />
+                            </div>
+                            <div style={{ position: 'relative' }}>
+                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1rem' }}>🌐</span>
+                                <Input
+                                    label="Website"
+                                    value={socials.website}
+                                    onChange={(e) => setSocials({ ...socials, website: e.target.value })}
+                                    placeholder="https://yoursite.com"
+                                    style={{ paddingLeft: '44px' }}
+                                />
+                            </div>
+                        </div>
+                    </Card>
                 </div>
-            </Card>
 
-            <Card style={{ marginBottom: '24px' }} variant="glass">
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#fff' }}>Payment Settings</h2>
-                <div style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
-                    <div>
-                        <label style={{ fontSize: '0.875rem', color: '#a1a1aa', marginBottom: '8px', display: 'block' }}>Payout Token</label>
-                        <select
-                            value={payoutToken}
-                            onChange={(e) => setPayoutToken(e.target.value)}
-                            style={{
-                                background: 'rgba(0, 0, 0, 0.2)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                padding: '14px 16px',
-                                borderRadius: '16px',
-                                color: '#fff',
-                                minWidth: '200px',
-                                outline: 'none',
-                                cursor: 'pointer'
-                            }}
+                {/* 2. SETTINGS & WALLET (Right Column on Desktop) */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+
+                    {/* PAYOUTS */}
+                    <Card variant="surface">
+                        <h3 className="text-h3" style={{ marginBottom: '24px' }}>Payout Settings</h3>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '8px' }}>Payout Token</label>
+                            <div style={{ position: 'relative' }}>
+                                <select
+                                    className="focus-ring"
+                                    value={payoutToken}
+                                    onChange={(e) => setPayoutToken(e.target.value)}
+                                    style={{
+                                        width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)',
+                                        border: '1px solid var(--color-border)', background: 'var(--color-bg-page)',
+                                        color: 'var(--color-text-primary)', appearance: 'none', cursor: 'pointer'
+                                    }}
+                                >
+                                    <option value="MNT">MNT (Native)</option>
+                                    <option value="USDC">USDC (Mantle)</option>
+                                </select>
+                                <span style={{ position: 'absolute', right: '16px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', fontSize: '0.8rem' }}>▼</span>
+                            </div>
+                            <p className="text-caption" style={{ marginTop: '8px', lineHeight: 1.4 }}>
+                                {payoutToken === 'MNT'
+                                    ? 'Recommended. You receive MNT directly with minimal fees.'
+                                    : 'You receive USDC. Requires an extra approval transaction.'}
+                            </p>
+                        </div>
+                    </Card>
+
+                    {/* WALLET */}
+                    <Card variant="surface">
+                        <h3 className="text-h3" style={{ marginBottom: '24px' }}>Wallet Connection</h3>
+                        <div style={{ padding: '16px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)' }}>
+                            <div className="text-caption" style={{ marginBottom: '4px', textTransform: 'uppercase', fontWeight: 700 }}>Connected Address</div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                                <code style={{ flex: 1, fontFamily: 'monospace', fontSize: '0.9rem', color: 'var(--color-text-primary)' }}>{address}</code>
+                                <button
+                                    onClick={() => navigator.clipboard.writeText(address || '')}
+                                    style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1rem' }}
+                                    title="Copy"
+                                >
+                                    📋
+                                </button>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }}></span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--color-text-secondary)' }}>Connected to Mantle Sepolia</span>
+                            </div>
+                        </div>
+                    </Card>
+
+                    {/* DANGER ZONE */}
+                    <Card style={{ marginTop: 'auto', border: '1px solid #fee2e2', background: '#fef2f2' }}>
+                        <h3 className="text-h3" style={{ color: 'var(--color-error)', marginBottom: '16px' }}>Danger Zone</h3>
+                        <p className="text-body-sm" style={{ marginBottom: '16px', color: '#b91c1c' }}>
+                            Resetting your contract link is irreversible. It will disconnect your fan page from the blockchain data until you re-deploy.
+                        </p>
+                        <Button
+                            onClick={() => setIsResetModalOpen(true)}
+                            style={{ width: '100%', background: 'var(--color-error)', color: 'white', borderColor: 'var(--color-error)' }}
                         >
-                            <option value="MNT">Native MNT</option>
-                            <option value="USDC">USDC (Mantle)</option>
-                        </select>
-                    </div>
-                    <div style={{ flex: 1, fontSize: '0.875rem', color: '#a1a1aa' }}>
-                        {payoutToken === 'MNT'
-                            ? 'Fees are paid in MNT. You receive MNT directly to your wallet.'
-                            : 'Fees are paid in USDC. You receive USDC directly. (Requires Token Approval)'}
-                    </div>
+                            Reset & Re-Deploy
+                        </Button>
+                    </Card>
                 </div>
-            </Card>
+            </div>
 
-            <Card variant="glass">
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#fff' }}>Wallet Connection</h2>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '16px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div>
-                        <p style={{ color: '#a1a1aa', fontSize: '0.875rem' }}>Connected Address</p>
-                        <p style={{ fontFamily: 'monospace', color: '#65b3ad' }}>{address}</p>
+            {/* RESET CONFIRMATION MODAL */}
+            {isResetModalOpen && (
+                <div style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, backdropFilter: 'blur(4px)'
+                }}>
+                    <div className="card-surface" style={{ width: '100%', maxWidth: '400px', padding: '32px' }}>
+                        <h2 className="text-h2" style={{ color: 'var(--color-error)', marginBottom: '12px' }}>Are you absolutely sure?</h2>
+                        <p className="text-body-sm" style={{ marginBottom: '24px' }}>
+                            This action cannot be undone. This will permanently unlink your current contract.
+                            <br /><br />
+                            Please type <strong>RESET</strong> to confirm.
+                        </p>
+                        <Input
+                            value={resetConfirmation}
+                            onChange={(e) => setResetConfirmation(e.target.value)}
+                            placeholder="Type RESET"
+                            style={{ marginBottom: '24px' }}
+                        />
+                        <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <Button variant="ghost" onClick={() => { setIsResetModalOpen(false); setResetConfirmation(''); }}>Cancel</Button>
+                            <Button
+                                onClick={handleResetContract}
+                                disabled={resetConfirmation !== 'RESET'}
+                                style={{ background: resetConfirmation === 'RESET' ? 'var(--color-error)' : 'var(--color-text-tertiary)', borderColor: 'transparent', color: 'white' }}
+                            >
+                                Confirm Reset
+                            </Button>
+                        </div>
                     </div>
-                    <span style={{ fontSize: '0.75rem', color: '#65b3ad', background: 'rgba(101, 179, 173, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>Connected on Mantle Mainnet</span>
                 </div>
-            </Card>
+            )}
 
-            <Card style={{ marginTop: '24px', border: '1px solid rgba(239, 68, 68, 0.3)', background: 'rgba(239, 68, 68, 0.05)' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '16px', color: '#ef4444' }}>Danger Zone</h2>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div>
-                        <p style={{ fontWeight: 'bold', color: '#fff' }}>Reset Contract Link</p>
-                        <p style={{ fontSize: '0.875rem', color: '#a1a1aa' }}>Use this if you need to re-deploy your contract (e.g. after a platform update).</p>
-                    </div>
-                    <Button
-                        variant="secondary"
-                        onClick={async () => {
-                            if (confirm('Are you sure? This will disconnect your current contract from your profile setup. You will need to re-deploy.')) {
-                                try {
-                                    const res = await fetch('/api/creators', {
-                                        method: 'POST',
-                                        headers: { 'Content-Type': 'application/json' },
-                                        body: JSON.stringify({
-                                            address,
-                                            contractAddress: null // Reset contract address
-                                        })
-                                    });
-                                    if (res.ok) {
-                                        window.location.reload();
-                                    } else {
-                                        showToast('Failed to reset.', 'error');
-                                    }
-                                } catch (e) { console.error(e); showToast('Error resetting.', 'error'); }
-                            }
-                        }}
-                        style={{ background: '#ef4444', color: '#fff', border: 'none' }}
-                    >
-                        Reset & Re-Deploy
-                    </Button>
-                </div>
-            </Card>
+            <style dangerouslySetInnerHTML={{
+                __html: `
+                .avatar-overlay:hover { opacity: 1 !important; }
+            `}} />
         </div>
     );
 }
