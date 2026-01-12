@@ -58,11 +58,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         return (
             <div style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100vh', background: '#0f1115', color: '#fff', textAlign: 'center'
+                height: '100vh', background: '#fff', color: '#000', textAlign: 'center'
             }}>
-                <div style={{ marginBottom: '24px', padding: '32px', background: '#13151a', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', maxWidth: '400px', margin: '16px' }}>
+                <div style={{ marginBottom: '24px', padding: '32px', background: '#fafafa', borderRadius: '24px', border: '1px solid #e5e7eb', maxWidth: '400px', margin: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
                     <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: '16px' }}>Dashboard Access</h1>
-                    <p style={{ color: '#a1a1aa', marginBottom: '32px' }}>Connect your wallet to manage your creator page.</p>
+                    <p style={{ color: '#52525b', marginBottom: '32px' }}>Connect your wallet to manage your creator page.</p>
                     <WalletButton />
                     <Button variant="outline" style={{ marginTop: '24px', width: '100%', justifyContent: 'center', borderRadius: '12px' }} onClick={() => router.push('/')}>
                         Return Home
@@ -73,13 +73,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     }
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: '#0f1115', color: '#fff', fontFamily: 'var(--font-geist-sans)' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#fff', color: '#000', fontFamily: 'var(--font-geist-sans)' }}>
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .dashboard-sidebar {
                     width: 260px;
-                    border-right: 1px solid rgba(255,255,255,0.05);
-                    background: #0f1115;
+                    border-right: 1px solid #e5e7eb;
+                    background: #f9fafb;
                     display: flex;
                     flex-direction: column;
                     position: fixed;
@@ -95,6 +95,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     min-height: 100vh;
                     display: flex;
                     flex-direction: column;
+                    background: #fff;
                 }
 
                 @media (max-width: 1024px) {
@@ -108,7 +109,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     margin: 2px 12px;
                     border-radius: 8px;
                     cursor: pointer;
-                    color: #a1a1aa;
+                    color: #52525b;
                     font-weight: 500;
                     display: flex;
                     align-items: center;
@@ -116,8 +117,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     font-size: 0.95rem;
                     transition: all 0.2s;
                 }
-                .nav-item:hover { background: rgba(255,255,255,0.03); color: #fff; }
-                .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; font-weight: 600; }
+                .nav-item:hover { background: #e4e4e7; color: #000; }
+                .nav-item.active { background: #e5e7eb; color: #000; font-weight: 600; }
             `}} />
 
             {/* Mobile Header */}
@@ -130,19 +131,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             padding: 16px 24px;
                             justify-content: space-between;
                             align-items: center;
-                            border-bottom: 1px solid rgba(255,255,255,0.05);
+                            border-bottom: 1px solid #e5e7eb;
                             position: sticky;
                             top: 0;
-                            background: #0f1115;
+                            background: #fff;
                             z-index: 40;
                         }
                     }
                  `}} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '1.5rem' }}>☰</button>
+                    <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: '#000', fontSize: '1.5rem' }}>☰</button>
                     <span style={{ fontWeight: 'bold' }}>Backr Dashboard</span>
                 </div>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#22d3ee' }}></div>
+                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#000' }}></div>
             </div>
 
             {/* Sidebar */}
@@ -153,14 +154,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         onClick={() => router.push('/')}
                     >
                         {/* Logo */}
-                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Backr</div>
-                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', color: '#a1a1aa' }}>STUDIO</span>
+                        <div style={{ width: '32px', height: '32px', background: '#000', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ width: '14px', height: '14px', background: '#fff', borderRadius: '2px' }}></div>
+                        </div>
+                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#000' }}>Backr</div>
+                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: '#f3f4f6', borderRadius: '4px', color: '#52525b', border: '1px solid #e5e7eb', marginLeft: 'auto' }}>STUDIO</span>
                     </div>
 
                     {/* Quick Action */}
                     <Button
                         onClick={() => router.push('/dashboard/posts')}
-                        style={{ width: '100%', justifyContent: 'center', borderRadius: '8px', marginBottom: '24px', fontWeight: '600' }}
+                        style={{ width: '100%', justifyContent: 'center', borderRadius: '9999px', marginBottom: '24px', fontWeight: '600', background: '#000', color: '#fff', border: 'none' }}
                     >
                         + Create Post
                     </Button>
@@ -182,17 +186,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
 
                 {/* User Profile at Bottom */}
-                <div style={{ marginTop: 'auto', padding: '24px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <div style={{ marginTop: 'auto', padding: '24px', borderTop: '1px solid #e5e7eb' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : '#22d3ee' }}></div>
+                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : '#e5e7eb', border: '1px solid #e5e7eb' }}></div>
                         <div style={{ overflow: 'hidden' }}>
-                            <div style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{displayName}</div>
-                            <div style={{ fontSize: '0.75rem', color: '#a1a1aa' }}>{address.slice(0, 6)}...{address.slice(-4)}</div>
+                            <div style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#000' }}>{displayName}</div>
+                            <div style={{ fontSize: '0.75rem', color: '#71717a' }}>{address.slice(0, 6)}...{address.slice(-4)}</div>
                         </div>
                     </div>
                     <button
                         onClick={() => { disconnect(); router.push('/'); }}
-                        style={{ background: 'none', border: 'none', color: '#a1a1aa', fontSize: '0.85rem', cursor: 'pointer', padding: 0 }}
+                        style={{ background: 'none', border: 'none', color: '#71717a', fontSize: '0.85rem', cursor: 'pointer', padding: 0 }}
                     >
                         Log Out
                     </button>
@@ -200,7 +204,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {/* Mobile Close */}
                     <button
                         onClick={() => setIsSidebarOpen(false)}
-                        style={{ display: 'none', marginTop: '16px', width: '100%', padding: '12px', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '8px' }}
+                        style={{ display: 'none', marginTop: '16px', width: '100%', padding: '12px', background: '#f3f4f6', border: 'none', color: '#000', borderRadius: '8px' }}
                         className="mobile-close"
                     >
                         Close Menu
@@ -219,14 +223,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Content Area */}
             <main className="main-content">
-                <header style={{ padding: '24px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>
+                <header style={{ padding: '24px 40px', borderBottom: '1px solid #e5e7eb', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fff' }}>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', color: '#000' }}>
                         {menuItems.find(i => i.path === pathname)?.label || 'Dashboard'}
                     </h2>
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                         {/* Network Status / Etc */}
                         <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#22c55e' }}></div>
-                        <span style={{ fontSize: '0.85rem', color: '#a1a1aa' }}>Mantle Network</span>
+                        <span style={{ fontSize: '0.85rem', color: '#71717a' }}>Mantle Network</span>
                     </div>
                 </header>
                 <div style={{ padding: '40px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
