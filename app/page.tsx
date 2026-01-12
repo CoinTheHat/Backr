@@ -344,7 +344,7 @@ export default function Home() {
                  `}} />
 
             {/* Image Side */}
-            <div style={{ minHeight: '400px', background: `${tabContent[activeTab].image} center/cover no-repeat`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ minHeight: '400px', background: `${tabContent[activeTab].image} center center / 100% 100% no-repeat`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             </div>
 
             {/* Text Side */}
