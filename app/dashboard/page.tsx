@@ -174,7 +174,7 @@ export default function Dashboard() {
         <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
             {/* Warning if no contract */}
             {!profile?.contractAddress && !isConfirming && (
-                <div style={{ marginBottom: '32px', padding: '16px 24px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '12px', color: '#fef08a', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div style={{ marginBottom: '32px', padding: '16px 24px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.2)', borderRadius: '12px', color: '#854d0e', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <span style={{ fontSize: '1.5rem' }}>⚠️</span>
                     <div>
                         <div style={{ fontWeight: 'bold' }}>Action Required</div>
@@ -186,16 +186,16 @@ export default function Dashboard() {
 
             {/* Stats Grid */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginBottom: '48px' }}>
-                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>Active Members</div>
-                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>{stats.activeMembers}</div>
+                <Card style={{ padding: '24px', background: '#fff', border: '1px solid #e4e4e7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#52525b', marginBottom: '8px', fontWeight: '600' }}>Active Members</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em', color: '#000' }}>{stats.activeMembers}</div>
                 </Card>
-                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>Monthly Income</div>
-                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em' }}>${stats.monthlyRevenue}</div>
+                <Card style={{ padding: '24px', background: '#fff', border: '1px solid #e4e4e7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#52525b', marginBottom: '8px', fontWeight: '600' }}>Monthly Income</div>
+                    <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em', color: '#000' }}>${stats.monthlyRevenue}</div>
                 </Card>
-                <Card style={{ padding: '24px', background: '#13151a', border: '1px solid rgba(255,255,255,0.05)' }}>
-                    <div style={{ fontSize: '0.9rem', color: '#a1a1aa', marginBottom: '8px', fontWeight: '500' }}>30-Day Growth</div>
+                <Card style={{ padding: '24px', background: '#fff', border: '1px solid #e4e4e7', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+                    <div style={{ fontSize: '0.9rem', color: '#52525b', marginBottom: '8px', fontWeight: '600' }}>30-Day Growth</div>
                     <div style={{ fontSize: '3rem', fontWeight: 'bold', letterSpacing: '-0.02em', color: '#22c55e' }}>+0%</div>
                 </Card>
             </div>
@@ -204,23 +204,23 @@ export default function Dashboard() {
                 {/* Main: Getting Started */}
                 <div>
                     <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '24px' }}>Getting Started</h3>
-                    <div style={{ background: '#13151a', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '16px', overflow: 'hidden' }}>
+                    <div style={{ background: '#fff', border: '1px solid #e4e4e7', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
                         {steps.map((step, i) => (
-                            <div key={i} style={{ padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '16px', opacity: step.done ? 0.5 : 1 }}>
+                            <div key={i} style={{ padding: '20px 24px', borderBottom: '1px solid #f4f4f5', display: 'flex', alignItems: 'center', gap: '16px', opacity: step.done ? 0.5 : 1 }}>
                                 <div style={{
                                     width: '24px', height: '24px', borderRadius: '50%',
                                     border: step.done ? 'none' : '2px solid #a1a1aa',
                                     background: step.done ? '#22c55e' : 'transparent',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: '#000', fontSize: '14px', fontWeight: 'bold'
+                                    color: '#fff', fontSize: '14px', fontWeight: 'bold'
                                 }}>
                                     {step.done && '✓'}
                                 </div>
-                                <div style={{ flex: 1, fontWeight: step.done ? 'normal' : '600', textDecoration: step.done ? 'line-through' : 'none' }}>{step.label}</div>
+                                <div style={{ flex: 1, fontWeight: step.done ? 'normal' : '600', textDecoration: step.done ? 'line-through' : 'none', color: '#000' }}>{step.label}</div>
                                 {!step.done && (
                                     <Button
                                         variant="outline"
-                                        style={{ fontSize: '0.8rem', padding: '6px 16px' }}
+                                        style={{ fontSize: '0.8rem', padding: '6px 16px', border: '1px solid #000', color: '#000' }}
                                         onClick={() => {
                                             if (i === 1) handleDeploy();
                                             if (i === 2) router.push('/dashboard/membership');
@@ -233,7 +233,7 @@ export default function Dashboard() {
                                 )}
                             </div>
                         ))}
-                        <div style={{ padding: '20px 24px', background: 'rgba(255,255,255,0.01)', textAlign: 'center', color: '#a1a1aa', fontSize: '0.9rem' }}>
+                        <div style={{ padding: '20px 24px', background: '#fafafa', textAlign: 'center', color: '#71717a', fontSize: '0.9rem' }}>
                             {Math.round(progress)}% Complete
                         </div>
                     </div>
