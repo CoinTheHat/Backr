@@ -394,14 +394,7 @@ export default function Dashboard() {
                                 </div>
                             ))}
                         </div>
-                        <style jsx>{`
-                            .quick-action-item:hover {
-                                background: var(--color-bg-page) !important;
-                                transform: translateY(-2px);
-                                box-shadow: var(--shadow-sm);
-                                border-color: var(--color-border) !important;
-                            }
-                        `}</style>
+
                     </Card>
 
                     {/* Minimized Checklist Link if Hidden */}
@@ -427,13 +420,7 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <style jsx>{`
-                @media (max-width: 900px) {
-                    .dashboard-grid {
-                        grid-template-columns: 1fr !important;
-                    }
-                }
-            `}</style>
+
         </div>
     );
 }

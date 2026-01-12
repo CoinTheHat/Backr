@@ -151,3 +151,23 @@ body {
     padding: 24px 16px;
   }
 }
+
+/* Dashboard Specifics - Moved from inline styled-jsx to avoid nested tag errors */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 32px;
+}
+
+@media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.quick-action-item:hover {
+  background: var(--color-bg-page) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--color-border) !important;
+}
