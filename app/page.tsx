@@ -15,32 +15,32 @@ export default function Home() {
     'Podcasters': {
       headline: "Episodes that pay.",
       text: "Give your listeners a backstage pass. Offer ad-free episodes, bonus content, and community access directly to your biggest fans.",
-      image: "linear-gradient(135deg, #FF6B6B 0%, #C44569 100%)",
-      icon: "🎙️"
+      image: "url(/images/home_visuals/podcast.png)",
     },
     'Video Creators': {
       headline: "Stream on your own terms.",
       text: "Share exclusive cuts, behind-the-scenes vlogs, and early access premieres without worrying about algorithms.",
-      image: "linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)",
-      icon: "🎬"
+      image: "url(/images/home_visuals/video.png)",
     },
     'Musicians': {
       headline: "Connect beyond the track.",
       text: "Ticket presales, unreleased demos, and VIP experiences. Turn casual listeners into a dedicated street team.",
-      image: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-      icon: "🎵"
+      image: "url(/images/home_visuals/music.png)",
     },
     'Visual Artists': {
       headline: "Art that sustains you.",
       text: "High-res downloads, tutorials, and print shops. Build a gallery that pays the rent and fuels your next masterpiece.",
-      image: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
-      icon: "🎨"
+      image: "url(/images/home_visuals/art.png)",
     },
     'Writers': {
       headline: "Serialized success.",
       text: "Serialize your novel, publish exclusive essays, or start a paid newsletter. Your words are worth more than likes.",
-      image: "linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)",
-      icon: "✍️"
+      image: "url(/images/home_visuals/writing.png)",
+    },
+    'Gamers': {
+      headline: "Level up your community.",
+      text: "Offer exclusive coaching, private lobbies, and custom mods. Monetize your skills and build a dedicated squad.",
+      image: "url(/images/home_visuals/gaming.png)",
     }
   };
 
@@ -344,8 +344,7 @@ export default function Home() {
                  `}} />
 
             {/* Image Side */}
-            <div style={{ minHeight: '400px', background: tabContent[activeTab].image, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ fontSize: '8rem', filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.2))' }}>{tabContent[activeTab].icon}</span>
+            <div style={{ minHeight: '400px', background: `${tabContent[activeTab].image} center/cover no-repeat`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             </div>
 
             {/* Text Side */}
