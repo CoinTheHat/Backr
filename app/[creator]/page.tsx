@@ -10,6 +10,7 @@ import { SUBSCRIPTION_ABI } from '@/utils/abis';
 import { Address } from 'viem';
 import { useToast } from '../components/Toast';
 import confetti from 'canvas-confetti';
+import { formatPrice, formatPlural } from '@/utils/format';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
     const { creator } = use(params);
@@ -118,6 +119,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const displayName = creatorProfile?.name || `Creator ${creatorId.substring(0, 4)}...`;
     const avatar = creatorProfile?.avatarUrl;
     const cover = creatorProfile?.coverUrl;
+    const memberCount = Math.floor(Math.random() * 100) + 1; // Mock
 
     return (
         <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)', color: 'var(--color-text-primary)' }}>
@@ -138,35 +140,36 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
             {/* Hero & Profile Header */}
             <div style={{ background: 'var(--color-bg-surface)', paddingBottom: '24px', marginBottom: '32px', borderBottom: '1px solid var(--color-border)' }}>
-                {/* Cover - Reduced Height */}
+                {/* Cover - Reduced Height (180px) */}
                 <div style={{
-                    height: '240px', width: '100%',
+                    height: '180px', width: '100%',
                     background: cover ? `url(${cover}) center/cover` : 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)',
                     position: 'relative',
                     overflow: 'hidden'
                 }}>
                     {/* Pattern Overlay */}
                     <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.1 }}></div>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.2))' }}></div>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.3))' }}></div>
                 </div>
 
-                <div className="page-container" style={{ position: 'relative', marginTop: '-48px', display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
-                    {/* Avatar */}
+                <div className="page-container" style={{ position: 'relative', marginTop: '-60px', display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap', paddingLeft: '24px', paddingRight: '24px' }}>
+                    {/* Avatar - Better Positioning & Border */}
                     <div style={{
-                        width: '128px', height: '128px', borderRadius: '50%',
+                        width: '120px', height: '120px', borderRadius: '50%',
                         background: avatar ? `url(${avatar}) center/cover` : '#fff',
                         border: '4px solid var(--color-bg-surface)',
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
-                        flexShrink: 0
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        flexShrink: 0,
+                        zIndex: 10
                     }}></div>
 
                     {/* Info */}
-                    <div style={{ flex: 1, paddingBottom: '8px' }}>
-                        <h1 className="text-h1" style={{ marginBottom: '4px' }}>{displayName}</h1>
+                    <div style={{ flex: 1, paddingBottom: '8px', zIndex: 10 }}>
+                        <h1 className="text-h1" style={{ marginBottom: '4px', textShadow: '0 2px 4px rgba(255,255,255,0.5)' }}>{displayName}</h1>
                         <div style={{ display: 'flex', gap: '16px', color: 'var(--color-text-secondary)', fontSize: '0.9rem', flexWrap: 'wrap' }}>
-                            <span><strong>{posts.length}</strong> Posts</span>
-                            <span><strong>{creatorTiers.length}</strong> Tiers</span>
-                            <span><strong>{Math.floor(Math.random() * 100) + 1}</strong> Members</span>
+                            <span><strong>{posts.length}</strong> {formatPlural(posts.length, 'Post', 'Posts')}</span>
+                            <span><strong>{creatorTiers.length}</strong> {formatPlural(creatorTiers.length, 'Tier', 'Tiers')}</span>
+                            <span><strong>{memberCount}</strong> {formatPlural(memberCount, 'Member', 'Members')}</span>
                         </div>
                     </div>
 
@@ -183,7 +186,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             </div>
 
             {/* Main Content Grid */}
-            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px', paddingBottom: '80px' }}>
+            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px', paddingBottom: '80px', maxWidth: '1200px', margin: '0 auto' }}>
 
                 {/* Left: Feed & Tabs */}
                 <div>
@@ -222,9 +225,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                 posts.map((post, i) => {
                                     const locked = !canViewPost(post);
                                     return (
-                                        <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column' }}>
-                                            {/* Optional Header Context (e.g. pinned?) */}
-
+                                        <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
                                             <div style={{ padding: '24px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
                                                     <span className="text-caption" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -298,7 +299,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     )}
 
                     {activeTab === 'about' && (
-                        <div className="card-surface" style={{ padding: '32px' }}>
+                        <div className="card-surface" style={{ padding: '32px', borderRadius: 'var(--radius-lg)' }}>
                             <h3 className="text-h3" style={{ marginBottom: '16px' }}>About {displayName}</h3>
                             <p className="text-body" style={{ whiteSpace: 'pre-line', marginBottom: '24px' }}>
                                 {creatorProfile?.description || "This creator hasn't written a bio yet."}
@@ -332,7 +333,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 {/* Right: Sidebar (Sticky) */}
                 <aside style={{ position: 'relative' }}>
                     <div id="tiers-section" style={{ position: 'sticky', top: '90px' }}>
-                        <div className="card-surface" style={{ padding: '24px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-lg)' }}>
+                        <div className="card-surface" style={{ padding: '24px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-lg)', borderRadius: 'var(--radius-lg)' }}>
                             <h3 className="text-h3" style={{ marginBottom: '8px' }}>Join Membership</h3>
                             <p className="text-body-sm" style={{ marginBottom: '24px', color: 'var(--color-text-secondary)' }}>Unlock exclusive content and support {displayName}.</p>
 
@@ -350,12 +351,13 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                             <h4 style={{ fontWeight: 700 }}>{tier.name}</h4>
-                                            <span style={{ fontWeight: 800 }}>${tier.price}</span>
+                                            <span style={{ fontWeight: 800 }}>{formatPrice(tier.price)}</span>
                                         </div>
                                         {tier.recommended && (
                                             <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '8px' }}>RECOMMENDED</div>
                                         )}
                                         <p className="text-caption" style={{ color: 'var(--color-text-secondary)' }}>Includes {tier.benefits?.length || 0} benefits</p>
+                                        <Button size="sm" style={{ width: '100%', marginTop: '12px' }} variant={tier.recommended ? 'primary' : 'outline'}>Join</Button>
                                     </div>
                                 ))}
 
@@ -374,7 +376,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 __html: `
                 @media (min-width: 1000px) {
                     .responsive-grid {
-                        grid-template-columns: 7fr 320px !important;
+                        grid-template-columns: 7fr 350px !important;
                     }
                 }
             `}} />

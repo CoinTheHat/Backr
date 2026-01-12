@@ -87,11 +87,11 @@ export default function AudiencePage() {
             />
 
             {/* Filters Row */}
-            <Card padding="md" style={{ marginBottom: '24px' }}>
+            <Card variant="surface" style={{ marginBottom: '24px', padding: '24px' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
                     {/* Top Row: Chips */}
-                    <div style={{ display: 'flex', gap: '12px' }}>
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                         <div style={{ padding: '6px 12px', background: 'var(--color-bg-page)', border: '1px solid var(--color-border)', borderRadius: '20px', fontSize: '0.8rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)' }}>
                             <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-success)' }}></span>
                             Active: <span style={{ color: 'var(--color-text-primary)' }}>{activeCount}</span>
@@ -103,39 +103,40 @@ export default function AudiencePage() {
                     </div>
 
                     {/* Bottom Row: Controls */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                        <div style={{ flex: 1, minWidth: '240px', position: 'relative' }}>
+                    <div className="filter-controls" style={{ display: 'flex', alignItems: 'center', gap: '16px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: '1 1 300px', position: 'relative' }}>
                             <span style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }}>🔍</span>
                             <Input
                                 placeholder="Search by address..."
                                 value={search}
                                 onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-                                style={{ paddingLeft: '44px', margin: 0, height: '44px' }}
+                                style={{ paddingLeft: '44px', margin: 0, height: '44px', width: '100%' }}
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: '12px' }}>
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
-                                className="focus-ring"
-                                style={{
-                                    width: '180px',
-                                    padding: '0 16px',
-                                    height: '44px',
-                                    borderRadius: 'var(--radius-md)',
-                                    border: '1px solid var(--color-border)',
-                                    background: 'var(--color-bg-surface)',
-                                    cursor: 'pointer',
-                                    // appearance: 'none', // Removed custom appearance to use default arrow for reliability
-                                }}
-                            >
-                                <option value="All">All Status</option>
-                                <option value="Active">Active</option>
-                                <option value="Expired">Expired</option>
-                            </select>
+                        <div style={{ display: 'flex', gap: '12px', flex: '1 1 auto', flexWrap: 'wrap' }}>
+                            <div style={{ position: 'relative', flexGrow: 1, minWidth: '150px' }}>
+                                <select
+                                    value={filterStatus}
+                                    onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(1); }}
+                                    className="focus-ring"
+                                    style={{
+                                        width: '100%',
+                                        padding: '0 16px',
+                                        height: '44px',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: '1px solid var(--color-border)',
+                                        background: 'var(--color-bg-surface)',
+                                        cursor: 'pointer',
+                                    }}
+                                >
+                                    <option value="All">All Status</option>
+                                    <option value="Active">Active</option>
+                                    <option value="Expired">Expired</option>
+                                </select>
+                            </div>
 
-                            <Button variant="outline" onClick={handleExportCSV} style={{ height: '44px' }} leftIcon={<span>📥</span>}>
+                            <Button variant="outline" onClick={handleExportCSV} style={{ height: '44px', whiteSpace: 'nowrap' }} leftIcon={<span>📥</span>}>
                                 Export
                             </Button>
                         </div>
@@ -154,7 +155,7 @@ export default function AudiencePage() {
                                 <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-tertiary)' }}>Joined</th>
                                 <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-tertiary)' }}>Expires</th>
                                 <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-tertiary)' }}>Status</th>
-                                <th style={{ padding: '16px 24px' }}></th>
+                                <th style={{ padding: '16px 24px', textAlign: 'right', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--color-text-tertiary)' }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>

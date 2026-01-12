@@ -157,12 +157,12 @@ export default function SettingsPage() {
                         <h3 className="text-h3" style={{ marginBottom: '24px' }}>Social Links</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6 }}>✖</span>
+                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6, pointerEvents: 'none' }}>𝕏</span>
                                 <Input label="Twitter / X" value={socials.twitter} onChange={(e) => setSocials({ ...socials, twitter: e.target.value })} placeholder="@username" style={{ paddingLeft: '48px' }} />
                             </div>
                             <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6 }}>🌐</span>
-                                <Input label="Website" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} placeholder="https://yoursite.com" style={{ paddingLeft: '48px' }} />
+                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6, pointerEvents: 'none' }}>🌐</span>
+                                <Input label="Website" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} placeholder="https://yoursite.com (Optional)" style={{ paddingLeft: '48px' }} />
                             </div>
                         </div>
                     </Card>
@@ -204,7 +204,7 @@ export default function SettingsPage() {
                     </div>
                     <div style={{ padding: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
                         <div>
-                            <div style={{ fontWeight: 600, color: '#7F1D1D' }}>Reset Contract Deployment</div>
+                            <div style={{ fontWeight: 600, color: '#7F1D1D' }}>Reset Connection</div>
                             <div style={{ fontSize: '0.85rem', color: '#991B1B' }}>This will disconnect your current fan page and require a re-deployment.</div>
                         </div>
                         <Button style={{ background: '#DC2626', color: '#fff', borderColor: '#DC2626' }} onClick={() => setIsResetModalOpen(true)}>Reset Connection</Button>
@@ -240,8 +240,9 @@ export default function SettingsPage() {
                             <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚠️</div>
                             <h2 className="text-h2" style={{ color: 'var(--color-error)' }}>Reset Connection?</h2>
                             <p className="text-body" style={{ color: 'var(--color-text-secondary)', marginTop: '8px' }}>
-                                This will unlink your current contract and data. To confirm, please type <strong>RESET</strong> below.
+                                <b>Warning:</b> This action cannot be undone. You will lose access to your current page configuration.
                             </p>
+                            <p className="text-caption" style={{ marginTop: '12px' }}>To confirm, please type <strong>RESET</strong> below.</p>
                         </div>
                         <Input value={resetConfirmation} onChange={(e) => setResetConfirmation(e.target.value)} placeholder="Type RESET" style={{ textAlign: 'center', fontSize: '1.2rem', letterSpacing: '2px', fontWeight: 'bold' }} />
                         <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
