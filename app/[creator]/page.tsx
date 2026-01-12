@@ -19,6 +19,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const router = useRouter();
     const { showToast, ToastComponent } = useToast();
 
+    // Tab State
+    const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'collections'>('posts');
+
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<any[]>([]);
     const [creatorTiers, setCreatorTiers] = useState<any[]>([]);
@@ -75,7 +78,6 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             setLoading(false);
             confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             showToast('Welcome to the inner circle! 🎉', 'success');
-            // Sync logic would go here
         }
     }, [isSubscribedOnChain]);
 
@@ -123,175 +125,256 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
             {/* Nav */}
             <nav style={{
-                position: 'sticky', top: 0, zIndex: 50,
+                position: 'sticky', top: 0, zIndex: 100,
                 background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border)',
-                padding: '16px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
             }}>
-                <Button variant="ghost" onClick={() => router.push('/')} style={{ color: 'var(--color-text-secondary)' }}>← Back</Button>
-                <div style={{ fontWeight: 700 }}>{displayName}</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <Button variant="ghost" onClick={() => router.push('/')} style={{ color: 'var(--color-text-secondary)', padding: '8px' }}>←</Button>
+                    <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{displayName}</div>
+                </div>
                 <WalletButton />
             </nav>
 
-            {/* Hero */}
-            <header style={{ position: 'relative', paddingBottom: '40px', background: 'var(--color-bg-surface)' }}>
-                {/* Cover */}
+            {/* Hero & Profile Header */}
+            <div style={{ background: 'var(--color-bg-surface)', paddingBottom: '24px', marginBottom: '32px', borderBottom: '1px solid var(--color-border)' }}>
+                {/* Cover - Reduced Height */}
                 <div style={{
-                    height: '280px', width: '100%',
+                    height: '240px', width: '100%',
                     background: cover ? `url(${cover}) center/cover` : 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)',
-                    position: 'relative'
+                    position: 'relative',
+                    overflow: 'hidden'
                 }}>
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.3))' }}></div>
+                    {/* Pattern Overlay */}
+                    <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '20px 20px', opacity: 0.1 }}></div>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.2))' }}></div>
                 </div>
 
-                {/* Profile Info */}
-                <div style={{ maxWidth: 'var(--max-width-page)', margin: '0 auto', padding: '0 24px', display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '-60px', position: 'relative', zIndex: 10 }}>
+                <div className="page-container" style={{ position: 'relative', marginTop: '-48px', display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
+                    {/* Avatar */}
                     <div style={{
-                        width: '120px', height: '120px', borderRadius: '50%',
+                        width: '128px', height: '128px', borderRadius: '50%',
                         background: avatar ? `url(${avatar}) center/cover` : '#fff',
-                        border: '4px solid var(--color-bg-page)', boxShadow: 'var(--shadow-lg)'
+                        border: '4px solid var(--color-bg-surface)',
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.08)',
+                        flexShrink: 0
                     }}></div>
 
-                    <h1 className="text-h1" style={{ marginTop: '16px', textAlign: 'center' }}>{displayName}</h1>
-                    <p className="text-body" style={{ color: 'var(--color-text-secondary)', maxWidth: '600px', textAlign: 'center', marginTop: '8px' }}>
-                        {creatorProfile?.description || "Creating amazing content for the Mantle community."}
-                    </p>
-
-                    <div style={{ display: 'flex', gap: '24px', marginTop: '16px', color: 'var(--color-text-tertiary)', fontSize: '0.875rem' }}>
-                        <span><strong>{posts.length}</strong> Posts</span>
-                        <span>•</span>
-                        <span><strong>{creatorTiers.length}</strong> Tiers</span>
+                    {/* Info */}
+                    <div style={{ flex: 1, paddingBottom: '8px' }}>
+                        <h1 className="text-h1" style={{ marginBottom: '4px' }}>{displayName}</h1>
+                        <div style={{ display: 'flex', gap: '16px', color: 'var(--color-text-secondary)', fontSize: '0.9rem', flexWrap: 'wrap' }}>
+                            <span><strong>{posts.length}</strong> Posts</span>
+                            <span><strong>{creatorTiers.length}</strong> Tiers</span>
+                            <span><strong>{Math.floor(Math.random() * 100) + 1}</strong> Members</span>
+                        </div>
                     </div>
 
-                    {/* Socials Placeholder */}
-                    <div style={{ display: 'flex', gap: '16px', marginTop: '16px' }}>
-                        {creatorProfile?.socials?.twitter && <a href={`https://x.com/${creatorProfile.socials.twitter}`} target="_blank" style={{ fontSize: '1.2rem', opacity: 0.6 }}>🐦</a>}
-                        {creatorProfile?.socials?.website && <a href={creatorProfile.socials.website} target="_blank" style={{ fontSize: '1.2rem', opacity: 0.6 }}>🌐</a>}
+                    {/* Socials / Actions */}
+                    <div style={{ display: 'flex', gap: '12px', paddingBottom: '12px' }}>
+                        {creatorProfile?.socials?.twitter && (
+                            <Button variant="ghost" size="sm" onClick={() => window.open(`https://x.com/${creatorProfile.socials.twitter}`, '_blank')}>
+                                🐦 Twitter
+                            </Button>
+                        )}
+                        <Button variant="outline" size="sm">Share</Button>
                     </div>
                 </div>
-            </header>
+            </div>
 
-            {/* Layout Grid */}
-            <main style={{ maxWidth: 'var(--max-width-page)', margin: '0 auto', padding: '0 24px 80px', display: 'grid', gridTemplateColumns: '1fr', gap: '40px' }} className="responsive-grid">
+            {/* Main Content Grid */}
+            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px', paddingBottom: '80px' }}>
 
-                {/* Left: Feed */}
+                {/* Left: Feed & Tabs */}
                 <div>
                     {/* Tabs */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '32px' }}>
-                        <button style={{ padding: '12px 24px', borderBottom: '2px solid var(--color-primary)', color: 'var(--color-text-primary)', fontWeight: 600, background: 'none', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>Posts</button>
-                        <button style={{ padding: '12px 24px', borderBottom: '2px solid transparent', color: 'var(--color-text-secondary)', fontWeight: 600, background: 'none', border: 'none' }}>About</button>
+                    <div style={{ display: 'flex', borderBottom: '1px solid var(--color-border)', marginBottom: '32px', gap: '8px' }}>
+                        {['posts', 'about', 'collections'].map((tab) => (
+                            <button
+                                key={tab}
+                                onClick={() => setActiveTab(tab as any)}
+                                style={{
+                                    padding: '12px 20px',
+                                    borderBottom: activeTab === tab ? '2px solid var(--color-primary)' : '2px solid transparent',
+                                    color: activeTab === tab ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+                                    fontWeight: 600,
+                                    background: 'none',
+                                    borderTop: 'none', borderLeft: 'none', borderRight: 'none',
+                                    cursor: 'pointer',
+                                    textTransform: 'capitalize',
+                                    fontSize: '1rem'
+                                }}
+                            >
+                                {tab}
+                            </button>
+                        ))}
                     </div>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                        {posts.length === 0 ? (
-                            <div style={{ padding: '64px', textAlign: 'center', background: 'var(--color-bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)' }}>
-                                <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📭</div>
-                                <h3 className="text-h3">No posts yet</h3>
-                                <p className="text-body-sm" style={{ color: 'var(--color-text-tertiary)' }}>Check back later for updates.</p>
-                            </div>
-                        ) : (
-                            posts.map((post, i) => {
-                                const locked = !canViewPost(post);
-                                return (
-                                    <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0 }}>
-                                        {post.image && (
-                                            <div style={{ height: '300px', background: '#000', position: 'relative' }}>
-                                                <img src={post.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', filter: locked ? 'blur(12px)' : 'none', opacity: locked ? 0.6 : 1 }} />
-                                                {locked && (
-                                                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.4)' }}>
-                                                        <div style={{ background: 'rgba(255,255,255,0.9)', padding: '12px 24px', borderRadius: '30px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: '#000' }}>
-                                                            🔒 Subscribers Only
+                    {activeTab === 'posts' && (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                            {posts.length === 0 ? (
+                                <div style={{ padding: '64px', textAlign: 'center', background: 'var(--color-bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)' }}>
+                                    <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📭</div>
+                                    <h3 className="text-h3">No posts yet</h3>
+                                    <p className="text-body-sm" style={{ color: 'var(--color-text-tertiary)' }}>This creator hasn't posted anything yet.</p>
+                                </div>
+                            ) : (
+                                posts.map((post, i) => {
+                                    const locked = !canViewPost(post);
+                                    return (
+                                        <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column' }}>
+                                            {/* Optional Header Context (e.g. pinned?) */}
+
+                                            <div style={{ padding: '24px' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
+                                                    <span className="text-caption" style={{ color: 'var(--color-text-tertiary)' }}>
+                                                        {new Date(post.createdAt).toLocaleDateString()}
+                                                    </span>
+                                                    {locked && (
+                                                        <div style={{
+                                                            fontSize: '0.7rem', fontWeight: 800,
+                                                            color: 'var(--color-warning)', textTransform: 'uppercase',
+                                                            background: 'rgba(245, 158, 11, 0.1)', padding: '4px 8px', borderRadius: '4px'
+                                                        }}>
+                                                            Locked 🔒
                                                         </div>
+                                                    )}
+                                                </div>
+
+                                                <h2 className="text-h3" style={{ marginBottom: '12px', fontSize: '1.4rem' }}>{post.title}</h2>
+
+                                                {/* Content Teaser */}
+                                                <div className="text-body" style={{ color: locked ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: '1.6' }}>
+                                                    {locked ? (
+                                                        <div style={{ fontStyle: 'italic', opacity: 0.8 }}>
+                                                            This post is for <strong>Tier {post.minTier || 1}+</strong> members only. Join to unlock and read the full story.
+                                                        </div>
+                                                    ) : (
+                                                        post.content?.length > 200 ? post.content.substring(0, 200) + '...' : post.content
+                                                    )}
+                                                </div>
+
+                                                {/* Image Preview (if present) - Optimized Ratio */}
+                                                {post.image && (
+                                                    <div style={{
+                                                        height: '240px', width: '100%', borderRadius: '12px', overflow: 'hidden',
+                                                        marginBottom: '20px', position: 'relative', background: '#f0f0f0'
+                                                    }}>
+                                                        <img src={post.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: locked ? 'blur(8px)' : 'none', opacity: locked ? 0.7 : 1 }} />
+                                                        {locked && (
+                                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <span style={{ fontSize: '3rem' }}>🔒</span>
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 )}
-                                            </div>
-                                        )}
-                                        <div style={{ padding: '24px' }}>
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                                                <span className="text-caption" style={{ color: 'var(--color-text-tertiary)' }}>{new Date(post.createdAt).toLocaleDateString()}</span>
-                                                {locked && <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--color-primary)', textTransform: 'uppercase' }}>Locked</span>}
-                                            </div>
-                                            <h2 className="text-h3" style={{ marginBottom: '12px' }}>{post.title}</h2>
-                                            <div className="text-body" style={{ color: locked ? 'var(--color-text-tertiary)' : 'var(--color-text-secondary)', marginBottom: '24px' }}>
-                                                {locked ? (post.teaser || "Join a membership tier to unlock this post.") : post.content}
-                                            </div>
 
-                                            {locked ? (
-                                                <Button style={{ width: '100%' }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Unlock Post</Button>
-                                            ) : (
-                                                <div style={{ display: 'flex', gap: '16px', borderTop: '1px solid var(--color-border)', paddingTop: '16px' }}>
-                                                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>❤️ Like</button>
-                                                    <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>💬 Comment</button>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                                                    <div style={{ display: 'flex', gap: '16px' }}>
+                                                        {locked ? (
+                                                            <Button size="sm" onClick={() => {
+                                                                const el = document.getElementById('tiers-section');
+                                                                el?.scrollIntoView({ behavior: 'smooth' });
+                                                            }}>Unlock</Button>
+                                                        ) : (
+                                                            <>
+                                                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '0.9rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                                                    <span>❤️</span> Like
+                                                                </button>
+                                                                <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)', fontSize: '0.9rem', display: 'flex', gap: '6px', alignItems: 'center' }}>
+                                                                    <span>💬</span> Comment
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                    {!locked && <Button variant="ghost" size="sm">Read More →</Button>}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
+                                    );
+                                })
+                            )}
+                        </div>
+                    )}
+
+                    {activeTab === 'about' && (
+                        <div className="card-surface" style={{ padding: '32px' }}>
+                            <h3 className="text-h3" style={{ marginBottom: '16px' }}>About {displayName}</h3>
+                            <p className="text-body" style={{ whiteSpace: 'pre-line', marginBottom: '24px' }}>
+                                {creatorProfile?.description || "This creator hasn't written a bio yet."}
+                            </p>
+
+                            <div style={{ padding: '16px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-md)' }}>
+                                <h4 style={{ fontWeight: 600, marginBottom: '12px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>STATS</h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                                    <div>
+                                        <div className="text-h2" style={{ color: 'var(--color-primary)' }}>{posts.length}</div>
+                                        <div className="text-caption">Total Posts</div>
                                     </div>
-                                );
-                            })
-                        )}
-                    </div>
+                                    <div>
+                                        <div className="text-h2" style={{ color: 'var(--color-primary)' }}>{creatorTiers.length}</div>
+                                        <div className="text-caption">Membership Tiers</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {activeTab === 'collections' && (
+                        <div style={{ padding: '64px', textAlign: 'center', background: 'var(--color-bg-surface)', borderRadius: 'var(--radius-lg)', border: '1px dashed var(--color-border)' }}>
+                            <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📂</div>
+                            <h3 className="text-h3">No Collections</h3>
+                            <p className="text-body-sm" style={{ color: 'var(--color-text-tertiary)' }}>Collections help organize posts series.</p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Sidebar (Sticky) */}
                 <aside style={{ position: 'relative' }}>
-                    <div style={{ position: 'sticky', top: '100px' }}>
-                        <h3 className="text-caption" style={{ fontWeight: 700, textTransform: 'uppercase', marginBottom: '16px', color: 'var(--color-text-tertiary)' }}>Membership Tiers</h3>
+                    <div id="tiers-section" style={{ position: 'sticky', top: '90px' }}>
+                        <div className="card-surface" style={{ padding: '24px', border: '1px solid var(--color-border)', boxShadow: 'var(--shadow-lg)' }}>
+                            <h3 className="text-h3" style={{ marginBottom: '8px' }}>Join Membership</h3>
+                            <p className="text-body-sm" style={{ marginBottom: '24px', color: 'var(--color-text-secondary)' }}>Unlock exclusive content and support {displayName}.</p>
 
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {creatorTiers.map((tier, i) => (
-                                <div key={i} className="card-surface" style={{
-                                    padding: '24px',
-                                    border: tier.recommended ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
-                                    background: tier.recommended ? 'var(--color-primary-light)' : 'var(--color-bg-surface)'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                        <h4 style={{ fontWeight: 700, fontSize: '1.1rem' }}>{tier.name}</h4>
-                                        {tier.recommended && <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--color-primary)', textTransform: 'uppercase' }}>Recommended</span>}
-                                    </div>
-                                    <div style={{ fontSize: '1.75rem', fontWeight: 800, marginBottom: '16px' }}>
-                                        {tier.price} <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-secondary)' }}>MNT / mo</span>
-                                    </div>
-
-                                    <ul style={{ padding: 0, listStyle: 'none', marginBottom: '24px' }}>
-                                        {tier.benefits?.slice(0, 4).map((b: string, k: number) => (
-                                            <li key={k} style={{ display: 'flex', gap: '8px', marginBottom: '8px', fontSize: '0.9rem', color: 'var(--color-text-secondary)' }}>
-                                                <span style={{ color: 'var(--color-primary)' }}>✓</span> {b}
-                                            </li>
-                                        ))}
-                                    </ul>
-
-                                    <Button
-                                        variant={tier.recommended ? 'primary' : 'outline'}
-                                        style={{ width: '100%' }}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {creatorTiers.map((tier, i) => (
+                                    <div key={i} style={{
+                                        padding: '16px',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: tier.recommended ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
+                                        background: tier.recommended ? 'var(--color-primary-light)' : 'var(--color-bg-page)',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s'
+                                    }}
                                         onClick={() => handleSubscribe(i)}
-                                        disabled={loading || isSubscribed}
                                     >
-                                        {loading ? 'Processing...' : isSubscribed ? 'Already Member' : 'Join Tier'}
-                                    </Button>
-                                </div>
-                            ))}
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                            <h4 style={{ fontWeight: 700 }}>{tier.name}</h4>
+                                            <span style={{ fontWeight: 800 }}>${tier.price}</span>
+                                        </div>
+                                        {tier.recommended && (
+                                            <div style={{ fontSize: '0.75rem', color: 'var(--color-primary)', fontWeight: 700, marginBottom: '8px' }}>RECOMMENDED</div>
+                                        )}
+                                        <p className="text-caption" style={{ color: 'var(--color-text-secondary)' }}>Includes {tier.benefits?.length || 0} benefits</p>
+                                    </div>
+                                ))}
 
-                            {creatorTiers.length === 0 && (
-                                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--color-text-secondary)', fontStyle: 'italic' }}>
-                                    No membership tiers available yet.
-                                </div>
-                            )}
-                        </div>
-
-                        <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                            <p className="text-caption" style={{ color: 'var(--color-text-tertiary)' }}>
-                                Secured by Mantle Network. <br /> Cancel anytime.
-                            </p>
+                                {creatorTiers.length === 0 && (
+                                    <div style={{ textAlign: 'center', padding: '16px', fontStyle: 'italic', color: 'var(--color-text-tertiary)' }}>No tiers public yet.</div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </aside>
 
-            </main>
+            </div>
 
+            {/* Global Styles for layout */}
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @media (min-width: 1000px) {
                     .responsive-grid {
-                        grid-template-columns: 1fr 340px !important;
+                        grid-template-columns: 7fr 320px !important;
                     }
                 }
             `}} />
