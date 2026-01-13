@@ -148,99 +148,152 @@ export default function Home() {
 
         {/* SECTION 1: HERO */}
         <section style={{
-          minHeight: '100vh',
-          background: 'linear-gradient(180deg, #dbeafe 0%, #eff6ff 100%)',
-          paddingTop: '140px',
+          minHeight: '90vh',
+          background: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%)',
+          paddingTop: '120px',
           paddingBottom: '80px',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          display: 'flex',
+          alignItems: 'center'
         }}>
+          {/* Mobile Layout Fix */}
+          <style dangerouslySetInnerHTML={{
+            __html: `
+             @media (max-width: 1024px) {
+                 .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
+                 .hero-left { margin: 0 auto; alignItems: center !important; }
+                 .hero-kpi { justify-content: center; }
+                 .hero-collage { display: none !important; }
+                 .mobile-cta-sticky { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important; animation: slideUp 0.5s ease-out; }
+             }
+             @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
+             `
+          }} />
 
-          <div className="page-container" style={{ position: 'relative', height: '100%' }}>
+          <div className="page-container hero-grid" style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '64px',
+            alignItems: 'center',
+            width: '100%'
+          }}>
 
-            {/* Top Text */}
-            <h1 className="headline-huge" style={{ fontSize: 'clamp(5rem, 11vw, 13rem)', color: '#4b3f35', marginBottom: '0' }}>
-              Creativity
-            </h1>
-
-            <div className="mobile-stack" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginTop: '-20px' }}>
-              {/* Middle Text - "powered" */}
-              <div style={{ position: 'relative', zIndex: 2 }}>
-                <h1 className="headline-huge" style={{
-                  fontSize: 'clamp(5rem, 11vw, 13rem)',
-                  color: '#4b3f35',
-                  marginLeft: 'clamp(0px, 10vw, 150px)',
-                  fontStyle: 'italic',
-                  fontFamily: 'var(--font-sans)',
-                  fontWeight: '300'
-                }}>
-                  powered
-                </h1>
-              </div>
-
-              {/* Creator Image 1 (Right side floating) */}
-              <div className="creator-card-hover float-slow" style={{
-                width: 'clamp(200px, 25vw, 350px)',
-                aspectRatio: '3/4',
-                borderRadius: 'var(--radius-md)',
-                overflow: 'hidden',
-                boxShadow: 'var(--shadow-lg)',
-                transform: 'rotate(2deg)',
-                marginTop: '40px'
+            {/* LEFT COLUMN */}
+            <div className="hero-left" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', zIndex: 10 }}>
+              {/* Trust Badge */}
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: '8px',
+                padding: '8px 16px',
+                background: '#fff',
+                border: '1px solid var(--color-border)',
+                borderRadius: '100px',
+                marginBottom: '32px',
+                boxShadow: 'var(--shadow-sm)',
+                fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-secondary)'
               }}>
-                <img src="/images/home_visuals/creator2.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Musician" />
-              </div>
-            </div>
-
-            <div className="mobile-stack" style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
-              {/* Creator Image 2 (Left side) */}
-              <div className="creator-card-hover float-medium mobile-hide" style={{
-                width: 'clamp(180px, 20vw, 280px)',
-                aspectRatio: '4/5',
-                borderRadius: 'var(--radius-md)',
-                overflow: 'hidden',
-                boxShadow: 'var(--shadow-lg)',
-                transform: 'rotate(-3deg)',
-                marginTop: '-100px',
-                marginLeft: '50px'
-              }}>
-                <img src="/images/home_visuals/creator1.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Artist" />
+                <span style={{ width: '8px', height: '8px', background: 'var(--color-brand-blue)', borderRadius: '50%' }}></span>
+                Built on Mantle
               </div>
 
-              {/* Bottom Text - "by fandom" */}
+              {/* Headline */}
               <h1 className="headline-huge" style={{
-                fontSize: 'clamp(5rem, 11vw, 13rem)',
-                color: '#9ca3af',
-                textAlign: 'right',
-                width: '100%',
-                marginTop: '20px'
+                fontSize: 'clamp(3rem, 5vw, 4.5rem)',
+                lineHeight: 1.1,
+                marginBottom: '24px',
+                color: '#111827',
+                letterSpacing: '-0.02em',
+                fontFamily: 'var(--font-serif)'
               }}>
-                by fandom
+                Unlock your <br />
+                <span style={{ color: 'var(--color-brand-blue)' }}>creative potential</span>
               </h1>
+
+              {/* Subheadline value prop */}
+              <p style={{
+                fontSize: '1.25rem',
+                color: 'var(--color-text-secondary)',
+                marginBottom: '40px',
+                maxWidth: '540px',
+                lineHeight: 1.6
+              }}>
+                The all-in-one platform for creators to build community, share exclusive content, and earn directly from fans.
+              </p>
+
+              {/* CTAs */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '48px' }}>
+                <button
+                  className="mobile-cta-sticky"
+                  onClick={() => router.push('/dashboard')}
+                  style={{
+                    padding: '16px 32px', borderRadius: 'var(--radius-full)', background: '#111827', color: '#fff',
+                    fontSize: '1.05rem', fontWeight: 600, border: 'none', cursor: 'pointer',
+                    boxShadow: 'var(--shadow-lg)', transition: 'transform 0.2s'
+                  }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                  Create on Backr
+                </button>
+                <button onClick={() => router.push('/explore')} style={{
+                  padding: '16px 32px', borderRadius: 'var(--radius-full)', background: '#fff', color: '#111827',
+                  fontSize: '1.05rem', fontWeight: 600, border: '1px solid var(--color-border)', cursor: 'pointer',
+                  boxShadow: 'var(--shadow-sm)', transition: 'transform 0.2s'
+                }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+                  Find Creators
+                </button>
+              </div>
+
+              {/* KPIs (Chips) */}
+              <div className="hero-kpi" style={{ display: 'flex', gap: '32px', borderTop: '1px solid var(--color-border)', paddingTop: '32px', width: '100%' }}>
+                {[
+                  { label: 'Creators', value: '10k+' },
+                  { label: 'Supporters', value: '250k+' },
+                  { label: 'Paid out', value: '$5M+' }
+                ].map((stat, i) => (
+                  <div key={i}>
+                    <div style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--color-text-primary)' }}>{stat.value}</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{stat.label}</div>
+                  </div>
+                ))}
+              </div>
             </div>
 
-            {/* Main CTA */}
-            <div style={{ marginTop: 'var(--space-16)', textAlign: 'center' }}>
-              <p style={{ fontSize: '1.25rem', maxWidth: '600px', margin: '0 auto 32px', lineHeight: '1.6', color: 'var(--color-text-secondary)' }}>
-                Patreon is the best place to build community with your biggest fans, share exclusive work, and turn your passion into a lasting creative business.
-              </p>
-              <button onClick={() => router.push('/dashboard')} style={{
-                padding: '24px 64px',
-                fontSize: '1.25rem',
-                background: '#000',
-                color: '#fff',
-                borderRadius: 'var(--radius-full)',
-                border: 'none',
-                cursor: 'pointer',
-                fontWeight: '600',
-                boxShadow: 'var(--shadow-lg)',
-                transition: 'transform 0.2s'
-              }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
-              >
-                Get Started
-              </button>
+            {/* RIGHT COLUMN (Collage) */}
+            <div className="hero-collage" style={{ position: 'relative', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Background Blob */}
+              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, #dbeafe 0%, transparent 70%)', opacity: 0.6, zIndex: 0 }}></div>
+
+              {/* Card 1: Creator Preview (Main) */}
+              <div className="card-surface float-slow" style={{
+                position: 'absolute', top: '10%', right: '10%', width: '320px', padding: '0', overflow: 'hidden', zIndex: 2
+              }}>
+                <div style={{ height: '320px', width: '100%', position: 'relative' }}>
+                  <img src="/images/home_visuals/creator1.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Creator" />
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '1.2rem', color: '#fff' }}>Sarah Artist</div>
+                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)' }}>Digital Illustrator</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Card 2: Earnings (Overlapping Bottom Left) */}
+              <div className="card-surface float-medium" style={{
+                position: 'absolute', bottom: '20%', left: '0%', width: '280px', padding: '24px', zIndex: 3
+              }}>
+                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Monthly Revenue</div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-success)', marginBottom: '12px' }}>$4,250</div>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '40px' }}>
+                  {[40, 60, 35, 80, 55, 90, 70].map((h, i) => <div key={i} style={{ flex: 1, background: '#10b981', height: `${h}%`, borderRadius: '2px', opacity: 0.8 }}></div>)}
+                </div>
+              </div>
+
+              {/* Card 3: Membership (Small Notification) */}
+              <div className="card-surface float-fast" style={{
+                position: 'absolute', top: '25%', left: '-10%', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1, borderRadius: '100px'
+              }}>
+                <div style={{ width: '32px', height: '32px', background: '#5865F2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✨</div>
+                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>New <strong>Gold Member</strong></div>
+              </div>
             </div>
 
           </div>
