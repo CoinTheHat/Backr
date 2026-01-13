@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
 import ChatMockup from './components/ChatMockup';
+import ExclusiveContentMockup from './components/ExclusiveContentMockup';
 
 export default function Home() {
   const router = useRouter();
@@ -297,12 +298,9 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Visual: Chat Mockup */}
+            {/* Visual: Exclusive Content Mockup */}
             <div style={{ transform: 'scale(1.1) rotate(-2deg)' }}>
-              {/* Reusing existing Chat Mockup but ensuring it looks native to this section */}
-              <div style={{ background: '#fff', borderRadius: '24px', padding: '10px', boxShadow: '0 40px 80px rgba(0,0,0,0.3)' }}>
-                <ChatMockup />
-              </div>
+              <ExclusiveContentMockup />
             </div>
 
           </div>
