@@ -10,15 +10,16 @@ export default function Home() {
   const router = useRouter();
   const { isConnected } = useAccount();
   const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 50);
+    const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', color: '#000', fontFamily: 'var(--font-family)', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#fff', color: '#111827', fontFamily: 'var(--font-family)', overflowX: 'hidden' }}>
 
       {/* Global Styles & Animations */}
       <style dangerouslySetInnerHTML={{
@@ -26,20 +27,18 @@ export default function Home() {
         :root {
             --brand-blue: #5865F2;
             --brand-text: #1a1a1a;
+            --section-padding-desktop: 96px 0;
+            --section-padding-mobile: 64px 0;
         }
         
+        /* Animations */
         @keyframes float { 
           0%, 100% { transform: translateY(0) rotate(0deg); } 
           50% { transform: translateY(-15px) rotate(1deg); } 
         }
-        @keyframes drift {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(10px, -10px); }
-            100% { transform: translate(0, 0); }
-        }
-        @keyframes pulse-soft {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.02); }
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .float-slow { animation: float 8s ease-in-out infinite; }
@@ -48,264 +47,253 @@ export default function Home() {
         
         .headline-huge {
             font-family: var(--font-serif);
-            font-weight: 400;
-            line-height: 0.9;
-            letter-spacing: -0.04em;
+            font-weight: 500;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
         }
 
+        /* Navbar */
         .nav-scrolled {
             background: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-
-        .creator-card-hover:hover {
-            transform: scale(1.03) translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important;
-            z-index: 10;
+        .nav-mobile-menu {
+            position: fixed; top: 70px; left: 0; right: 0;
+            background: #fff; padding: 24px;
+            border-bottom: 1px solid var(--color-border);
+            animation: slideDown 0.3s ease-out;
+            z-index: 99;
         }
+
+        /* Utilities */
+        .btn-primary {
+            padding: 14px 28px;
+            border-radius: 99px;
+            background: #111827;
+            color: #fff;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
         
-        .halftone-bg {
-            background-image: radial-gradient(circle, #000 1px, transparent 1px);
-            background-size: 20px 20px;
-            opacity: 0.1;
+        .btn-secondary {
+            padding: 14px 28px;
+            border-radius: 99px;
+            background: #fff;
+            color: #111827;
+            border: 1px solid var(--color-border);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { border-color: var(--color-brand-blue); color: var(--color-brand-blue); }
+
+        .stat-chip {
+            padding: 12px 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; align-items: flex-start;
+            min-width: 120px;
         }
 
-        /* Mobile specific adjustments */
+        /* Responsive Breakpoints */
+        .desktop-only { display: flex; }
+        .mobile-only { display: none; }
+        
         @media (max-width: 768px) {
-            .mobile-stack { flex-direction: column !important; }
-            .mobile-hide { display: none !important; }
-            .mobile-padding { padding: 40px 20px !important; }
-            .headline-huge { font-size: 15vw !important; }
+            .desktop-only { display: none !important; }
+            .mobile-only { display: flex !important; }
+            .hero-grid { grid-template-columns: 1fr !important; text-align: center; gap: 40px !important; }
+            .hero-left { margin: 0 auto; align-items: center !important; }
+            .hero-collage { display: none !important; } /* Hide complex collage on mobile */
+            .headline-huge { font-size: 3rem !important; }
+            .hero-kpi { justify-content: center; flex-wrap: wrap; gap: 12px !important; }
+            .btn-mobile-full { width: 100%; justify-content: center; }
         }
       `}} />
 
       {/* ---------------------------------------------------------------------------
-         NAVIGATION - Transparent to Sticky
+         NAVIGATION
          --------------------------------------------------------------------------- */}
-      {/* Navigation */}
       <nav
         className={scrolled ? 'nav-scrolled' : ''}
         style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0,
-          zIndex: 100,
-          padding: '20px 0',
-          transition: 'all 0.3s ease',
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: '72px',
+          display: 'flex', alignItems: 'center', transition: 'all 0.3s ease',
           background: scrolled ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-          backdropFilter: scrolled ? 'blur(10px)' : 'none',
-          borderBottom: scrolled ? '1px solid var(--color-border)' : 'none'
         }}>
-        <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div
-            onClick={() => router.push('/')}
-            style={{
-              fontFamily: 'var(--font-serif)',
-              fontSize: '1.5rem',
-              fontWeight: 'bold',
-              cursor: 'pointer',
-              color: 'var(--color-text-primary)'
-            }}
-          >
+        <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+          {/* Logo */}
+          <div onClick={() => router.push('/')} style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.02em' }}>
             Backr
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
-            <span
-              className="mobile-hide"
-              onClick={() => router.push('/explore')}
-              style={{
-                cursor: 'pointer',
-                fontWeight: '500',
-                fontSize: '0.95rem',
-                color: 'var(--color-text-primary)'
-              }}>
-              Find Creators
-            </span>
-            <button
-              onClick={() => router.push('/dashboard')}
-              style={{
-                padding: '12px 24px',
-                borderRadius: 'var(--radius-full)',
-                background: '#000',
-                color: '#fff',
-                border: 'none',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '0.95rem',
-                transition: 'transform 0.2s'
-              }}
-              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              Get Started
-            </button>
+          {/* Desktop Links */}
+          <div className="desktop-only" style={{ gap: '32px', alignItems: 'center' }}>
+            <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', fontWeight: 500, color: '#4b5563', transition: 'color 0.2s' }}>Find Creators</span>
+            <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ cursor: 'pointer', fontWeight: 500, color: '#4b5563', transition: 'color 0.2s' }}>How it Works</a>
+            <button className="btn-primary" onClick={() => router.push('/dashboard')}>Get Started</button>
+          </div>
+
+          {/* Mobile Hamburger */}
+          <div className="mobile-only" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ cursor: 'pointer', fontSize: '1.5rem', padding: '8px' }}>
+            {mobileMenuOpen ? '✕' : '☰'}
           </div>
         </div>
       </nav>
+
+      {/* Mobile Menu Slide-down */}
+      {mobileMenuOpen && (
+        <div className="nav-mobile-menu">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '1.1rem', fontWeight: 600 }}>
+            <div onClick={() => router.push('/explore')}>Find Creators</div>
+            <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
+            <div style={{ padding: '12px 0', borderTop: '1px solid #eee' }}>
+              <button className="btn-primary" style={{ width: '100%' }} onClick={() => router.push('/dashboard')}>Get Started</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <main style={{ paddingTop: '0px' }}>
 
         {/* SECTION 1: HERO */}
         <section style={{
-          minHeight: '90vh',
+          minHeight: '100vh',
           background: 'linear-gradient(135deg, #f0f7ff 0%, #ffffff 100%)',
-          paddingTop: '120px',
+          paddingTop: '140px',
           paddingBottom: '80px',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center'
         }}>
-          {/* Mobile Layout Fix */}
-          <style dangerouslySetInnerHTML={{
-            __html: `
-             @media (max-width: 1024px) {
-                 .hero-grid { grid-template-columns: 1fr !important; text-align: center; }
-                 .hero-left { margin: 0 auto; alignItems: center !important; }
-                 .hero-kpi { justify-content: center; }
-                 .hero-collage { display: none !important; }
-                 .mobile-cta-sticky { position: fixed; bottom: 20px; left: 20px; right: 20px; z-index: 1000; box-shadow: 0 10px 25px rgba(0,0,0,0.2) !important; animation: slideUp 0.5s ease-out; }
-             }
-             @keyframes slideUp { from { transform: translateY(100px); } to { transform: translateY(0); } }
-             `
-          }} />
-
           <div className="page-container hero-grid" style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: '64px',
-            alignItems: 'center',
-            width: '100%'
+            display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '80px', alignItems: 'center', width: '100%'
           }}>
 
             {/* LEFT COLUMN */}
             <div className="hero-left" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', zIndex: 10 }}>
+
               {/* Trust Badge */}
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: '8px',
-                padding: '8px 16px',
-                background: '#fff',
-                border: '1px solid var(--color-border)',
-                borderRadius: '100px',
-                marginBottom: '32px',
-                boxShadow: 'var(--shadow-sm)',
-                fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-text-secondary)'
+                padding: '6px 12px', background: 'rgba(88, 101, 242, 0.1)',
+                borderRadius: '100px', marginBottom: '32px',
+                fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-brand-blue)'
               }}>
                 <span style={{ width: '8px', height: '8px', background: 'var(--color-brand-blue)', borderRadius: '50%' }}></span>
-                Built on Mantle
+                Built on Mantle Network
               </div>
 
               {/* Headline */}
-              <h1 className="headline-huge" style={{
-                fontSize: 'clamp(3rem, 5vw, 4.5rem)',
-                lineHeight: 1.1,
-                marginBottom: '24px',
-                color: '#111827',
-                letterSpacing: '-0.02em',
-                fontFamily: 'var(--font-serif)'
-              }}>
+              <h1 className="headline-huge" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', marginBottom: '24px', color: '#111827' }}>
                 Unlock your <br />
-                <span style={{ color: 'var(--color-brand-blue)' }}>creative potential</span>
+                <span style={{ color: 'var(--color-brand-blue)', fontStyle: 'italic' }}>creative potential</span>
               </h1>
 
-              {/* Subheadline value prop */}
-              <p style={{
-                fontSize: '1.25rem',
-                color: 'var(--color-text-secondary)',
-                marginBottom: '40px',
-                maxWidth: '540px',
-                lineHeight: 1.6
-              }}>
-                The all-in-one platform for creators to build community, share exclusive content, and earn directly from fans.
+              {/* Subheadline */}
+              <p style={{ fontSize: '1.25rem', color: '#4b5563', marginBottom: '40px', maxWidth: '540px', lineHeight: 1.6 }}>
+                The all-in-one platform for creators to build community, share exclusive content, and earn directly from fans without the middleman.
               </p>
 
               {/* CTAs */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '48px' }}>
-                <button
-                  className="mobile-cta-sticky"
-                  onClick={() => router.push('/dashboard')}
-                  style={{
-                    padding: '16px 32px', borderRadius: 'var(--radius-full)', background: '#111827', color: '#fff',
-                    fontSize: '1.05rem', fontWeight: 600, border: 'none', cursor: 'pointer',
-                    boxShadow: 'var(--shadow-lg)', transition: 'transform 0.2s'
-                  }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                  Create on Backr
-                </button>
-                <button onClick={() => router.push('/explore')} style={{
-                  padding: '16px 32px', borderRadius: 'var(--radius-full)', background: '#fff', color: '#111827',
-                  fontSize: '1.05rem', fontWeight: 600, border: '1px solid var(--color-border)', cursor: 'pointer',
-                  boxShadow: 'var(--shadow-sm)', transition: 'transform 0.2s'
-                }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
-                  onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-                  Find Creators
-                </button>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '48px', width: '100%' }}>
+                <button className="btn-primary btn-mobile-full" onClick={() => router.push('/dashboard')}>Create on Backr</button>
+                <button className="btn-secondary btn-mobile-full" onClick={() => router.push('/explore')}>Find Creators</button>
               </div>
 
-              {/* KPIs (Chips) */}
-              <div className="hero-kpi" style={{ display: 'flex', gap: '32px', borderTop: '1px solid var(--color-border)', paddingTop: '32px', width: '100%' }}>
+              {/* Trust Row */}
+              <div style={{ display: 'flex', gap: '24px', fontSize: '0.85rem', color: '#6b7280', marginBottom: '40px', alignItems: 'center' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>🛡️ Cancel anytime</span>
+                <span style={{ height: '4px', width: '4px', background: '#d1d5db', borderRadius: '50%' }}></span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>⚡ Instant payouts</span>
+                <span style={{ height: '4px', width: '4px', background: '#d1d5db', borderRadius: '50%' }}></span>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>💎 Low fees</span>
+              </div>
+
+              {/* KPI Stat Chips */}
+              <div className="hero-kpi" style={{ display: 'flex', gap: '16px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '32px', width: '100%' }}>
                 {[
-                  { label: 'Creators', value: '10k+' },
-                  { label: 'Supporters', value: '250k+' },
-                  { label: 'Paid out', value: '$5M+' }
+                  { label: 'Active Creators', value: '10k+' },
+                  { label: 'Total Supporters', value: '250k+' },
+                  { label: 'Paid to Creators', value: '$5M+' }
                 ].map((stat, i) => (
-                  <div key={i}>
-                    <div style={{ fontWeight: 800, fontSize: '1.5rem', color: 'var(--color-text-primary)' }}>{stat.value}</div>
-                    <div style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{stat.label}</div>
+                  <div key={i} className="stat-chip hover-lift">
+                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#111827' }}>{stat.value}</div>
+                    <div style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>{stat.label}</div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* RIGHT COLUMN (Collage) */}
-            <div className="hero-collage" style={{ position: 'relative', height: '600px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Background Blob */}
-              <div style={{ position: 'absolute', inset: 0, background: 'radial-gradient(circle at 50% 50%, #dbeafe 0%, transparent 70%)', opacity: 0.6, zIndex: 0 }}></div>
+            <div className="hero-collage" style={{ position: 'relative', height: '650px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {/* Background Orbit */}
+              <div style={{ position: 'absolute', width: '500px', height: '500px', borderRadius: '50%', border: '1px dashed rgba(88, 101, 242, 0.2)', animation: 'spin 60s linear infinite' }}></div>
 
               {/* Card 1: Creator Preview (Main) */}
               <div className="card-surface float-slow" style={{
-                position: 'absolute', top: '10%', right: '10%', width: '320px', padding: '0', overflow: 'hidden', zIndex: 2
+                position: 'absolute', top: '5%', right: '5%', width: '340px', padding: '0', overflow: 'hidden', zIndex: 2,
+                boxShadow: '0 30px 60px -10px rgba(0,0,0,0.15)'
               }}>
-                <div style={{ height: '320px', width: '100%', position: 'relative' }}>
+                <div style={{ height: '380px', width: '100%', position: 'relative' }}>
                   <img src="/images/home_visuals/creator1.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Creator" />
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '20px', background: 'linear-gradient(to top, rgba(0,0,0,0.8), transparent)' }}>
-                    <div style={{ fontWeight: 700, fontSize: '1.2rem', color: '#fff' }}>Sarah Artist</div>
-                    <div style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.9)' }}>Digital Illustrator</div>
+                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                      <div style={{ fontWeight: 700, fontSize: '1.4rem', color: '#fff' }}>Sarah Artist</div>
+                      <span style={{ background: '#5865F2', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', fontWeight: 700 }}>PRO</span>
+                    </div>
+                    <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>creating digital illustrations & tutorials</div>
                   </div>
                 </div>
               </div>
 
-              {/* Card 2: Earnings (Overlapping Bottom Left) */}
+              {/* Card 2: Earnings */}
               <div className="card-surface float-medium" style={{
-                position: 'absolute', bottom: '20%', left: '0%', width: '280px', padding: '24px', zIndex: 3
+                position: 'absolute', bottom: '15%', left: '0%', width: '260px', padding: '24px', zIndex: 3
               }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Monthly Revenue</div>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--color-success)', marginBottom: '12px' }}>$4,250</div>
-                <div style={{ display: 'flex', gap: '6px', alignItems: 'flex-end', height: '40px' }}>
-                  {[40, 60, 35, 80, 55, 90, 70].map((h, i) => <div key={i} style={{ flex: 1, background: '#10b981', height: `${h}%`, borderRadius: '2px', opacity: 0.8 }}></div>)}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+                  <div style={{ width: '32px', height: '32px', background: '#ecfdf5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>💰</div>
+                  <div style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 600 }}>Monthly Revenue</div>
                 </div>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#111827', marginBottom: '8px', letterSpacing: '-0.03em' }}>$4,250.00</div>
+                <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>+12% this month</div>
               </div>
 
-              {/* Card 3: Membership (Small Notification) */}
+              {/* Card 3: New Member */}
               <div className="card-surface float-fast" style={{
-                position: 'absolute', top: '25%', left: '-10%', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '12px', zIndex: 1, borderRadius: '100px'
+                position: 'absolute', top: '25%', left: '-5%', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '16px', zIndex: 1, borderRadius: '100px',
+                background: '#fff', border: '1px solid rgba(0,0,0,0.05)'
               }}>
-                <div style={{ width: '32px', height: '32px', background: '#5865F2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>✨</div>
-                <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>New <strong>Gold Member</strong></div>
+                <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)', borderRadius: '50%', border: '2px solid #fff' }}></div>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#111827' }}>Alex B.</div>
+                  <div style={{ fontSize: '0.8rem', color: '#5865F2' }}>Just pledged $10/mo</div>
+                </div>
               </div>
             </div>
 
+          </div>
+
+          {/* Scroll Cue */}
+          <div style={{ position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)', opacity: 0.5, animation: 'bounce 2s infinite' }}>
+            ⬇
           </div>
         </section>
 
 
         {/* SECTION 2: HOW IT WORKS */}
-        <section style={{ padding: '96px 0', background: '#fff' }}>
+        <section id="how-it-works" style={{ padding: 'var(--section-padding-desktop)', background: '#fff' }}>
           <div className="page-container">
             <div style={{ textAlign: 'center', marginBottom: '64px' }}>
               <h2 className="text-h2" style={{ marginBottom: '16px', fontFamily: 'var(--font-serif)' }}>How it works</h2>
-              <p className="text-body" style={{ color: 'var(--color-text-secondary)', maxWidth: '600px', margin: '0 auto' }}>
+              <p className="text-body" style={{ color: '#4b5563', maxWidth: '600px', margin: '0 auto' }}>
                 Start building your membership business in three simple steps.
               </p>
             </div>
@@ -316,50 +304,63 @@ export default function Home() {
                 { icon: '🔒', title: 'Share exclusive content', desc: 'Post behind-the-scenes updates, early access work, and member-only media.' },
                 { icon: '💸', title: 'Get paid instantly', desc: 'Receive support directly in crypto with low fees and instant settlements on Mantle.' }
               ].map((step, i) => (
-                <div key={i} className="card-surface" style={{ padding: '32px', textAlign: 'left', border: 'none', background: 'var(--color-bg-page)' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '24px' }}>{step.icon}</div>
-                  <h3 className="text-h3" style={{ marginBottom: '12px' }}>{step.title}</h3>
-                  <p className="text-body-sm">{step.desc}</p>
+                <div key={i} className="card-surface hover-lift" style={{
+                  padding: '32px', textAlign: 'left', border: '1px solid var(--color-border)',
+                  background: '#fff', borderRadius: '24px', display: 'flex', flexDirection: 'column'
+                }}>
+                  <div style={{ fontSize: '3rem', marginBottom: '24px', background: '#f9fafb', width: '80px', height: '80px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{step.icon}</div>
+                  <h3 className="text-h3" style={{ marginBottom: '12px', fontSize: '1.5rem' }}>{step.title}</h3>
+                  <p className="text-body-sm" style={{ color: '#6b7280', lineHeight: 1.6, flex: 1 }}>{step.desc}</p>
                 </div>
               ))}
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '48px' }}>
-              <a onClick={() => router.push('/dashboard')} style={{ color: 'var(--color-brand-blue)', fontWeight: 600, cursor: 'pointer', textDecoration: 'underline' }}>
-                Start your page now →
-              </a>
+            <div style={{ textAlign: 'center', marginTop: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
+              <button className="btn-secondary" onClick={() => router.push('/dashboard')} style={{ padding: '16px 40px', fontSize: '1.1rem' }}>
+                Start your page now
+              </button>
+              <span style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Takes ~2 minutes to set up</span>
             </div>
           </div>
         </section>
 
         {/* SECTION 3: FEATURES (Creative Control) */}
-        <section style={{ padding: '96px 0', background: '#f9fafb', borderTop: '1px solid var(--color-border)' }}>
-          <div className="page-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '80px', alignItems: 'center' }}>
-            <div>
-              <div style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, fontSize: '0.875rem', color: 'var(--color-brand-blue)', marginBottom: '16px' }}>
+        <section style={{ padding: 'var(--section-padding-desktop)', background: '#f9fafb', borderTop: '1px solid var(--color-border)' }}>
+          <div className="page-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '80px', alignItems: 'center' }}>
+            <div style={{ order: 1 }}> {/* Content first on desktop, handled by grid flow usually but ensuring text is prominent */}
+              <div style={{
+                textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, fontSize: '0.875rem',
+                color: 'var(--color-brand-blue)', marginBottom: '16px', display: 'inline-block',
+                background: 'rgba(88, 101, 242, 0.1)', padding: '4px 12px', borderRadius: '4px'
+              }}>
                 Ownership
               </div>
               <h2 className="headline-huge" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '24px', color: '#111827' }}>
                 Complete<br />creative control
               </h2>
-              <p className="text-body" style={{ fontSize: '1.25rem', marginBottom: '32px', color: 'var(--color-text-secondary)' }}>
-                You own your content, your list, and your payments. No algorithms between you and your biggest fans.
+              <p className="text-body" style={{ fontSize: '1.25rem', marginBottom: '32px', color: '#4b5563', lineHeight: 1.6 }}>
+                You own your content, your list, and your payments. No algorithms standing between you and your biggest fans.
               </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '40px' }}>
                 {['Direct audience relationships', 'Own your email list', 'Censorship-resistant payments'].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span style={{ color: 'var(--color-success)', fontSize: '1.2rem' }}>✓</span>
-                    <span style={{ fontWeight: 500 }}>{item}</span>
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem' }}>✓</div>
+                    <span style={{ fontWeight: 500, fontSize: '1.1rem', color: '#374151' }}>{item}</span>
                   </div>
                 ))}
               </div>
+
+              <button className="btn-secondary" onClick={() => router.push('/explore')}>
+                See membership perks example
+              </button>
             </div>
 
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative', order: 2 }}>
               {/* Abstract Visual */}
               <div style={{
-                background: '#fff', borderRadius: 'var(--radius-xl)', padding: '24px',
-                boxShadow: 'var(--shadow-lg)', transform: 'rotate(2deg)',
+                background: '#fff', borderRadius: 'var(--radius-xl)', padding: '8px',
+                boxShadow: 'var(--shadow-xl)', transform: 'rotate(2deg)',
                 border: '1px solid var(--color-border)'
               }}>
                 <ExclusiveContentMockup />
@@ -368,54 +369,91 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SECTION 4: PRICING TEASER */}
-        <section style={{ padding: '96px 0', background: '#111827', color: '#fff', position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at 80% 20%, #2a2f45 0%, #111827 70%)' }}></div>
+        {/* SECTION 4: PRICING */}
+        <section style={{ padding: 'var(--section-padding-desktop)', background: '#111827', color: '#fff', position: 'relative' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 0%, #1f2937 0%, #111827 50%)' }}></div>
 
-          <div className="page-container" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '64px', alignItems: 'center' }}>
-            <div>
-              <h2 className="text-h2" style={{ fontFamily: 'var(--font-serif)', fontSize: '3rem', marginBottom: '24px' }}>
-                Output more.<br />Keep more.
-              </h2>
-              <p style={{ fontSize: '1.125rem', color: '#9ca3af', marginBottom: '32px', maxWidth: '450px' }}>
-                We only earn when you do. Our flat platform fee ensures you keep the lion's share of your hard-earned revenue.
+          <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ textAlign: 'center', marginBottom: '80px' }}>
+              <h2 className="headline-huge" style={{ color: '#fff', marginBottom: '24px' }}>Simple, transparent pricing</h2>
+              <p style={{ fontSize: '1.25rem', color: '#9ca3af', maxWidth: '600px', margin: '0 auto' }}>
+                We succeed only when you do. No hidden fees, no monthly subscriptions.
               </p>
-              <button onClick={() => router.push('/dashboard')} style={{
-                padding: '12px 24px', background: '#fff', color: '#000', borderRadius: 'var(--radius-full)', border: 'none', fontWeight: 600, cursor: 'pointer'
-              }}>
-                View Pricing Details
-              </button>
             </div>
 
-            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.1)', backdropFilter: 'blur(12px)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '40px' }}>
-                <div>
-                  <div style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '8px' }}>Platform Fee</div>
-                  <div style={{ fontSize: '4rem', fontWeight: 800, lineHeight: 1 }}>5%</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '0.9rem', color: '#9ca3af', marginBottom: '8px' }}>Gas Fees</div>
-                  <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#4ade80' }}>&lt;$0.01</div>
-                  <div style={{ fontSize: '0.75rem', color: '#6b7280' }}>on Mantle</div>
-                </div>
+            {/* Pricing Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', marginBottom: '80px' }}>
+              {/* Free Plan */}
+              <div style={{ padding: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Lite</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '24px' }}>$0<span style={{ fontSize: '1rem', fontWeight: 400, color: '#9ca3af' }}>/mo</span></div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <li>✓ Unlimited Posts</li>
+                  <li>✓ Crypto Payments</li>
+                  <li>✓ Basic Analytics</li>
+                </ul>
+                <button className="btn-secondary" style={{ width: '100%', background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Start Free</button>
               </div>
-              <div style={{ paddingTop: '24px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <p style={{ fontSize: '0.9rem', color: '#9ca3af', lineHeight: 1.5 }}>
-                  Compare to traditional platforms taking 30%+ of your income. We leverage Layer 2 technology to maximize your profits.
-                </p>
+
+              {/* Pro Plan (Highlighted) */}
+              <div style={{ padding: '40px 32px', background: 'var(--brand-blue)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', transform: 'scale(1.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative' }}>
+                <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#10b981', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>MOST POPULAR</div>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Pro</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '24px' }}>5%<span style={{ fontSize: '1rem', fontWeight: 400, color: 'rgba(255,255,255,0.8)' }}> fee</span></div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#fff', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <li><strong>Everything in Lite, plus:</strong></li>
+                  <li>✓ Membership Tiers</li>
+                  <li>✓ Email Newsletters</li>
+                  <li>✓ Zero gas fees for fans</li>
+                </ul>
+                <button className="btn-primary" style={{ width: '100%', background: '#fff', color: 'var(--brand-blue)' }}>Start Pro Page</button>
+              </div>
+
+              {/* Premium Plan */}
+              <div style={{ padding: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px' }}>Premium</h3>
+                <div style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '24px' }}>Custom</div>
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 32px 0', color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <li>✓ Dedicated Success Mgr</li>
+                  <li>✓ API Access</li>
+                  <li>✓ Custom Contracts</li>
+                  <li>✓ White-labeling</li>
+                </ul>
+                <button className="btn-secondary" style={{ width: '100%', background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.3)' }}>Contact Sales</button>
+              </div>
+            </div>
+
+            {/* Comparison Table Mini */}
+            <div style={{ maxWidth: '800px', margin: '0 auto', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '40px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', textAlign: 'center', color: '#d1d5db', fontSize: '0.9rem' }}>
+                <div style={{ textAlign: 'left', fontWeight: 700, color: '#fff' }}>Feature</div>
+                <div style={{ fontWeight: 700, color: '#fff' }}>Backr</div>
+                <div>Patreon</div>
+
+                <div style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>Platform Fee</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0', color: '#4ade80', fontWeight: 700 }}>5% Flat</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>8% - 12%</div>
+
+                <div style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>Payouts</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0', color: '#fff', fontWeight: 700 }}>Instant</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>Monthly</div>
+
+                <div style={{ textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>Ownership</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0', color: '#fff', fontWeight: 700 }}>100% You</div>
+                <div style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', padding: '12px 0' }}>Shared</div>
               </div>
             </div>
           </div>
         </section>
 
         {/* SECTION 5: FAQ */}
-        <section style={{ padding: '96px 0', background: '#fff' }}>
+        <section style={{ padding: 'var(--section-padding-desktop)', background: '#fff' }}>
           <div className="page-container" style={{ maxWidth: '800px' }}>
             <div style={{ textAlign: 'center', marginBottom: '64px' }}>
               <h2 className="text-h2" style={{ fontFamily: 'var(--font-serif)' }}>Frequently Asked Questions</h2>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
               {[
                 { q: 'What do I need to get started?', a: 'Just a crypto wallet (like MetaMask) and your creativity. No credit card required.' },
                 { q: 'How do I get paid?', a: 'Payments are streamed directly to your wallet in real-time. You can withdraw instantly.' },
@@ -429,8 +467,9 @@ export default function Home() {
                   border: '1px solid var(--color-border)',
                   borderRadius: 'var(--radius-lg)',
                   cursor: 'pointer',
-                  background: 'var(--color-bg-surface)'
-                }}>
+                  background: 'var(--color-bg-surface)',
+                  transition: 'background 0.2s'
+                }} className="hover:bg-gray-50">
                   <summary style={{ fontSize: '1.1rem', fontWeight: 600, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     {item.q}
                     <span style={{ fontSize: '1.5rem', fontWeight: 300, color: 'var(--color-text-secondary)' }}>+</span>
@@ -439,6 +478,15 @@ export default function Home() {
                 </details>
               ))}
             </div>
+
+            <div style={{ textAlign: 'center', padding: '32px', background: '#f9fafb', borderRadius: '16px' }}>
+              <p style={{ fontWeight: 600, marginBottom: '8px' }}>Still have questions?</p>
+              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
+                <a href="#" style={{ color: 'var(--color-brand-blue)', textDecoration: 'underline' }}>Read the docs</a>
+                <span style={{ color: '#d1d5db' }}>|</span>
+                <a href="#" style={{ color: 'var(--color-brand-blue)', textDecoration: 'underline' }}>Join Discord Support</a>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -446,12 +494,12 @@ export default function Home() {
         <section style={{ padding: '120px 0', background: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)', textAlign: 'center' }}>
           <div className="page-container" style={{ maxWidth: '600px' }}>
             <h2 className="headline-huge" style={{ fontSize: '3rem', marginBottom: '16px', color: '#000' }}>Stay in the loop</h2>
-            <p style={{ fontSize: '1.125rem', marginBottom: '32px', color: '#333' }}>
+            <p style={{ fontSize: '1.125rem', marginBottom: '32px', color: 'rgba(0,0,0,0.7)' }}>
               Get the latest updates on creator economy features and Mantle ecosystem growth.
             </p>
 
             <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }} style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
-              <div style={{ display: 'flex', gap: '12px' }}>
+              <div className="mobile-stack" style={{ display: 'flex', gap: '12px' }}>
                 <input
                   type="email"
                   placeholder="Enter your email"
@@ -460,8 +508,10 @@ export default function Home() {
                     flex: 1,
                     padding: '16px 24px',
                     borderRadius: 'var(--radius-full)',
-                    border: '2px solid rgba(0,0,0,0.1)',
-                    fontSize: '1rem'
+                    border: '2px solid rgba(255,255,255,0.5)',
+                    fontSize: '1rem',
+                    background: 'rgba(255,255,255,0.8)',
+                    backdropFilter: 'blur(4px)'
                   }}
                 />
                 <button type="submit" style={{
@@ -471,13 +521,15 @@ export default function Home() {
                   color: '#fff',
                   border: 'none',
                   fontWeight: 700,
-                  cursor: 'pointer'
-                }}>
+                  cursor: 'pointer',
+                  minWidth: '140px',
+                  transition: 'transform 0.2s'
+                }} className="hover-lift">
                   Subscribe
                 </button>
               </div>
-              <p style={{ fontSize: '0.875rem', color: '#555', marginTop: '8px' }}>
-                We respect your privacy. Unsubscribe at any time.
+              <p style={{ fontSize: '0.875rem', color: 'rgba(0,0,0,0.6)', marginTop: '8px' }}>
+                We respect your privacy. No spam. Unsubscribe at any time.
               </p>
             </form>
           </div>
@@ -487,24 +539,45 @@ export default function Home() {
         {/* FOOTER */}
         <footer style={{ background: '#000', color: '#fff', padding: '80px 0' }}>
           <div className="page-container">
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
-              <div className="headline-huge" style={{ fontSize: '3rem' }}>Backr</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '40px', paddingTop: '40px', borderTop: '1px solid #333' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <strong style={{ marginBottom: '8px' }}>Product</strong>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Lite</a>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Pro</a>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Premium</a>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '64px' }}>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                <div className="headline-huge" style={{ fontSize: '2.5rem' }}>Backr</div>
+                <p style={{ color: '#9ca3af', lineHeight: 1.6 }}>Empowering creators with true ownership and decentralized monetization on Mantle.</p>
+                <div style={{ display: 'flex', gap: '16px' }}>
+                  {/* Social Icons Placeholder */}
+                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
+                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
+                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <strong style={{ marginBottom: '8px' }}>For Creators</strong>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Podcasters</a>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Video Creators</a>
-                  <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>Musicians</a>
-                </div>
-                <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                  <p style={{ color: '#666' }}>© 2024 Backr on Mantle.</p>
-                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <strong style={{ marginBottom: '8px', color: '#fff' }}>Product</strong>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Pricing</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Success Stories</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Roadmap</a>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <strong style={{ marginBottom: '8px', color: '#fff' }}>Resources</strong>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Help Center</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Creator Handbook</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Mantle Network</a>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <strong style={{ marginBottom: '8px', color: '#fff' }}>Legal</strong>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</a>
+                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</a>
+              </div>
+            </div>
+
+            <div style={{ marginTop: '80px', paddingTop: '32px', borderTop: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+              <p style={{ color: '#666', fontSize: '0.9rem' }}>© 2024 Backr. All rights reserved.</p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontSize: '0.9rem' }}>
+                <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%' }}></span>
+                All systems operational
               </div>
             </div>
           </div>
