@@ -161,6 +161,15 @@ function ExploreContent() {
                                 <option>Any</option><option>English</option><option>Español</option><option>Français</option>
                             </select>
                         </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                            <label style={{ fontSize: '0.875rem', fontWeight: 600 }}>Options</label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                <input type="checkbox" /> Verified Only
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                <input type="checkbox" /> Has Free Tier
+                            </label>
+                        </div>
                     </div>
                 )}
 
@@ -168,7 +177,7 @@ function ExploreContent() {
                 {loading ? (
                     <div className="explore-grid">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="card-surface" style={{ height: '380px' }}>
+                            <div key={i} className="card-surface" style={{ height: '420px' }}>
                                 <div className="skeleton" style={{ height: '140px' }} />
                                 <div style={{ padding: '24px' }}>
                                     <div className="skeleton skeleton-avatar" style={{ marginTop: '-48px', border: '4px solid #fff' }} />
@@ -232,9 +241,32 @@ function ExploreContent() {
                                         </div>
                                     </div>
 
+                                    {/* Post Previews (Mock Content) */}
+                                    <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+                                        {[1, 2].map(p => (
+                                            <div key={p} style={{
+                                                flex: 1, height: '60px', borderRadius: '8px', background: '#f3f4f6',
+                                                position: 'relative', overflow: 'hidden'
+                                            }}>
+                                                <div style={{
+                                                    width: '100%', height: '100%', background: `linear-gradient(45deg, #e5e7eb, #d1d5db)`,
+                                                    filter: 'blur(4px)', opacity: 0.7
+                                                }}></div>
+                                                <div style={{
+                                                    position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    background: 'rgba(0,0,0,0.05)'
+                                                }}>
+                                                    <span style={{ fontSize: '12px' }}>🔒</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <div className="text-caption">Tiers from $5</div>
-                                        <Button size="sm" variant="outline">View Page</Button>
+                                        <div className="text-caption" style={{ background: 'var(--color-bg-page)', padding: '4px 8px', borderRadius: '4px' }}>
+                                            Tiers from $5
+                                        </div>
+                                        <Button size="sm" variant="outline" style={{ borderColor: 'var(--color-border-hover)' }}>View Page</Button>
                                     </div>
                                 </div>
                             </div>
