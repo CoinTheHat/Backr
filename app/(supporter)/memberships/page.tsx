@@ -29,19 +29,19 @@ export default function MyMembershipsPage() {
     }, [address]);
 
     return (
-        <div style={{ minHeight: '100vh', background: '#fff' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
             {/* Hero */}
             <div style={{
                 background: 'linear-gradient(135deg, #a8c0f7 0%, #7FA1F7 100%)',
-                padding: '80px 24px 100px',
+                padding: '80px 0 100px',
                 marginBottom: '-40px'
             }}>
-                <div style={{ maxWidth: '800px', margin: '0 auto' }}>
+                <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto' }}>
                     <h1 style={{
                         fontFamily: 'var(--font-serif)',
                         fontSize: 'clamp(2.5rem, 6vw, 4rem)',
                         color: '#000',
-                        marginBottom: '16px',
+                        marginBottom: 'var(--space-4)',
                         fontWeight: '400',
                         lineHeight: '1.1'
                     }}>
@@ -53,26 +53,44 @@ export default function MyMembershipsPage() {
                 </div>
             </div>
 
-            <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 24px 80px' }}>
+            <div className="page-container" style={{ maxWidth: '800px', margin: '0 auto', paddingBottom: '80px' }}>
                 {!address ? (
-                    <div style={{ textAlign: 'center', padding: '80px', background: '#f9fafb', borderRadius: '24px', border: '2px dashed #e5e7eb' }}>
-                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px', color: '#000' }}>Connect your wallet</h3>
-                        <p style={{ color: '#52525b', marginBottom: '32px' }}>Sign in to view your active memberships</p>
+                    <div style={{ textAlign: 'center', padding: '80px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-lg)', border: '2px dashed var(--color-border)' }}>
+                        <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--color-text-primary)' }}>Connect your wallet</h3>
+                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '32px' }}>Sign in to view your active memberships</p>
                     </div>
                 ) : loading ? (
-                    <div style={{ textAlign: 'center', padding: '64px', color: '#52525b' }}>Loading...</div>
+                    <div className="grid-system" style={{ gridTemplateColumns: '1fr', gap: 'var(--space-6)' }}>
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="card-surface" style={{
+                                display: 'flex',
+                                alignItems: 'center', // Center vertically
+                                justifyContent: 'space-between',
+                                padding: '28px 32px'
+                            }}>
+                                <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flex: 1 }}>
+                                    <div className="skeleton skeleton-avatar" style={{ width: '56px', height: '56px' }} />
+                                    <div style={{ flex: 1 }}>
+                                        <div className="skeleton skeleton-text" style={{ width: '30%', marginBottom: '8px' }} />
+                                        <div className="skeleton skeleton-text" style={{ width: '40%', height: '14px' }} />
+                                    </div>
+                                </div>
+                                <div className="skeleton skeleton-rect" style={{ width: '120px', height: '40px', borderRadius: '999px' }} />
+                            </div>
+                        ))}
+                    </div>
                 ) : memberships.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '80px', background: '#f9fafb', borderRadius: '24px', border: '2px dashed #e5e7eb' }}>
-                        <h3 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '16px', color: '#000' }}>No active memberships</h3>
-                        <p style={{ color: '#52525b', marginBottom: '32px', fontSize: '1.05rem' }}>
+                    <div style={{ textAlign: 'center', padding: '80px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-lg)', border: '2px dashed var(--color-border)' }}>
+                        <h3 style={{ fontSize: '1.75rem', fontWeight: 'bold', marginBottom: '16px', color: 'var(--color-text-primary)' }}>No active memberships</h3>
+                        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '32px', fontSize: '1.05rem' }}>
                             Support your favorite creators to unlock exclusive content and join their communities.
                         </p>
                         <button
                             onClick={() => router.push('/explore')}
                             style={{
                                 padding: '14px 32px',
-                                borderRadius: '9999px',
-                                background: '#5865F2',
+                                borderRadius: 'var(--radius-full)',
+                                background: 'var(--color-brand-blue)',
                                 color: '#fff',
                                 border: 'none',
                                 fontWeight: '600',
@@ -84,28 +102,24 @@ export default function MyMembershipsPage() {
                         </button>
                     </div>
                 ) : (
-                    <div style={{ display: 'grid', gap: '24px' }}>
+                    <div className="grid-system" style={{ gridTemplateColumns: '1fr', gap: 'var(--space-6)' }}>
                         {memberships.map((sub, i) => (
                             <div
                                 key={i}
+                                className="card-surface"
                                 style={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
-                                    background: '#fff',
-                                    border: '1px solid #e5e7eb',
-                                    borderRadius: '20px',
                                     padding: '28px 32px',
-                                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
-                                    transition: 'all 0.2s',
                                     cursor: 'pointer'
                                 }}
                                 onMouseEnter={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 10px 20px rgba(0,0,0,0.08)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
                                     e.currentTarget.style.transform = 'translateY(-2px)';
                                 }}
                                 onMouseLeave={(e) => {
-                                    e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.05)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-card)';
                                     e.currentTarget.style.transform = 'translateY(0)';
                                 }}
                             >
@@ -125,11 +139,11 @@ export default function MyMembershipsPage() {
                                         {sub.creators?.name?.charAt(0).toUpperCase() || sub.creatorAddress.charAt(2).toUpperCase()}
                                     </div>
                                     <div>
-                                        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '6px', color: '#000' }}>
+                                        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '6px', color: 'var(--color-text-primary)' }}>
                                             {sub.creators?.name || `Creator ${sub.creatorAddress.slice(0, 6)}`}
                                         </h3>
-                                        <div style={{ display: 'flex', gap: '12px', fontSize: '0.95rem', color: '#9ca3af' }}>
-                                            <span>Status: <span style={{ color: '#10b981', fontWeight: '600' }}>Active</span></span>
+                                        <div style={{ display: 'flex', gap: '12px', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
+                                            <span>Status: <span style={{ color: 'var(--color-success)', fontWeight: '600' }}>Active</span></span>
                                             <span>•</span>
                                             <span>Expires: {new Date(sub.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                         </div>
@@ -138,22 +152,24 @@ export default function MyMembershipsPage() {
                                 <Link href={`/${sub.creatorAddress}`} style={{ textDecoration: 'none' }}>
                                     <button style={{
                                         padding: '12px 28px',
-                                        borderRadius: '9999px',
-                                        background: '#f3f4f6',
-                                        color: '#000',
-                                        border: '1px solid #e5e7eb',
+                                        borderRadius: 'var(--radius-full)',
+                                        background: 'var(--color-bg-page)',
+                                        color: 'var(--color-text-primary)',
+                                        border: '1px solid var(--color-border)',
                                         fontWeight: '600',
                                         cursor: 'pointer',
                                         fontSize: '0.95rem',
                                         transition: 'all 0.2s'
                                     }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = '#5865F2';
+                                            e.currentTarget.style.background = 'var(--color-brand-blue)';
                                             e.currentTarget.style.color = '#fff';
+                                            e.currentTarget.style.borderColor = 'transparent';
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = '#f3f4f6';
-                                            e.currentTarget.style.color = '#000';
+                                            e.currentTarget.style.background = 'var(--color-bg-page)';
+                                            e.currentTarget.style.color = 'var(--color-text-primary)';
+                                            e.currentTarget.style.borderColor = 'var(--color-border)';
                                         }}
                                     >
                                         View Content
