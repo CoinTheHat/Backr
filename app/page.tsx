@@ -375,9 +375,9 @@ export default function Home() {
 
           <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
             <div style={{ textAlign: 'center', marginBottom: '80px' }}>
-              <h2 className="headline-huge" style={{ color: '#fff', marginBottom: '24px' }}>Creators set the price.<br />We take a simple fee.</h2>
-              <p style={{ fontSize: '1.25rem', color: '#9ca3af', maxWidth: '600px', margin: '0 auto' }}>
-                You choose your tier prices. Backr only charges a transparent platform fee per transaction.
+              <h2 className="headline-huge" style={{ color: '#fff', marginBottom: '24px', fontSize: 'clamp(2.5rem, 5vw, 3.5rem)' }}>Creators set the price.<br />We take a simple fee.</h2>
+              <p style={{ fontSize: '1.25rem', color: '#9ca3af', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
+                You choose your tier prices. Backr only charges a transparent platform fee per successful transaction. No monthly subscription. No hidden fees.
               </p>
             </div>
 
@@ -385,47 +385,76 @@ export default function Home() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', marginBottom: '80px' }}>
 
               {/* Card A: Creator Control */}
-              <div className="card-surface" style={{ padding: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column' }}>
+              <div className="card-surface hover-lift" style={{
+                padding: '32px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'all 0.3s ease-out'
+              }}>
                 <div style={{ marginBottom: '24px', flex: 1 }}>
                   <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>You set your prices</h3>
-                  <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px' }}>
+                  <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px', fontSize: '0.95rem' }}>
                     Set any price, anytime. Create tiers that work for your community, from free to VIP.
                   </p>
                   {/* Illustrative Chips */}
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    <span style={{ padding: '6px 12px', background: 'rgba(52, 211, 153, 0.1)', border: '1px solid rgba(52, 211, 153, 0.2)', borderRadius: '20px', color: '#34d399', fontSize: '0.85rem' }}>Bronze: 5 MNT</span>
-                    <span style={{ padding: '6px 12px', background: 'rgba(96, 165, 250, 0.1)', border: '1px solid rgba(96, 165, 250, 0.2)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.85rem' }}>Silver: 15 MNT</span>
-                    <span style={{ padding: '6px 12px', background: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.2)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.85rem' }}>Gold: 50 MNT</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
+                    <span style={{ padding: '6px 12px', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '20px', color: '#34d399', fontSize: '0.85rem', fontWeight: 600 }}>Bronze: 5 MNT</span>
+                    <span style={{ padding: '6px 12px', background: 'rgba(96, 165, 250, 0.15)', border: '1px solid rgba(96, 165, 250, 0.3)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.85rem', fontWeight: 600 }}>Silver: 15 MNT</span>
+                    <span style={{ padding: '6px 12px', background: 'rgba(251, 191, 36, 0.15)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 600 }}>Gold: 50 MNT</span>
                   </div>
+                  <p style={{ fontSize: '0.75rem', color: '#6b7280', fontStyle: 'italic' }}>
+                    Illustrative examples — creators choose their own pricing.
+                  </p>
                 </div>
               </div>
 
               {/* Card B: Platform Fee (Highlight) */}
-              <div className="card-surface hover-lift" style={{ padding: '40px 32px', background: 'var(--brand-blue)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)', transform: 'scale(1.05)', boxShadow: '0 20px 40px rgba(0,0,0,0.3)', position: 'relative', zIndex: 10 }}>
+              <div className="card-surface hover-lift" style={{
+                padding: '40px 32px',
+                background: 'var(--brand-blue)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255,255,255,0.2)',
+                transform: 'scale(1.05)',
+                boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
+                position: 'relative',
+                zIndex: 10,
+                transition: 'all 0.3s ease-out'
+              }}>
                 <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#10b981', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>TRANSPARENT</div>
-                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '8px', color: '#fff' }}>Platform Fee</h3>
+                <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>Platform Fee</h3>
                 <div style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '8px', lineHeight: 1 }}>5%</div>
-                <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
+                <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', marginBottom: '24px', lineHeight: 1.5 }}>
                   Only on successful payments.<br />No monthly subscription.
                 </p>
                 <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff' }}><span style={{ color: '#a7f3d0' }}>✓</span> Instant payouts</div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff' }}><span style={{ color: '#a7f3d0' }}>✓</span> Token-gating</div>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff' }}><span style={{ color: '#a7f3d0' }}>✓</span> Creator tools</div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>What's included:</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Access control & token-gating</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Creator page + memberships</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Payout dashboard</div>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Audience management</div>
                 </div>
               </div>
 
               {/* Card C: Instant Payouts */}
-              <div className="card-surface" style={{ padding: '32px', background: 'rgba(255,255,255,0.05)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.1)' }}>
+              <div className="card-surface hover-lift" style={{
+                padding: '32px',
+                background: 'rgba(255,255,255,0.05)',
+                borderRadius: '24px',
+                border: '1px solid rgba(255,255,255,0.1)',
+                transition: 'all 0.3s ease-out'
+              }}>
                 <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>Instant Payouts</h3>
                 <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚡</div>
-                <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px' }}>
-                  Settlements happen instantly on Mantle Network.
+                <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px', fontSize: '0.95rem' }}>
+                  Settlements designed for instant processing on Mantle Network.
                 </p>
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <li>✓ Funds go to your wallet</li>
-                  <li>✓ No holding periods</li>
-                  <li>✓ Low gas fees</li>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.9rem' }}>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Funds to your wallet</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Crypto-native payments</li>
+                  <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Low gas fees on Mantle</li>
                 </ul>
               </div>
             </div>
@@ -466,8 +495,8 @@ export default function Home() {
             {/* CTAs */}
             <div style={{ textAlign: 'center', marginTop: '64px' }}>
               <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <button className="btn-primary" onClick={() => router.push('/dashboard')} style={{ background: '#fff', color: '#111827', minWidth: '200px' }}>Create your page</button>
-                <button className="btn-secondary" onClick={() => router.push('/explore')} style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.3)', minWidth: '200px' }}>See example setups</button>
+                <button className="btn-primary hover-lift" onClick={() => router.push('/dashboard')} style={{ background: '#fff', color: '#111827', minWidth: '200px', transition: 'all 0.2s ease-out' }}>Create your page</button>
+                <button className="btn-secondary hover-lift" onClick={() => router.push('/explore')} style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.3)', minWidth: '200px', transition: 'all 0.2s ease-out' }}>See example setups</button>
               </div>
               <p style={{ marginTop: '16px', fontSize: '0.875rem', color: '#6b7280' }}>
                 Set your tier prices in minutes.
