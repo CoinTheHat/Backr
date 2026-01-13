@@ -41,7 +41,7 @@ function ExploreContent() {
     });
 
     return (
-        <div style={{ minHeight: '100vh', background: '#fff' }}>
+        <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .headline-serif {
@@ -54,22 +54,21 @@ function ExploreContent() {
                     cursor: pointer;
                 }
                 .creator-card:hover {
-                    transform: translateY(-4px);
-                    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+                    box-shadow: var(--shadow-card-hover) !important;
                 }
             `}} />
 
             {/* Hero Section */}
             <div style={{
                 background: 'linear-gradient(135deg, #a8c0f7 0%, #7FA1F7 100%)',
-                padding: '80px 24px 120px',
+                padding: '80px 0 120px',
                 marginBottom: '-60px'
             }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+                <div className="page-container" style={{ textAlign: 'center' }}>
                     <h1 className="headline-serif" style={{
                         fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
                         color: '#000',
-                        marginBottom: '24px',
+                        marginBottom: 'var(--space-6)',
                         lineHeight: '1.1'
                     }}>
                         Discover amazing <span style={{ fontStyle: 'italic' }}>creators</span>
@@ -80,9 +79,9 @@ function ExploreContent() {
                 </div>
             </div>
 
-            <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 24px 80px' }}>
+            <div className="page-container" style={{ paddingBottom: '80px' }}>
                 {/* Search & Filter Bar */}
-                <div style={{ marginBottom: '48px', display: 'flex', gap: '16px', flexDirection: 'column', position: 'relative', zIndex: 10 }}>
+                <div style={{ marginBottom: '48px', display: 'flex', gap: 'var(--space-4)', flexDirection: 'column', position: 'relative', zIndex: 10 }}>
                     {/* Search */}
                     <div style={{ position: 'relative', width: '100%', maxWidth: '600px', margin: '0 auto' }}>
                         <span style={{ position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.2rem' }}>🔍</span>
@@ -93,25 +92,25 @@ function ExploreContent() {
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') router.push(`/explore?q=${e.currentTarget.value}`)
                             }}
+                            className="focus-ring"
                             style={{
                                 width: '100%',
                                 background: '#fff',
-                                border: '2px solid #e5e7eb',
+                                border: '2px solid var(--color-border)',
                                 padding: '16px 20px 16px 56px',
                                 borderRadius: '50px',
-                                color: '#000',
+                                color: 'var(--color-text-primary)',
                                 fontSize: '1.05rem',
-                                outline: 'none',
                                 transition: 'all 0.2s',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                boxShadow: 'var(--shadow-sm)'
                             }}
-                            onFocus={(e) => e.currentTarget.style.borderColor = '#5865F2'}
-                            onBlur={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+                            onFocus={(e) => e.currentTarget.style.borderColor = 'var(--color-brand-blue)'}
+                            onBlur={(e) => e.currentTarget.style.borderColor = 'var(--color-border)'}
                         />
                     </div>
 
                     {/* Categories */}
-                    <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', justifyContent: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', gap: 'var(--space-3)', overflowX: 'auto', paddingBottom: '8px', scrollbarWidth: 'none', justifyContent: 'center', flexWrap: 'wrap' }}>
                         {categories.map(cat => (
                             <button
                                 key={cat}
@@ -119,8 +118,8 @@ function ExploreContent() {
                                 style={{
                                     padding: '10px 24px',
                                     borderRadius: '9999px',
-                                    background: (!category && cat === 'All') || category === cat ? '#5865F2' : '#f3f4f6',
-                                    color: (!category && cat === 'All') || category === cat ? '#fff' : '#52525b',
+                                    background: (!category && cat === 'All') || category === cat ? 'var(--color-brand-blue)' : 'var(--color-bg-page)',
+                                    color: (!category && cat === 'All') || category === cat ? '#fff' : 'var(--color-text-secondary)',
                                     border: 'none',
                                     fontWeight: '600',
                                     cursor: 'pointer',
@@ -137,21 +136,15 @@ function ExploreContent() {
 
                 {/* Results */}
                 {loading ? (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px' }}>
+                    <div className="grid-system">
                         {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} style={{
-                                background: '#fff',
-                                borderRadius: '20px',
-                                overflow: 'hidden',
-                                border: '1px solid #e5e7eb',
-                                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
-                            }}>
+                            <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0 }}>
                                 <div className="skeleton skeleton-card" style={{ height: '160px', borderRadius: 0 }} />
                                 <div style={{ padding: '52px 24px 24px' }}>
                                     <div className="skeleton skeleton-text" style={{ width: '60%', marginBottom: '12px', height: '24px' }} />
                                     <div className="skeleton skeleton-text" style={{ width: '100%' }} />
                                     <div className="skeleton skeleton-text" style={{ width: '80%' }} />
-                                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid #f3f4f6' }}>
+                                    <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px solid var(--color-border)' }}>
                                         <div className="skeleton skeleton-text" style={{ width: '50%', height: '14px' }} />
                                     </div>
                                 </div>
@@ -159,28 +152,26 @@ function ExploreContent() {
                         ))}
                     </div>
                 ) : filteredCreators.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '80px', background: '#f9fafb', borderRadius: '24px', border: '2px dashed #e5e7eb' }}>
-                        <p style={{ fontSize: '1.2rem', color: '#52525b', marginBottom: '16px' }}>No creators found</p>
-                        <p style={{ color: '#9ca3af' }}>Try a different search or category</p>
+                    <div style={{ textAlign: 'center', padding: '80px', background: 'var(--color-bg-page)', borderRadius: 'var(--radius-lg)', border: '2px dashed var(--color-border)' }}>
+                        <p style={{ fontSize: '1.2rem', color: 'var(--color-text-secondary)', marginBottom: '16px' }}>No creators found</p>
+                        <p style={{ color: 'var(--color-text-tertiary)' }}>Try a different search or category</p>
                     </div>
                 ) : (
                     <>
-                        <div style={{ marginBottom: '24px', color: '#52525b', fontSize: '0.95rem' }}>
+                        <div style={{ marginBottom: '24px', color: 'var(--color-text-secondary)', fontSize: '0.95rem' }}>
                             Found <strong>{filteredCreators.length}</strong> creator{filteredCreators.length !== 1 ? 's' : ''}
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '32px' }}>
+                        <div className="grid-system">
                             {filteredCreators.map((creator, i) => (
                                 <div
                                     key={i}
-                                    className="creator-card"
+                                    className="creator-card card-surface"
                                     onClick={() => router.push(`/${creator.address}`)}
                                     style={{
-                                        background: '#fff',
-                                        borderRadius: '20px',
                                         overflow: 'hidden',
-                                        border: '1px solid #e5e7eb',
-                                        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+                                        padding: 0,
+                                        border: '1px solid var(--color-border)'
                                     }}
                                 >
                                     {/* Cover Image */}
@@ -202,7 +193,7 @@ function ExploreContent() {
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                             fontSize: '2rem',
-                                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                                            boxShadow: 'var(--shadow-sm)'
                                         }}>
                                             {creator.name ? creator.name.charAt(0).toUpperCase() : '👤'}
                                         </div>
@@ -210,24 +201,24 @@ function ExploreContent() {
 
                                     {/* Content */}
                                     <div style={{ padding: '52px 24px 24px' }}>
-                                        <h3 style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
+                                        <h3 style={{ fontSize: '1.3rem', fontWeight: 'bold', marginBottom: '8px', color: 'var(--color-text-primary)' }}>
                                             {creator.name || `Creator ${creator.address.slice(0, 6)}`}
                                         </h3>
-                                        <p style={{ fontSize: '0.95rem', color: '#52525b', marginBottom: '20px', lineHeight: '1.5', minHeight: '60px' }}>
+                                        <p style={{ fontSize: '0.95rem', color: 'var(--color-text-secondary)', marginBottom: '20px', lineHeight: '1.5', minHeight: '60px' }}>
                                             {creator.description || 'Creating amazing content for the community'}
                                         </p>
 
                                         <div style={{
                                             display: 'flex',
-                                            gap: '16px',
+                                            gap: 'var(--space-4)',
                                             paddingTop: '20px',
-                                            borderTop: '1px solid #f3f4f6',
+                                            borderTop: '1px solid var(--color-border)',
                                             fontSize: '0.9rem',
-                                            color: '#71717a'
+                                            color: 'var(--color-text-tertiary)'
                                         }}>
-                                            <span><strong style={{ color: '#000' }}>{Math.floor(Math.random() * 500) + 10}</strong> Backrs</span>
+                                            <span><strong style={{ color: 'var(--color-text-primary)' }}>{Math.floor(Math.random() * 500) + 10}</strong> Backrs</span>
                                             <span>•</span>
-                                            <span style={{ color: '#5865F2', fontWeight: '600' }}>Creating content</span>
+                                            <span style={{ color: 'var(--color-brand-blue)', fontWeight: '600' }}>Creating content</span>
                                         </div>
                                     </div>
                                 </div>
