@@ -28,23 +28,34 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
     };
 
     return (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#000' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--color-bg-page)', color: 'var(--color-text-primary)' }}>
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .nav-link {
-                    transition: all 0.2s ease;
+                    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
+                    color: var(--color-text-secondary);
+                    font-weight: 500;
+                    padding: 8px 0;
+                }
+                .nav-link:hover {
+                    color: var(--color-text-primary);
                 }
                 .nav-link::after {
                     content: '';
                     position: absolute;
-                    bottom: -20px;
+                    bottom: -2px;
                     left: 0;
                     right: 0;
                     height: 2px;
-                    background: #5865F2;
+                    background: var(--color-brand-blue);
                     transform: scaleX(0);
                     transition: transform 0.2s ease;
+                    transform-origin: center;
+                }
+                .nav-link.active {
+                    color: var(--color-text-primary);
+                    font-weight: 600;
                 }
                 .nav-link.active::after {
                     transform: scaleX(1);
@@ -54,36 +65,42 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                 }
                 .search-input:focus {
                     box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.1);
+                    border-color: var(--color-brand-blue) !important;
                 }
+                
+                /* Desktop/Mobile Visibility */
+                .desktop-nav { display: flex; }
+                .mobile-bottom-nav { display: none; }
+                
                 @media (max-width: 768px) {
                     .desktop-nav { display: none !important; }
-                    .mobile-nav { display: flex !important; }
-                    .nav-search { width: 100% !important; max-width: 100% !important; }
+                    .mobile-bottom-nav { display: flex !important; }
+                    .nav-search { display: none !important; } /* Hide search on mobile header to save space, maybe move to explore page layout or show icon */
+                    
+                    /* Adjust padding for bottom nav */
+                    main { padding-bottom: 80px !important; }
+                    
+                    /* Search icon toggle for mobile could be added here later */
                 }
             `}} />
 
-            <nav style={{
-                padding: '0 min(64px, 5vw)',
-                height: '72px',
+            {/* Top Navigation */}
+            <nav className="sticky-blur" style={{
+                padding: '0 min(24px, 5vw)',
+                height: 'var(--header-height)',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                borderBottom: '1px solid #e5e7eb',
-                background: 'rgba(255,255,255,0.95)',
-                backdropFilter: 'blur(12px)',
-                position: 'sticky',
-                top: 0,
-                zIndex: 50,
-                gap: '32px'
+                gap: '24px'
             }}>
-                {/* Left: Logo + Nav Links */}
+                {/* Left: Logo + Desktop Nav */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
                     <h1
                         style={{
                             fontFamily: 'var(--font-serif)',
                             fontSize: '1.5rem',
-                            fontWeight: '400',
-                            color: '#000',
+                            fontWeight: '700',
+                            color: 'var(--color-text-primary)',
                             cursor: 'pointer',
                             letterSpacing: '-0.02em',
                             margin: 0
@@ -93,19 +110,13 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                         Backr
                     </h1>
 
-                    <div className="desktop-nav" style={{ display: 'flex', gap: '32px', alignItems: 'center' }}>
+                    <div className="desktop-nav" style={{ gap: '32px', alignItems: 'center' }}>
                         {navItems.map(item => (
                             <div
                                 key={item.path}
                                 className={`nav-link ${pathname === item.path ? 'active' : ''}`}
                                 onClick={() => router.push(item.path)}
-                                style={{
-                                    cursor: 'pointer',
-                                    color: pathname === item.path ? '#000' : '#71717a',
-                                    fontWeight: pathname === item.path ? '600' : '500',
-                                    fontSize: '0.95rem',
-                                    padding: '8px 0'
-                                }}
+                                style={{ cursor: 'pointer', fontSize: '0.95rem' }}
                             >
                                 {item.label}
                             </div>
@@ -113,23 +124,23 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                     </div>
                 </div>
 
-                {/* Center: Search Bar */}
-                <div className="nav-search" style={{ flex: '0 1 500px', maxWidth: '500px', display: 'flex' }}>
+                {/* Center: Search Bar (Desktop Only) */}
+                <div className="nav-search" style={{ flex: '0 1 400px', maxWidth: '400px', display: 'flex' }}>
                     <form onSubmit={handleSearch} style={{ width: '100%', position: 'relative' }}>
                         <span style={{
                             position: 'absolute',
                             left: '16px',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            fontSize: '1.1rem',
-                            color: searchFocused ? '#5865F2' : '#9ca3af',
+                            fontSize: '1rem',
+                            color: searchFocused ? 'var(--color-brand-blue)' : 'var(--color-text-tertiary)',
                             transition: 'color 0.2s'
                         }}>
                             🔍
                         </span>
                         <input
                             type="text"
-                            placeholder="Search creators..."
+                            placeholder="Find creators..."
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onFocus={() => setSearchFocused(true)}
@@ -137,12 +148,12 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                             className="search-input"
                             style={{
                                 width: '100%',
-                                background: '#f9fafb',
-                                border: searchFocused ? '2px solid #5865F2' : '2px solid #e5e7eb',
-                                padding: '10px 20px 10px 48px',
-                                borderRadius: '50px',
-                                color: '#000',
-                                fontSize: '0.95rem',
+                                background: 'var(--color-bg-page)',
+                                border: '1px solid var(--color-border)',
+                                padding: '10px 16px 10px 44px',
+                                borderRadius: 'var(--radius-full)',
+                                color: 'var(--color-text-primary)',
+                                fontSize: '0.9rem',
                                 outline: 'none'
                             }}
                         />
@@ -150,70 +161,91 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                 </div>
 
                 {/* Right: Actions */}
-                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                    {/* Notification Bell */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                     {isConnected && (
                         <div
+                            className="hover-lift"
                             style={{
                                 position: 'relative',
                                 cursor: 'pointer',
                                 padding: '8px',
                                 borderRadius: '50%',
-                                transition: 'background 0.2s'
+                                background: 'var(--color-bg-surface)',
+                                border: '1px solid var(--color-border)'
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = '#f3f4f6'}
-                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
                             onClick={() => router.push('/feed')}
                         >
-                            <span style={{ fontSize: '1.3rem' }}>🔔</span>
+                            <span style={{ fontSize: '1.1rem' }}>🔔</span>
                             {/* Notification Badge */}
                             <div style={{
                                 position: 'absolute',
-                                top: '6px',
-                                right: '6px',
-                                width: '8px',
-                                height: '8px',
-                                background: '#ef4444',
+                                top: '0px',
+                                right: '0px',
+                                width: '10px',
+                                height: '10px',
+                                background: 'var(--color-error)',
                                 borderRadius: '50%',
-                                border: '2px solid #fff'
+                                border: '2px solid var(--color-bg-surface)'
                             }}></div>
                         </div>
                     )}
 
-                    {isConnected && (
-                        <Button
-                            variant="outline"
-                            onClick={() => router.push('/dashboard')}
-                            style={{
-                                fontSize: '0.9rem',
-                                padding: '10px 20px',
-                                borderRadius: '50px',
-                                border: '2px solid #e5e7eb',
-                                color: '#000',
-                                fontWeight: '600',
-                                transition: 'all 0.2s'
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.background = '#000';
-                                e.currentTarget.style.color = '#fff';
-                                e.currentTarget.style.borderColor = '#000';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.background = 'transparent';
-                                e.currentTarget.style.color = '#000';
-                                e.currentTarget.style.borderColor = '#e5e7eb';
-                            }}
-                        >
-                            Create
-                        </Button>
-                    )}
                     <WalletButton />
+
+                    {/* Mobile Only: Menu Toggle (if needed, but using bottom bar instead) */}
                 </div>
             </nav>
 
+            {/* Main Content */}
             <main style={{ flex: 1, padding: '0', margin: '0 auto', width: '100%' }}>
                 {children}
             </main>
+
+            {/* Mobile Bottom Navigation Bar */}
+            <div className="mobile-bottom-nav" style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: 'rgba(255,255,255,0.9)',
+                backdropFilter: 'blur(16px)',
+                borderTop: '1px solid var(--color-border)',
+                padding: '12px 24px 24px', // Extra padding for safe area
+                justifyContent: 'space-between',
+                zIndex: 100,
+                boxShadow: '0 -4px 20px rgba(0,0,0,0.05)'
+            }}>
+                {navItems.map(item => {
+                    const isActive = pathname === item.path;
+                    return (
+                        <div
+                            key={item.path}
+                            onClick={() => router.push(item.path)}
+                            style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: '4px',
+                                cursor: 'pointer',
+                                color: isActive ? 'var(--color-primary)' : 'var(--color-text-tertiary)',
+                                transition: 'all 0.2s',
+                                flex: 1
+                            }}
+                        >
+                            <div style={{
+                                fontSize: '1.5rem',
+                                transform: isActive ? 'scale(1.1)' : 'scale(1)',
+                                transition: 'transform 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
+                            }}>
+                                {item.label === 'Explore' ? '🧭' : item.label === 'Feed' ? '⚡' : '🎟️'}
+                            </div>
+                            <span style={{ fontSize: '0.7rem', fontWeight: isActive ? 700 : 500 }}>
+                                {item.label}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 }

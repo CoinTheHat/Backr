@@ -199,7 +199,7 @@ function ExploreContent() {
                         {sortedCreators.map((creator, i) => (
                             <div
                                 key={i}
-                                className="card-surface"
+                                className="card-surface hover-lift"
                                 onClick={() => router.push(`/${creator.address}`)}
                                 style={{
                                     padding: 0, overflow: 'hidden', cursor: 'pointer',

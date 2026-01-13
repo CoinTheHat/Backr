@@ -21,8 +21,10 @@
   --color-bg-skeleton: #e5e7eb;
 
   --color-text-primary: #111827;
-  --color-text-secondary: #6B7280;
-  --color-text-tertiary: #9CA3AF;
+  --color-text-secondary: #4B5563;
+  /* Darkened from #6B7280 */
+  --color-text-tertiary: #6B7280;
+  /* Darkened from #9CA3AF */
 
   /* Borders */
   --color-border: #F3F4F6;
@@ -69,20 +71,13 @@
   --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-serif: var(--font-playfair), serif;
 
-  --text-display: 3.5rem;
-  /* 56px */
-  --text-h1: 2.5rem;
-  /* 40px */
+  --text-display: clamp(2.5rem, 5vw, 3.5rem);
+  --text-h1: clamp(2rem, 4vw, 2.5rem);
   --text-h2: 2rem;
-  /* 32px */
   --text-h3: 1.5rem;
-  /* 24px */
   --text-body: 1rem;
-  /* 16px */
   --text-body-sm: 0.875rem;
-  /* 14px */
   --text-caption: 0.75rem;
-  /* 12px */
 
   --leading-tight: 1.2;
   --leading-normal: 1.5;
@@ -125,14 +120,21 @@ body {
 .grid-system {
   display: grid;
   gap: var(--space-6);
-  grid-template-columns: repeat(2, 1fr);
-  /* Mobile: 2 cols */
+  grid-template-columns: repeat(1, 1fr);
+  /* Mobile default 1 col */
 }
 
 @media (min-width: 640px) {
   .grid-system {
-    grid-template-columns: repeat(6, 1fr);
-    /* Tablet: 6 cols */
+    grid-template-columns: repeat(2, 1fr);
+    /* Tablet small: 2 cols */
+  }
+}
+
+@media (min-width: 768px) {
+  .grid-system {
+    grid-template-columns: repeat(3, 1fr);
+    /* Tablet: 3 cols */
   }
 }
 
@@ -149,13 +151,35 @@ body {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
-  transition: all 0.2s ease;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-surface:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-card-hover);
   border-color: var(--color-border-hover);
+}
+
+/* Hover Lift Utility */
+.hover-lift {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.hover-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
+}
+
+/* Sticky Blur Navbar Utility */
+.sticky-blur {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.85);
+  /* Slightly more opaque */
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: background 0.3s ease;
 }
 
 /* Typography Utilities */
@@ -221,7 +245,7 @@ body {
   }
 }
 
-/* Dashboard Specifics - Moved from inline styled-jsx to avoid nested tag errors */
+/* Dashboard Specifics */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 2fr 1fr;

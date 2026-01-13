@@ -170,11 +170,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             {ToastComponent}
 
             {/* Nav */}
-            <nav style={{
-                position: 'sticky', top: 0, zIndex: 100,
-                background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border)',
-                padding: '12px 0'
-            }}>
+            <nav className="sticky-blur" style={{ padding: '12px 0' }}>
                 <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
                         <Button variant="ghost" onClick={() => router.push('/')} style={{ color: 'var(--color-text-secondary)', padding: '8px' }}>←</Button>
@@ -274,7 +270,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                     const minTierName = creatorTiers[post.minTier || 0]?.name || 'Members Only';
 
                                     return (
-                                        <div key={i} className="card-surface" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
+                                        <div key={i} className="card-surface hover-lift" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)' }}>
                                             <div style={{ padding: '24px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', alignItems: 'center' }}>
                                                     <span className="text-caption" style={{ color: 'var(--color-text-tertiary)' }}>
@@ -340,7 +336,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                                                     el.scrollIntoView({ behavior: 'smooth' });
                                                                 } else {
                                                                     setActiveTab('membership');
-                                                                    document.querySelector('.responsive-grid')?.scrollIntoView({ behavior: 'smooth' });
+                                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
                                                                 }
                                                             }}>Unlock Post</Button>
                                                         ) : (
@@ -429,7 +425,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                                 {creatorTiers.map((tier, i) => (
-                                    <div key={i} style={{
+                                    <div key={i} className="hover-lift" style={{
                                         padding: '16px',
                                         borderRadius: 'var(--radius-md)',
                                         border: tier.recommended ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
@@ -478,7 +474,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 </div>
                 <Button onClick={() => {
                     setActiveTab('membership');
-                    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); // Simplified scroll
+                    window.scrollTo({ top: 300, behavior: 'smooth' }); // Scroll to content area (approx)
                 }}>View Tiers</Button>
             </div>
 
