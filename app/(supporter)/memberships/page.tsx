@@ -1,11 +1,11 @@
 'use client';
 
-import Card from '../../components/Card';
 import Button from '../../components/Button';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
+import { formatPrice } from '@/utils/format';
 
 export default function MyMembershipsPage() {
     const router = useRouter();
@@ -62,20 +62,15 @@ export default function MyMembershipsPage() {
                 ) : loading ? (
                     <div className="grid-system" style={{ gridTemplateColumns: '1fr', gap: 'var(--space-6)' }}>
                         {[1, 2, 3].map(i => (
-                            <div key={i} className="card-surface" style={{
-                                display: 'flex',
-                                alignItems: 'center', // Center vertically
-                                justifyContent: 'space-between',
-                                padding: '28px 32px'
-                            }}>
-                                <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flex: 1 }}>
-                                    <div className="skeleton skeleton-avatar" style={{ width: '56px', height: '56px' }} />
+                            <div key={i} className="card-surface" style={{ padding: '28px 32px' }}>
+                                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+                                    <div className="skeleton skeleton-avatar" style={{ width: '64px', height: '64px' }} />
                                     <div style={{ flex: 1 }}>
-                                        <div className="skeleton skeleton-text" style={{ width: '30%', marginBottom: '8px' }} />
-                                        <div className="skeleton skeleton-text" style={{ width: '40%', height: '14px' }} />
+                                        <div className="skeleton skeleton-text" style={{ width: '40%', marginBottom: '8px' }} />
+                                        <div className="skeleton skeleton-text" style={{ width: '30%', height: '14px' }} />
                                     </div>
+                                    <div className="skeleton skeleton-rect" style={{ width: '100px', height: '40px' }} />
                                 </div>
-                                <div className="skeleton skeleton-rect" style={{ width: '120px', height: '40px', borderRadius: '999px' }} />
                             </div>
                         ))}
                     </div>
@@ -102,82 +97,95 @@ export default function MyMembershipsPage() {
                         </button>
                     </div>
                 ) : (
-                    <div className="grid-system" style={{ gridTemplateColumns: '1fr', gap: 'var(--space-6)' }}>
-                        {memberships.map((sub, i) => (
-                            <div
-                                key={i}
-                                className="card-surface"
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '28px 32px',
-                                    cursor: 'pointer'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.boxShadow = 'var(--shadow-card-hover)';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.boxShadow = 'var(--shadow-card)';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                }}
-                            >
-                                <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                                    <div style={{
-                                        width: '56px',
-                                        height: '56px',
-                                        borderRadius: '50%',
-                                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    <>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '64px' }}>
+                            {memberships.map((sub, i) => (
+                                <div
+                                    key={i}
+                                    className="card-surface"
+                                    style={{
                                         display: 'flex',
+                                        justifyContent: 'space-between',
                                         alignItems: 'center',
-                                        justifyContent: 'center',
-                                        color: '#fff',
-                                        fontWeight: 'bold',
-                                        fontSize: '1.4rem'
-                                    }}>
-                                        {sub.creators?.name?.charAt(0).toUpperCase() || sub.creatorAddress.charAt(2).toUpperCase()}
-                                    </div>
-                                    <div>
-                                        <h3 style={{ fontSize: '1.3rem', fontWeight: '700', marginBottom: '6px', color: 'var(--color-text-primary)' }}>
-                                            {sub.creators?.name || `Creator ${sub.creatorAddress.slice(0, 6)}`}
-                                        </h3>
-                                        <div style={{ display: 'flex', gap: '12px', fontSize: '0.95rem', color: 'var(--color-text-secondary)' }}>
-                                            <span>Status: <span style={{ color: 'var(--color-success)', fontWeight: '600' }}>Active</span></span>
-                                            <span>•</span>
-                                            <span>Expires: {new Date(sub.expiresAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                        padding: '24px 32px',
+                                        transition: 'transform 0.2s',
+                                        flexWrap: 'wrap', gap: '24px'
+                                    }}
+                                >
+                                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center', flex: 1, minWidth: '250px' }}>
+                                        <div style={{
+                                            width: '64px',
+                                            height: '64px',
+                                            borderRadius: '50%',
+                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            color: '#fff', fontWeight: 'bold', fontSize: '1.5rem',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                        }}>
+                                            {sub.creators?.name?.charAt(0).toUpperCase() || sub.creatorAddress.charAt(2).toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h3 style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '4px', color: 'var(--color-text-primary)' }}>
+                                                {sub.creators?.name || `Creator ${sub.creatorAddress.slice(0, 6)}...`}
+                                            </h3>
+                                            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                                <span style={{ background: 'var(--color-success)', color: '#fff', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase' }}>Active</span>
+                                                <span>Tier 1 Member</span>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginBottom: '2px' }}>Renews on</div>
+                                            <div style={{ fontWeight: 600 }}>{new Date(sub.expiresAt).toLocaleDateString()}</div>
+                                        </div>
+                                        <Link href={`/${sub.creatorAddress}`} style={{ textDecoration: 'none' }}>
+                                            <Button variant="outline">Manage Membership</Button>
+                                        </Link>
+                                    </div>
                                 </div>
-                                <Link href={`/${sub.creatorAddress}`} style={{ textDecoration: 'none' }}>
-                                    <button style={{
-                                        padding: '12px 28px',
-                                        borderRadius: 'var(--radius-full)',
-                                        background: 'var(--color-bg-page)',
-                                        color: 'var(--color-text-primary)',
-                                        border: '1px solid var(--color-border)',
-                                        fontWeight: '600',
-                                        cursor: 'pointer',
-                                        fontSize: '0.95rem',
-                                        transition: 'all 0.2s'
-                                    }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = 'var(--color-brand-blue)';
-                                            e.currentTarget.style.color = '#fff';
-                                            e.currentTarget.style.borderColor = 'transparent';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = 'var(--color-bg-page)';
-                                            e.currentTarget.style.color = 'var(--color-text-primary)';
-                                            e.currentTarget.style.borderColor = 'var(--color-border)';
-                                        }}
-                                    >
-                                        View Content
-                                    </button>
-                                </Link>
+                            ))}
+                        </div>
+
+                        {/* History Section */}
+                        <div style={{ marginTop: '40px' }}>
+                            <h3 className="text-h3" style={{ marginBottom: '24px' }}>Payment History</h3>
+                            <div className="card-surface" style={{ overflow: 'hidden', padding: 0 }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                    <thead style={{ background: 'var(--color-bg-page)', borderBottom: '1px solid var(--color-border)' }}>
+                                        <tr>
+                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Date</th>
+                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Description</th>
+                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>Status</th>
+                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-secondary)', textAlign: 'right' }}>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {memberships.map((m, i) => (
+                                            <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                                <td style={{ padding: '16px 24px', fontSize: '0.9rem' }}>{new Date().toLocaleDateString()}</td>
+                                                <td style={{ padding: '16px 24px', fontWeight: 500 }}>Membership - {m.creators?.name || 'Creator'}</td>
+                                                <td style={{ padding: '16px 24px' }}>
+                                                    <span style={{ fontSize: '0.8rem', background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>PAID</span>
+                                                </td>
+                                                <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 MNT</td>
+                                            </tr>
+                                        ))}
+                                        {/* Mock extra entry */}
+                                        <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                            <td style={{ padding: '16px 24px', fontSize: '0.9rem' }}>{new Date(Date.now() - 86400000 * 30).toLocaleDateString()}</td>
+                                            <td style={{ padding: '16px 24px', fontWeight: 500 }}>Membership - Creator 0x123</td>
+                                            <td style={{ padding: '16px 24px' }}>
+                                                <span style={{ fontSize: '0.8rem', background: '#dcfce7', color: '#166534', padding: '2px 8px', borderRadius: '4px', fontWeight: 600 }}>PAID</span>
+                                            </td>
+                                            <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 MNT</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    </>
                 )}
             </div>
         </div>

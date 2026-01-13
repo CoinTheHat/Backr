@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from './Button';
 import { createPortal } from 'react-dom';
-import { useAccount } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useAccount, useConnect } from 'wagmi';
 
 type CheckoutStatus = 'idle' | 'pending' | 'success' | 'error';
 
@@ -24,7 +23,7 @@ interface CheckoutModalProps {
 export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status, txHash }: CheckoutModalProps) {
     const [mounted, setMounted] = useState(false);
     const { isConnected } = useAccount();
-    const { open } = useWeb3Modal();
+    const { connect, connectors } = useConnect();
 
     useEffect(() => {
         setMounted(true);
@@ -67,7 +66,8 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                 boxShadow: '0 40px 80px -12px rgba(0, 0, 0, 0.25)',
                 overflow: 'hidden',
                 animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
-                display: 'flex', flexDirection: 'column'
+                display: 'flex', flexDirection: 'column',
+                maxHeight: '90vh', overflowY: 'auto' // Handle long content like connector list
             }}>
                 <style dangerouslySetInnerHTML={{
                     __html: `
@@ -162,11 +162,24 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                             {/* Actions */}
                             {!isConnected ? (
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                    <Button variant="primary" onClick={() => open()} style={{ width: '100%', padding: '14px' }}>
-                                        Connect Wallet to Pay
-                                    </Button>
-                                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)' }}>
-                                        You need to connect a wallet on Mantle Network.
+                                    <p style={{ textAlign: 'center', fontSize: '0.9rem', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                                        Choose Wallet to Connect
+                                    </p>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                        {connectors.slice(0, 4).map((connector) => (
+                                            <Button
+                                                key={connector.uid}
+                                                variant="outline"
+                                                onClick={() => connect({ connector })}
+                                                style={{ width: '100%', padding: '12px', justifyContent: 'space-between' }}
+                                            >
+                                                Connect {connector.name}
+                                                <span style={{ fontSize: '1.2rem' }}>→</span>
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
+                                        Mantle Network
                                     </p>
                                 </div>
                             ) : (
