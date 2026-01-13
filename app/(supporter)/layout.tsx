@@ -73,7 +73,8 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                 backdropFilter: 'blur(12px)',
                 position: 'sticky',
                 top: 0,
-                zIndex: 50
+                zIndex: 50,
+                gap: '32px'
             }}>
                 {/* Left: Logo + Nav Links */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
