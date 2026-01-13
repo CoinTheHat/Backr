@@ -121,6 +121,33 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const cover = creatorProfile?.coverUrl;
     const memberCount = Math.floor(Math.random() * 100) + 1; // Mock
 
+    // Loading Skeleton
+    if (!creatorProfile && loading) {
+        return (
+            <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+                {/* Hero Skeleton */}
+                <div style={{ height: '180px', width: '100%', background: 'linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)' }}></div>
+                <div className="page-container" style={{ position: 'relative', marginTop: '-60px', display: 'flex', alignItems: 'flex-end', gap: '24px', paddingBottom: '32px' }}>
+                    <div className="skeleton skeleton-avatar" style={{ width: '120px', height: '120px', border: '4px solid var(--color-bg-surface)' }} />
+                    <div style={{ paddingBottom: '16px', flex: 1 }}>
+                        <div className="skeleton skeleton-text" style={{ width: '200px', height: '32px', marginBottom: '8px' }} />
+                        <div className="skeleton skeleton-text" style={{ width: '150px' }} />
+                    </div>
+                </div>
+
+                <div className="page-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '40px', paddingTop: '40px' }}>
+                    <div>
+                        <div className="skeleton skeleton-rect" style={{ width: '100%', height: '200px', marginBottom: '24px' }} />
+                        <div className="skeleton skeleton-rect" style={{ width: '100%', height: '200px' }} />
+                    </div>
+                    <div>
+                        <div className="skeleton skeleton-card" style={{ height: '400px' }} />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)', color: 'var(--color-text-primary)' }}>
             {ToastComponent}
@@ -129,13 +156,15 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             <nav style={{
                 position: 'sticky', top: 0, zIndex: 100,
                 background: 'rgba(255,255,255,0.9)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--color-border)',
-                padding: '12px 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                padding: '12px 0'
             }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <Button variant="ghost" onClick={() => router.push('/')} style={{ color: 'var(--color-text-secondary)', padding: '8px' }}>←</Button>
-                    <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{displayName}</div>
+                <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+                        <Button variant="ghost" onClick={() => router.push('/')} style={{ color: 'var(--color-text-secondary)', padding: '8px' }}>←</Button>
+                        <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{displayName}</div>
+                    </div>
+                    <WalletButton />
                 </div>
-                <WalletButton />
             </nav>
 
             {/* Hero & Profile Header */}
@@ -152,7 +181,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.3))' }}></div>
                 </div>
 
-                <div className="page-container" style={{ position: 'relative', marginTop: '-60px', display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap', paddingLeft: '24px', paddingRight: '24px' }}>
+                <div className="page-container" style={{ position: 'relative', marginTop: '-60px', display: 'flex', alignItems: 'flex-end', gap: '24px', flexWrap: 'wrap' }}>
                     {/* Avatar - Better Positioning & Border */}
                     <div style={{
                         width: '120px', height: '120px', borderRadius: '50%',
@@ -186,7 +215,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             </div>
 
             {/* Main Content Grid */}
-            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '40px', paddingBottom: '80px', maxWidth: '1200px', margin: '0 auto' }}>
+            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '40px', paddingBottom: '80px' }}>
 
                 {/* Left: Feed & Tabs */}
                 <div>
@@ -205,7 +234,8 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                     borderTop: 'none', borderLeft: 'none', borderRight: 'none',
                                     cursor: 'pointer',
                                     textTransform: 'capitalize',
-                                    fontSize: '1rem'
+                                    fontSize: '1rem',
+                                    transition: 'color 0.2s'
                                 }}
                             >
                                 {tab}
@@ -255,11 +285,11 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                                     )}
                                                 </div>
 
-                                                {/* Image Preview (if present) - Optimized Ratio */}
+                                                {/* Image Preview (if present) */}
                                                 {post.image && (
                                                     <div style={{
                                                         height: '240px', width: '100%', borderRadius: '12px', overflow: 'hidden',
-                                                        marginBottom: '20px', position: 'relative', background: '#f0f0f0'
+                                                        marginBottom: '20px', position: 'relative', background: 'var(--color-bg-skeleton)'
                                                     }}>
                                                         <img src={post.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: locked ? 'blur(8px)' : 'none', opacity: locked ? 0.7 : 1 }} />
                                                         {locked && (
@@ -345,9 +375,20 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                         border: tier.recommended ? '2px solid var(--color-primary)' : '1px solid var(--color-border)',
                                         background: tier.recommended ? 'var(--color-primary-light)' : 'var(--color-bg-page)',
                                         cursor: 'pointer',
-                                        transition: 'all 0.2s'
+                                        transition: 'all 0.2s',
+                                        position: 'relative'
                                     }}
                                         onClick={() => handleSubscribe(i)}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.borderColor = tier.recommended ? 'var(--color-primary)' : 'var(--color-border)';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = 'none';
+                                        }}
                                     >
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                                             <h4 style={{ fontWeight: 700 }}>{tier.name}</h4>
