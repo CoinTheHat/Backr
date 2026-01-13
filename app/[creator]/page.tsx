@@ -94,7 +94,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     }, [isSubscribedOnChain, isTxLoading, writeError]);
 
     const handleSubscribeClick = (tierId: number) => {
-        if (!isConnected) return showToast('Please connect your wallet first.', 'error');
+        // Removed auth check to let Modal handle it
         if (!creatorContractAddress) return showToast('Creator contract not found.', 'error');
 
         setSelectedTierIndex(tierId);
