@@ -152,7 +152,7 @@ export default function Home() {
                         <Reveal>
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl font-bold mb-4 font-serif text-white">How Backr Works</h2>
-                                <p className="text-body text-gray-300 font-medium">Simple, transparent, and built for you.</p>
+                                <p className="text-xl text-white/90 font-medium">Simple, transparent, and built for you.</p>
                             </div>
                         </Reveal>
 
