@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useCommunity } from '../../context/CommunityContext';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown, Bold, Italic, Type, Quote, List } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown, Bold, Italic, Type, Quote, List, Upload } from 'lucide-react';
 import Button from '../../components/Button';
 import { useAccount } from 'wagmi';
 
@@ -27,6 +27,7 @@ export default function NewPostPage() {
     const [showVideoInput, setShowVideoInput] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Auto-resize textarea
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -125,6 +126,41 @@ export default function NewPostPage() {
         }
     };
 
+    // Shared file reader
+    const processFile = (file: File) => {
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            if (e.target?.result) {
+                setImageUrl(e.target.result as string);
+                setShowImageInput(true);
+            }
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // Handle file select
+    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            processFile(e.target.files[0]);
+        }
+    };
+
+    // Handle paste events for images
+    const handlePaste = (e: React.ClipboardEvent) => {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+            if (items[i].type.indexOf('image') !== -1) {
+                const file = items[i].getAsFile();
+                if (file) {
+                    processFile(file);
+                    e.preventDefault();
+                    return;
+                }
+            }
+        }
+    };
+
     return (
         <div className="min-h-screen bg-brand-light font-sans flex flex-col">
 
@@ -208,8 +244,9 @@ export default function NewPostPage() {
                         ref={textareaRef}
                         value={content}
                         onChange={handleContentChange}
+                        onPaste={handlePaste}
                         className="w-full min-h-[30vh] text-xl text-gray-700 leading-relaxed placeholder-gray-300 border-none focus:ring-0 bg-transparent p-0 resize-none overflow-hidden mb-12"
-                        placeholder="Tell your story..."
+                        placeholder="Tell your story... (Paste images directly!)"
                     />
 
                     {/* Media Previews */}
@@ -243,20 +280,29 @@ export default function NewPostPage() {
                                 </button>
                                 {/* Popover Input for Image */}
                                 {showImageInput && (
-                                    <div className="absolute bottom-full mb-3 left-0 w-[300px] bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-20 animate-in fade-in zoom-in-95">
-                                        <div className="flex gap-2">
+                                    <div className="absolute bottom-full mb-3 left-0 w-[320px] bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-20 animate-in fade-in zoom-in-95">
+                                        <div className="flex gap-2 items-center">
+                                            <button
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors"
+                                                title="Upload Image"
+                                            >
+                                                <Upload size={18} />
+                                            </button>
+                                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
                                             <input
                                                 type="text"
                                                 value={imageUrl}
                                                 onChange={(e) => setImageUrl(e.target.value)}
-                                                placeholder="Paste image URL..."
-                                                className="flex-1 text-sm border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
+                                                placeholder="Paste URL..."
+                                                className="flex-1 text-sm border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary min-w-0"
                                                 autoFocus
                                             />
                                             <button onClick={() => setShowImageInput(false)} className="text-gray-400 hover:text-red-500"><X size={18} /></button>
                                         </div>
                                     </div>
                                 )}
+                                <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*" />
                             </div>
 
                             <div className="relative group">
