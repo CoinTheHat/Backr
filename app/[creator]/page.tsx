@@ -203,24 +203,24 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     // Loading Skeleton
     if (!creatorProfile && loading) {
         return (
-            <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)' }}>
+            <div className="min-h-screen bg-bg-page">
                 {/* Hero Skeleton */}
-                <div style={{ height: '180px', width: '100%', background: 'linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 100%)' }}></div>
-                <div className="page-container" style={{ position: 'relative', marginTop: '-60px', display: 'flex', alignItems: 'flex-end', gap: '24px', paddingBottom: '32px' }}>
-                    <div className="skeleton skeleton-avatar" style={{ width: '120px', height: '120px', border: '4px solid var(--color-bg-surface)' }} />
-                    <div style={{ paddingBottom: '16px', flex: 1 }}>
-                        <div className="skeleton skeleton-text" style={{ width: '200px', height: '32px', marginBottom: '8px' }} />
-                        <div className="skeleton skeleton-text" style={{ width: '150px' }} />
+                <div className="h-[180px] w-full bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse"></div>
+                <div className="page-container relative -mt-[60px] flex items-end gap-6 pb-8">
+                    <div className="w-[120px] h-[120px] rounded-full border-4 border-bg-surface bg-gray-200 animate-pulse" />
+                    <div className="flex-1 pb-4">
+                        <div className="h-8 w-[200px] bg-gray-200 rounded mb-2 animate-pulse" />
+                        <div className="h-4 w-[150px] bg-gray-200 rounded animate-pulse" />
                     </div>
                 </div>
 
-                <div className="page-container" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 350px', gap: '40px', paddingTop: '40px' }}>
+                <div className="page-container grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-10 pt-10">
                     <div>
-                        <div className="skeleton skeleton-rect" style={{ width: '100%', height: '200px', marginBottom: '24px' }} />
-                        <div className="skeleton skeleton-rect" style={{ width: '100%', height: '200px' }} />
+                        <div className="h-[200px] w-full bg-gray-200 rounded-lg mb-6 animate-pulse" />
+                        <div className="h-[200px] w-full bg-gray-200 rounded-lg animate-pulse" />
                     </div>
-                    <div>
-                        <div className="skeleton skeleton-card" style={{ height: '400px' }} />
+                    <div className="hidden lg:block">
+                        <div className="h-[400px] w-full bg-gray-200 rounded-lg animate-pulse" />
                     </div>
                 </div>
             </div>
@@ -228,63 +228,61 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     }
 
     return (
-        <div style={{ minHeight: '100vh', background: '#F9FAFB', color: '#111827', fontFamily: "'Inter', sans-serif" }}>
+        <div className="min-h-screen bg-bg-page text-text-primary font-sans pb-[100px] lg:pb-12">
             {ToastComponent}
 
             {/* Nav */}
-            <nav style={{ padding: '16px 0', background: 'rgba(255,255,255,0.8)', backdropFilter: 'blur(12px)', borderBottom: '1px solid rgba(0,0,0,0.05)', position: 'sticky', top: 0, zIndex: 100 }}>
-                <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Button variant="ghost" onClick={() => router.push('/')} style={{ color: '#6B7280', padding: '8px', borderRadius: '50%' }}>←</Button>
-                        <div style={{ fontWeight: 700, fontSize: '1rem', letterSpacing: '-0.01em' }}>{displayName}</div>
+            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5 py-4">
+                <div className="page-container flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                        <Button variant="ghost" onClick={() => router.push('/')} className="text-gray-500 p-2 rounded-full">←</Button>
+                        <div className="font-bold text-base tracking-tight">{displayName}</div>
                     </div>
                     <WalletButton />
                 </div>
             </nav>
 
             {/* Hero & Profile Header */}
-            <div style={{ background: '#fff', paddingBottom: '32px', marginBottom: '40px', borderBottom: '1px solid #E5E7EB' }}>
+            <div className="bg-white pb-8 mb-10 border-b border-gray-200">
                 {/* Cover - Modern Gradient */}
-                <div style={{
-                    height: '240px', width: '100%',
-                    background: cover ? `url(${cover}) center/cover` : 'linear-gradient(120deg, #FDFBFB 0%, #EBEDEE 100%)', // Clean Neutral or user custom
-                    position: 'relative',
-                    overflow: 'hidden'
-                }}>
+                <div
+                    className="h-[240px] w-full relative overflow-hidden bg-cover bg-center"
+                    style={{
+                        backgroundImage: cover ? `url(${cover})` : 'linear-gradient(120deg, #FDFBFB 0%, #EBEDEE 100%)'
+                    }}
+                >
                     {!cover && (
-                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', opacity: 0.1 }}></div>
+                        <div className="absolute inset-0 bg-gradient-to-br from-[#667eea] to-[#764ba2] opacity-10"></div>
                     )}
                 </div>
 
-                <div className="page-container" style={{ position: 'relative', marginTop: '-80px', display: 'flex', alignItems: 'flex-end', gap: '32px', flexWrap: 'wrap' }}>
+                <div className="page-container relative -mt-20 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
                     {/* Avatar - Premium Border */}
-                    <div style={{
-                        width: '160px', height: '160px', borderRadius: '50%',
-                        background: avatar ? `url(${avatar}) center/cover` : '#fff',
-                        border: '6px solid #fff',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.1)',
-                        flexShrink: 0,
-                        zIndex: 10
-                    }}></div>
+                    <div
+                        className="w-[160px] h-[160px] rounded-full border-[6px] border-white shadow-2xl flex-shrink-0 z-10 bg-cover bg-center bg-white"
+                        style={{
+                            backgroundImage: avatar ? `url(${avatar})` : undefined
+                        }}
+                    ></div>
 
                     {/* Info */}
-                    <div style={{ flex: 1, paddingBottom: '12px', zIndex: 10 }}>
-                        <h1 className="text-h1" style={{ marginBottom: '8px', fontSize: '2.5rem', letterSpacing: '-0.02em', color: '#111827' }}>{displayName}</h1>
-                        <div style={{ display: 'flex', gap: '24px', color: '#4B5563', fontSize: '1rem', flexWrap: 'wrap' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><strong>{posts.length}</strong> <span style={{ color: '#6B7280' }}>Posts</span></div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><strong>{creatorTiers.length}</strong> <span style={{ color: '#6B7280' }}>Tiers</span></div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><strong>{memberCount}</strong> <span style={{ color: '#6B7280' }}>Following</span></div>
+                    <div className="flex-1 pb-3 z-10 text-center md:text-left">
+                        <h1 className="text-h1 mb-2 text-text-primary">{displayName}</h1>
+                        <div className="flex justify-center md:justify-start gap-6 text-gray-600 text-base flex-wrap">
+                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{posts.length}</strong> <span>Posts</span></div>
+                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{creatorTiers.length}</strong> <span>Tiers</span></div>
+                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{memberCount}</strong> <span>Following</span></div>
                         </div>
                     </div>
 
                     {/* Socials / Actions */}
-                    <div style={{ display: 'flex', gap: '12px', paddingBottom: '12px' }}>
+                    <div className="flex gap-3 pb-3">
                         {creatorProfile?.socials?.twitter && (
-                            <Button variant="outline" size="sm" onClick={() => window.open(`https://x.com/${creatorProfile.socials.twitter}`, '_blank')} style={{ borderRadius: '20px' }}>
-                                🐦 <span style={{ marginLeft: '4px' }}>Follow</span>
+                            <Button variant="outline" size="sm" onClick={() => window.open(`https://x.com/${creatorProfile.socials.twitter}`, '_blank')} className="rounded-full">
+                                🐦 <span className="ml-1">Follow</span>
                             </Button>
                         )}
-                        <Button variant="ghost" size="sm" style={{ borderRadius: '20px' }} onClick={() => {
+                        <Button variant="ghost" size="sm" className="rounded-full" onClick={() => {
                             navigator.clipboard.writeText(window.location.href);
                             showToast('Link copied to clipboard!', 'success');
                         }}>↗ Share</Button>
@@ -293,30 +291,20 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             </div>
 
             {/* Main Content Grid */}
-            <div className="page-container responsive-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr)', gap: '64px', paddingBottom: '100px' }}>
+            <div className="page-container grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 lg:gap-16">
 
                 {/* Left: Feed & Tabs */}
                 <div>
                     {/* Modern Tabs */}
-                    <div style={{ display: 'flex', borderBottom: '1px solid #E5E7EB', marginBottom: '40px', gap: '32px' }}>
+                    <div className="flex border-b border-gray-200 mb-10 gap-8 overflow-x-auto scrollbar-hide">
                         {['posts', 'about', 'membership'].map((tab) => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                style={{
-                                    padding: '16px 0',
-                                    borderBottom: activeTab === tab ? '2px solid #111827' : '2px solid transparent',
-                                    color: activeTab === tab ? '#111827' : '#6B7280',
-                                    fontWeight: activeTab === tab ? 600 : 500,
-                                    background: 'none',
-                                    borderTop: 'none', borderLeft: 'none', borderRight: 'none',
-                                    cursor: 'pointer',
-                                    textTransform: 'capitalize',
-                                    fontSize: '1rem',
-                                    transition: 'all 0.2s',
-                                    position: 'relative',
-                                    top: '1px'
-                                }}
+                                className={`py-4 px-1 border-b-2 bg-transparent capitalize text-base font-medium transition-colors whitespace-nowrap ${activeTab === tab
+                                        ? 'border-text-primary text-text-primary font-semibold'
+                                        : 'border-transparent text-gray-500 hover:text-text-primary'
+                                    }`}
                             >
                                 {tab}
                             </button>
@@ -324,12 +312,12 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     </div>
 
                     {activeTab === 'posts' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                        <div className="flex flex-col gap-8">
                             {posts.length === 0 ? (
-                                <div style={{ padding: '80px 40px', textAlign: 'center', background: '#fff', borderRadius: '24px', border: '1px solid #F3F4F6', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}>
-                                    <div style={{ fontSize: '3rem', marginBottom: '24px', opacity: 0.5 }}>✨</div>
-                                    <h3 className="text-h3" style={{ marginBottom: '12px' }}>No posts published yet</h3>
-                                    <p className="text-body-sm" style={{ color: '#6B7280', maxWidth: '400px', margin: '0 auto' }}>This creator is preparing exclusive content. Join the membership to be the first to know when they post.</p>
+                                <div className="py-20 px-10 text-center bg-white rounded-3xl border border-gray-100 shadow-sm">
+                                    <div className="text-5xl mb-6 opacity-50">✨</div>
+                                    <h3 className="text-h3 mb-3">No posts published yet</h3>
+                                    <p className="text-sm text-gray-500 max-w-sm mx-auto">This creator is preparing exclusive content. Join the membership to be the first to know when they post.</p>
                                 </div>
                             ) : (
                                 posts.map((post, i) => {
@@ -338,38 +326,29 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                     const isExpanded = expandedPosts[i];
 
                                     return (
-                                        <div key={i} className="hover-lift" style={{ overflow: 'hidden', padding: 0, display: 'flex', flexDirection: 'column', background: '#fff', borderRadius: '16px', border: '1px solid #E5E7EB', boxShadow: '0 1px 3px rgba(0,0,0,0.05)' }}>
-                                            <div style={{ padding: '32px' }}>
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', alignItems: 'center' }}>
-                                                    <span className="text-caption" style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>
+                                        <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
+                                            <div className="p-8">
+                                                <div className="flex justify-between items-center mb-4">
+                                                    <span className="text-xs text-gray-400 font-medium">
                                                         {new Date(post.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
                                                     </span>
                                                     {locked ? (
-                                                        <div style={{
-                                                            fontSize: '0.75rem', fontWeight: 700,
-                                                            color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.05em',
-                                                            background: '#FFFBEB', padding: '6px 12px', borderRadius: '99px',
-                                                            display: 'flex', alignItems: 'center', gap: '6px'
-                                                        }}>
+                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
                                                             🔒 {minTierName}
                                                         </div>
                                                     ) : (
-                                                        <div style={{
-                                                            fontSize: '0.75rem', fontWeight: 700,
-                                                            color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.05em',
-                                                            background: '#ECFDF5', padding: '6px 12px', borderRadius: '99px'
-                                                        }}>
+                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
                                                             Free
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                <h2 className="text-h2" style={{ marginBottom: '16px', fontSize: '1.75rem', lineHeight: 1.3, letterSpacing: '-0.01em', color: locked ? '#374151' : '#111827' }}>{post.title}</h2>
+                                                <h2 className={`text-2xl font-bold mb-4 leading-tight ${locked ? 'text-gray-700' : 'text-gray-900'}`}>{post.title}</h2>
 
                                                 {/* Content Teaser */}
-                                                <div className="text-body" style={{ color: locked ? '#9CA3AF' : '#4B5563', marginBottom: '24px', lineHeight: '1.7', fontSize: '1.05rem' }}>
+                                                <div className={`text-base mb-6 leading-relaxed ${locked ? 'text-gray-400' : 'text-gray-600'}`}>
                                                     {locked ? (
-                                                        <div style={{ fontStyle: 'italic', background: '#F9FAFB', padding: '20px', borderRadius: '12px', fontSize: '0.95rem' }}>
+                                                        <div className="italic bg-gray-50 p-5 rounded-xl text-sm">
                                                             This post is exclusive to <strong>{minTierName}</strong> members.
                                                             <br />Join the community to unlock this story and support the creator.
                                                         </div>
@@ -382,14 +361,15 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
                                                 {/* Image Preview (if present) */}
                                                 {post.image && (
-                                                    <div style={{
-                                                        height: '300px', width: '100%', borderRadius: '12px', overflow: 'hidden',
-                                                        marginBottom: '24px', position: 'relative', background: '#F3F4F6'
-                                                    }}>
-                                                        <img src={post.image} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', filter: locked ? 'blur(16px)' : 'none', opacity: locked ? 0.8 : 1 }} />
+                                                    <div className="h-[300px] w-full rounded-xl overflow-hidden mb-6 relative bg-gray-100">
+                                                        <img
+                                                            src={post.image}
+                                                            alt=""
+                                                            className={`w-full h-full object-cover ${locked ? 'blur-md opacity-80' : ''}`}
+                                                        />
                                                         {locked && (
-                                                            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                                <div style={{ background: 'rgba(255,255,255,0.9)', color: '#111827', padding: '16px 32px', borderRadius: '99px', backdropFilter: 'blur(8px)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+                                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                                <div className="bg-white/90 text-gray-900 px-8 py-4 rounded-full backdrop-blur-md font-semibold flex items-center gap-2 shadow-xl">
                                                                     <span>🔒</span> Subscribers Only
                                                                 </div>
                                                             </div>
@@ -397,37 +377,35 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                                     </div>
                                                 )}
 
-                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #F3F4F6' }}>
-                                                    <div style={{ display: 'flex', gap: '20px' }}>
+                                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
+                                                    <div className="flex gap-5">
                                                         {locked ? (
                                                             <Button size="sm" onClick={() => {
                                                                 const el = document.getElementById('tiers-section');
-                                                                if (el && window.innerWidth >= 1000) {
+                                                                if (el && window.innerWidth >= 1024) {
                                                                     el.scrollIntoView({ behavior: 'smooth' });
                                                                 } else {
                                                                     setActiveTab('membership');
-                                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                    window.scrollTo({ top: 300, behavior: 'smooth' });
                                                                 }
                                                             }}>Unlock Post</Button>
                                                         ) : (
                                                             <>
                                                                 <button
                                                                     onClick={() => showToast('Likes coming soon!', 'info')}
-                                                                    className="hover-opacity"
-                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', fontSize: '0.95rem', display: 'flex', gap: '8px', alignItems: 'center', fontWeight: 500 }}>
+                                                                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
                                                                     <span>❤️</span> Like
                                                                 </button>
                                                                 <button
                                                                     onClick={() => showToast('Comments coming soon!', 'info')}
-                                                                    className="hover-opacity"
-                                                                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B7280', fontSize: '0.95rem', display: 'flex', gap: '8px', alignItems: 'center', fontWeight: 500 }}>
+                                                                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
                                                                     <span>💬</span> Comment
                                                                 </button>
                                                             </>
                                                         )}
                                                     </div>
                                                     {!locked && post.content?.length > 250 && (
-                                                        <Button variant="ghost" size="sm" onClick={() => toggleExpand(i)} style={{ color: 'var(--color-primary)' }}>
+                                                        <Button variant="ghost" size="sm" onClick={() => toggleExpand(i)} className="text-primary">
                                                             {isExpanded ? 'Read Less ↑' : 'Read More →'}
                                                         </Button>
                                                     )}
@@ -441,26 +419,25 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     )}
 
                     {activeTab === 'about' && (
-                        <div style={{ padding: '40px', background: '#fff', borderRadius: '24px', border: '1px solid #E5E7EB' }}>
-                            <h3 className="text-h3" style={{ marginBottom: '24px' }}>About {displayName}</h3>
-                            <p className="text-body" style={{ whiteSpace: 'pre-line', marginBottom: '32px', fontSize: '1.1rem', lineHeight: '1.6', color: '#4B5563' }}>
+                        <div className="p-10 bg-white rounded-3xl border border-gray-200">
+                            <h3 className="text-h3 mb-6">About {displayName}</h3>
+                            <p className="whitespace-pre-line text-lg leading-relaxed text-gray-600">
                                 {creatorProfile?.description || "This creator hasn't written a bio yet."}
                             </p>
                         </div>
                     )}
 
                     {activeTab === 'membership' && (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                            <div style={{ textAlign: 'center' }}>
-                                <div className="text-h2" style={{ marginBottom: '8px' }}>Choose your plan</div>
-                                <p style={{ color: '#6B7280' }}>Unlock exclusive access and support {displayName}</p>
+                        <div className="flex flex-col gap-8">
+                            <div className="text-center">
+                                <h2 className="text-h2 mb-2">Choose your plan</h2>
+                                <p className="text-gray-500">Unlock exclusive access and support {displayName}</p>
                             </div>
 
                             {creatorTiers.map((tier, i) => {
                                 const isCurrentTier = i === memberTierId;
                                 const isUpgrade = i > memberTierId && memberTierId !== -1;
                                 const isDowngrade = i < memberTierId && memberTierId !== -1;
-                                // ... (re-use logic for brevity, assuming state is same)
                                 let buttonText = "Join " + tier.name;
                                 let buttonVariant = tier.recommended ? 'primary' : 'outline';
                                 let disabled = false;
@@ -475,32 +452,25 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                 }
 
                                 return (
-                                    <div key={i} className="hover-lift" style={{
-                                        padding: '32px',
-                                        display: 'flex', flexDirection: 'column', gap: '24px',
-                                        borderRadius: '24px',
-                                        background: '#fff',
-                                        border: tier.recommended ? '2px solid #111827' : '1px solid #E5E7EB',
-                                        boxShadow: tier.recommended ? '0 20px 40px -10px rgba(0,0,0,0.1)' : 'none'
-                                    }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                                    <div key={i} className={`p-8 flex flex-col gap-6 rounded-3xl bg-white border shadow-sm hover:shadow-lg transition-all ${tier.recommended ? 'border-gray-900 ring-4 ring-black/5' : 'border-gray-200'}`}>
+                                        <div className="flex justify-between items-start">
                                             <div>
-                                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, color: '#111827' }}>{tier.name}</h3>
-                                                <div style={{ fontSize: '2rem', fontWeight: 800, marginTop: '8px', color: '#111827' }}>{formatPrice(tier.price)} <span style={{ fontSize: '1rem', color: '#6B7280', fontWeight: 500 }}>/ month</span></div>
+                                                <h3 className="text-2xl font-bold text-gray-900">{tier.name}</h3>
+                                                <div className="text-3xl font-bold mt-2 text-gray-900">{formatPrice(tier.price)} <span className="text-base text-gray-500 font-medium">/ month</span></div>
                                             </div>
-                                            {tier.recommended && <span style={{ background: '#111827', color: '#fff', padding: '6px 12px', borderRadius: '99px', fontSize: '0.75rem', fontWeight: 700, letterSpacing: '0.05em' }}>RECOMMENDED</span>}
+                                            {tier.recommended && <span className="bg-gray-900 text-white px-3 py-1.5 rounded-full text-xs font-bold tracking-wider">RECOMMENDED</span>}
                                         </div>
-                                        <div style={{ height: '1px', background: '#F3F4F6' }}></div>
+                                        <div className="h-px bg-gray-100"></div>
                                         <div>
-                                            <p style={{ fontSize: '0.9rem', fontWeight: 600, marginBottom: '16px', color: '#374151', textTransform: 'uppercase', letterSpacing: '0.05em' }}>What's included:</p>
-                                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                                <li style={{ display: 'flex', gap: '12px', fontSize: '1rem', color: '#4B5563', alignItems: 'center' }}>
-                                                    <span style={{ color: '#10B981', background: '#ECFDF5', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>✓</span>
+                                            <p className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">What's included:</p>
+                                            <ul className="flex flex-col gap-3">
+                                                <li className="flex gap-3 text-base text-gray-600 items-center">
+                                                    <span className="bg-emerald-50 text-emerald-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</span>
                                                     Direct support to {displayName}
                                                 </li>
                                                 {tier.benefits?.map((b: string, idx: number) => (
-                                                    <li key={idx} style={{ display: 'flex', gap: '12px', fontSize: '1rem', color: '#4B5563', alignItems: 'center' }}>
-                                                        <span style={{ color: '#10B981', background: '#ECFDF5', borderRadius: '50%', width: '20px', height: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem' }}>✓</span>
+                                                    <li key={idx} className="flex gap-3 text-base text-gray-600 items-center">
+                                                        <span className="bg-emerald-50 text-emerald-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</span>
                                                         {b}
                                                     </li>
                                                 ))}
@@ -511,7 +481,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                                             variant={buttonVariant as any}
                                             disabled={disabled}
                                             size="lg"
-                                            style={{ width: '100%', opacity: disabled ? 0.6 : 1, padding: '16px', fontSize: '1.1rem' }}
+                                            className="w-full justify-center py-4 text-lg"
                                         >
                                             {buttonText}
                                         </Button>
@@ -523,48 +493,40 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 </div>
 
                 {/* Right: Sidebar (Sticky - Desktop Only) */}
-                <aside className="desktop-sidebar" style={{ position: 'relative' }}>
-                    <div id="tiers-section" style={{ position: 'sticky', top: '100px' }}>
-                        <div style={{ padding: '32px', background: '#fff', border: '1px solid #E5E7EB', borderRadius: '24px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.1)' }}>
-                            <h3 className="text-h3" style={{ marginBottom: '24px', fontSize: '1.25rem' }}>Membership</h3>
+                <aside className="hidden lg:block relative">
+                    <div id="tiers-section" className="sticky top-[100px]">
+                        <div className="p-8 bg-white border border-gray-200 rounded-3xl shadow-xl shadow-gray-200/50">
+                            <h3 className="text-xl font-bold mb-6">Membership</h3>
 
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <div className="flex flex-col gap-4">
                                 {creatorTiers.map((tier, i) => (
-                                    <div key={i} className="hover-scale" style={{
-                                        padding: '20px',
-                                        borderRadius: '16px',
-                                        border: tier.recommended ? '2px solid #111827' : '1px solid #F3F4F6',
-                                        background: tier.recommended ? '#F9FAFB' : '#fff',
-                                        cursor: 'pointer',
-                                        transition: 'all 0.2s',
-                                        position: 'relative'
-                                    }}
+                                    <div key={i} className={`p-5 rounded-2xl cursor-pointer transition-all border ${tier.recommended ? 'bg-gray-50 border-gray-900' : 'bg-white border-gray-100 hover:border-gray-300'}`}
                                         onClick={() => handleSubscribeClick(i)}
                                     >
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                                            <h4 style={{ fontWeight: 700, fontSize: '1.1rem', color: '#111827' }}>{tier.name}</h4>
-                                            {tier.recommended && <span style={{ fontSize: '0.7rem', fontWeight: 800, background: '#111827', color: '#fff', padding: '2px 8px', borderRadius: '12px' }}>BEST</span>}
+                                        <div className="flex justify-between items-center mb-1">
+                                            <h4 className="font-bold text-lg text-gray-900">{tier.name}</h4>
+                                            {tier.recommended && <span className="bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">BEST</span>}
                                         </div>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
-                                            <span style={{ fontWeight: 800, fontSize: '1.4rem', color: '#111827' }}>{formatPrice(tier.price)}</span>
-                                            <span style={{ fontSize: '0.85rem', color: '#6B7280' }}>/ month</span>
+                                        <div className="flex justify-between items-end">
+                                            <span className="font-bold text-xl text-gray-900">{formatPrice(tier.price)}</span>
+                                            <span className="text-sm text-gray-500">/ month</span>
                                         </div>
                                     </div>
                                 ))}
 
                                 {creatorTiers.length === 0 && (
-                                    <div style={{ textAlign: 'center', padding: '16px', background: '#F9FAFB', borderRadius: '12px', color: '#6B7280' }}>No public tiers available.</div>
+                                    <div className="text-center p-4 bg-gray-50 rounded-xl text-gray-500 text-sm">No public tiers available.</div>
                                 )}
                             </div>
 
                             {/* Trust Microcopy */}
-                            <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #F3F4F6', fontSize: '0.85rem', color: '#6B7280', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ background: '#FEF3C7', color: '#D97706', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>⚡</span>
+                            <div className="mt-6 pt-5 border-t border-gray-100 text-sm text-gray-500 flex flex-col gap-3">
+                                <div className="flex items-center gap-2.5">
+                                    <span className="bg-amber-100 text-amber-600 rounded-full w-6 h-6 flex items-center justify-center">⚡</span>
                                     <span>Instant access unlocked</span>
                                 </div>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <span style={{ background: '#DBEAFE', color: '#2563EB', borderRadius: '50%', width: '24px', height: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>🛡️</span>
+                                <div className="flex items-center gap-2.5">
+                                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center">🛡️</span>
                                     <span>Secure payments on Mantle</span>
                                 </div>
                             </div>
@@ -575,40 +537,16 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             </div>
 
             {/* Mobile Sticky Bottom Bar */}
-            <div className="mobile-sticky-bar" style={{
-                position: 'fixed', bottom: 0, left: 0, right: 0,
-                background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-                padding: '16px 24px', borderTop: '1px solid #E5E7EB',
-                boxShadow: '0 -10px 25px rgba(0,0,0,0.05)', zIndex: 90,
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-            }}>
+            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md p-4 border-t border-gray-200 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40 flex justify-between items-center lg:hidden">
                 <div>
-                    <div style={{ fontSize: '0.75rem', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>Membership</div>
-                    <div style={{ fontWeight: 800, color: '#111827', fontSize: '1.2rem' }}>From {creatorTiers[0] ? formatPrice(creatorTiers[0].price) : 'Free'}</div>
+                    <div className="text-xs text-gray-500 uppercase font-bold tracking-wide">Membership</div>
+                    <div className="font-bold text-gray-900 text-lg">From {creatorTiers[0] ? formatPrice(creatorTiers[0].price) : 'Free'}</div>
                 </div>
                 <Button size="lg" onClick={() => {
                     setActiveTab('membership');
                     window.scrollTo({ top: 300, behavior: 'smooth' });
                 }}>View Plans</Button>
             </div>
-
-            {/* Global Styles for layout */}
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .desktop-sidebar { display: none; }
-                .mobile-sticky-bar { display: flex; }
-                .hover-scale { transition: transform 0.2s; }
-                .hover-scale:hover { transform: scale(1.02); }
-                .hover-opacity:hover { opacity: 0.7; }
-                
-                @media (min-width: 1000px) {
-                    .responsive-grid {
-                        grid-template-columns: 1fr 380px !important;
-                    }
-                    .desktop-sidebar { display: block; }
-                    .mobile-sticky-bar { display: none !important; }
-                }
-            `}} />
 
             <CheckoutModal
                 isOpen={checkoutModalOpen}
@@ -619,4 +557,5 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
             />
         </div>
     );
+
 }

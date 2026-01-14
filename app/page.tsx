@@ -66,7 +66,11 @@ export default function Home() {
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="fixed top-[72px] inset-x-0 bg-black/90 backdrop-blur-xl border-b border-white/10 p-6 z-40 animate-slide-down shadow-lg md:hidden text-white">
+                <div className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[60] flex flex-col pt-24 px-6 animate-fade-in">
+                    <button className="absolute top-6 right-6 p-2 text-white/50 hover:text-white" onClick={() => setMobileMenuOpen(false)}>
+                        <div style={{ fontSize: '1.5rem' }}>✕</div>
+                    </button>
+
                     <div className="flex flex-col gap-6 text-xl font-semibold">
                         <div onClick={() => router.push('/explore')}>Explore</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
@@ -82,7 +86,8 @@ export default function Home() {
             <main className="relative pt-[72px]">
 
                 {/* SECTION 1: HERO EDITORIAL */}
-                <section className="relative z-10 min-h-[90vh] flex items-center pt-8 pb-16 lg:pb-0 overflow-hidden">
+                <section className="relative z-10 min-h-[90vh] flex items-center pt-24 pb-12 lg:pt-32 lg:pb-0 overflow-hidden">
+
                     <div className="page-container grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
                         {/* LEFT COLUMN: Editorial & Value Prop */}
@@ -151,7 +156,8 @@ export default function Home() {
                             </div>
                         </Reveal>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
+
                             {[
                                 { icon: <Palette size={28} className="text-brand-secondary" />, title: 'Create your page', desc: 'Customize your creator page, set your tier prices, and start creating.' },
                                 { icon: <Lock size={28} className="text-brand-primary" />, title: 'Share exclusive content', desc: 'Your members only content and connect with your biggest fans.' },
@@ -296,7 +302,8 @@ export default function Home() {
                         <div className="max-w-4xl mx-auto">
                             <h2 className="text-3xl font-serif font-bold text-center mb-16 text-white">Backr vs. The Old Way</h2>
 
-                            <div className="glass-card-dark rounded-3xl overflow-hidden shadow-xl border border-white/10">
+                            <div className="scroll-x-container rounded-3xl overflow-hidden glass-card-dark shadow-xl border border-white/10">
+
                                 <div className="grid grid-cols-3 bg-white/5 border-b border-white/10 text-sm font-bold text-gray-400 uppercase tracking-wider">
                                     <div className="p-6">Feature</div>
                                     <div className="p-6 text-center text-brand-secondary bg-brand-secondary/10">Backr</div>

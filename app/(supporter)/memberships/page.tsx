@@ -226,27 +226,29 @@ export default function MyMembershipsPage() {
                         <div style={{ marginTop: '40px' }}>
                             <h3 className="text-h3" style={{ marginBottom: '24px' }}>Payment History</h3>
                             <div className="card-surface" style={{ overflow: 'hidden', padding: 0 }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-                                    <thead style={{ background: 'var(--color-bg-page)', borderBottom: '1px solid var(--color-border)' }}>
-                                        <tr>
-                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>DATE</th>
-                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>DETAILS</th>
-                                            <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)', textAlign: 'right' }}>AMOUNT</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {memberships.map((m, i) => (
-                                            <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
-                                                <td style={{ padding: '16px 24px', fontSize: '0.9rem' }}>{new Date().toLocaleDateString()}</td>
-                                                <td style={{ padding: '16px 24px' }}>
-                                                    <div style={{ fontWeight: 600 }}>Membership Renewal</div>
-                                                    <div className="text-caption">{m.creators?.name || 'Creator'}</div>
-                                                </td>
-                                                <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 MNT</td>
+                                <div style={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
+                                        <thead style={{ background: 'var(--color-bg-page)', borderBottom: '1px solid var(--color-border)' }}>
+                                            <tr>
+                                                <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>DATE</th>
+                                                <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)' }}>DETAILS</th>
+                                                <th style={{ padding: '16px 24px', fontSize: '0.85rem', color: 'var(--color-text-tertiary)', textAlign: 'right' }}>AMOUNT</th>
                                             </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody>
+                                            {memberships.map((m, i) => (
+                                                <tr key={i} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                                                    <td style={{ padding: '16px 24px', fontSize: '0.9rem' }}>{new Date().toLocaleDateString()}</td>
+                                                    <td style={{ padding: '16px 24px' }}>
+                                                        <div style={{ fontWeight: 600 }}>Membership Renewal</div>
+                                                        <div className="text-caption">{m.creators?.name || 'Creator'}</div>
+                                                    </td>
+                                                    <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 MNT</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </>

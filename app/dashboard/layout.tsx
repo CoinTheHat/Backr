@@ -2,22 +2,34 @@
 
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { useAccount, useDisconnect } from 'wagmi';
 import Button from '../components/Button';
 import WalletButton from '../components/WalletButton';
-import { useAccount, useDisconnect } from 'wagmi';
-import BrandLogo from '../components/BrandLogo';
+import {
+    LayoutDashboard,
+    PenTool,
+    Users,
+    DollarSign,
+    Settings,
+    LogOut,
+    Menu,
+    X,
+    ExternalLink
+} from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 import { useCommunity } from '../context/CommunityContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { address } = useAccount();
+    const { address, isConnected } = useAccount();
     const { disconnect } = useDisconnect();
     const { isDeployed } = useCommunity(); // Use shared state
     const [mounted, setMounted] = useState(false);
     const [profile, setProfile] = useState<any>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
 
     useEffect(() => {
         setMounted(true);
@@ -76,155 +88,96 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     const currentTitle = menuItems.find(i => i.path === pathname)?.label || 'Dashboard';
 
+    // Handle logout
+    const handleLogout = () => {
+        disconnect();
+        router.push('/');
+    };
+
+    // Mobile Overlay
+    const MobileOverlay = () => (
+        <div
+            className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                }`}
+            onClick={() => setIsSidebarOpen(false)}
+        />
+    );
+
     return (
-        <div className="dashboard-root" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-family)' }}>
-            <style dangerouslySetInnerHTML={{
-                __html: `
-                .dashboard-root {
-                    display: flex;
-                    flex-wrap: nowrap;
-                    min-height: 100vh;
-                }
+        <div className="min-h-screen bg-bg-page text-text-primary font-sans flex">
 
-                .dashboard-sidebar {
-                    width: var(--sidebar-width);
-                    border-right: 1px solid var(--color-border);
-                    background: var(--color-bg-surface);
-                    display: flex;
-                    flex-direction: column;
-                    position: fixed;
-                    top: 0;
-                    bottom: 0;
-                    z-index: 50;
-                    left: 0;
-                    transition: transform 0.3s ease;
-                }
-                
-                .main-content {
-                    flex: 1;
-                    margin-left: var(--sidebar-width);
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    background: var(--color-bg-page);
-                }
-
-                @media (max-width: 1024px) {
-                    .dashboard-root {
-                        flex-direction: column;
-                    }
-                    .dashboard-sidebar { transform: translateX(-100%); }
-                    .dashboard-sidebar.open { transform: translateX(0); }
-                    .main-content { margin-left: 0 !important; }
-                    
-                    .mobile-header-trigger {
-                        display: flex !important;
-                        padding: 16px 24px;
-                        justify-content: space-between;
-                        align-items: center;
-                        border-bottom: 1px solid var(--color-border);
-                        position: sticky;
-                        top: 0;
-                        background: var(--color-bg-surface);
-                        z-index: 40;
-                        width: 100%;
-                    }
-                }
-
-                .nav-item {
-                    padding: 12px 18px;
-                    margin: 4px 0;
-                    cursor: pointer;
-                    color: var(--color-text-secondary);
-                    font-weight: 500;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    font-size: 0.95rem;
-                    transition: all 0.2s;
-                    border-left: 3px solid transparent;
-                }
-                .nav-item:hover { background: var(--color-bg-page); color: var(--color-text-primary); }
-                .nav-item.active { 
-                    background: var(--color-primary-light); 
-                    color: var(--color-primary); 
-                    font-weight: 600; 
-                    border-left: 3px solid var(--color-primary);
-                }
-            `}} />
-
-            {/* Mobile Header */}
-            <div style={{ display: 'none' }} className="mobile-header-trigger">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem' }}>☰</button>
-                    <span style={{ fontWeight: 'bold' }}>Backr Studio</span>
+            {/* Mobile Header (Hamburger) */}
+            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-20 flex items-center px-4 justify-between">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setIsSidebarOpen(true)}
+                        className="p-2 -ml-2 text-gray-600 hover:text-gray-900 focus:outline-none"
+                    >
+                        <Menu size={24} />
+                    </button>
+                    <span className="font-bold text-lg">Studio</span>
                 </div>
-
+                <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
+                    {/* Tiny avatar placeholder */}
+                </div>
             </div>
 
+            <MobileOverlay />
+
             {/* Sidebar */}
-            <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
-                <div style={{ padding: '24px 24px 12px' }}>
-                    <div
-                        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginBottom: '40px' }}
-                        onClick={() => router.push('/')}
-                    >
-                        {/* Logo - Text Only */}
-                        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>Backr</div>
-                        <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--color-bg-page)', borderRadius: '4px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', marginLeft: 'auto' }}>STUDIO</span>
+            <aside
+                className={`fixed top-0 bottom-0 left-0 z-40 w-[280px] bg-white border-r border-gray-200 shadow-xl lg:shadow-none transition-transform duration-300 transform lg:translate-x-0 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                    }`}
+            >
+                <div className="p-6 flex flex-col h-full">
+                    {/* Header */}
+                    <div className="mb-10 pl-2 pt-2">
+                        <Link href="/" className="text-2xl font-bold font-serif hover:opacity-80 transition-opacity">
+                            Backr<span className="text-brand-primary">.</span>
+                        </Link>
                     </div>
 
-                    {/* Quick Action */}
-                    <div style={{ marginBottom: '24px' }}>
-                        <Button
-                            onClick={() => router.push('/dashboard/posts')}
-                            style={{ width: '100%', justifyContent: 'center', borderRadius: '12px' }}
-                        >
-                            + Create Post
-                        </Button>
-                    </div>
+                    {/* Nav Items */}
+                    <nav className="flex-1 flex flex-col gap-2">
+                        {menuItems.map((item) => {
+                            const isActive = pathname === item.path;
+                            return (
+                                <Link
+                                    key={item.path}
+                                    href={item.path}
+                                    onClick={() => setIsSidebarOpen(false)} // close on mobile click
+                                    className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all font-medium text-sm ${isActive
+                                        ? 'bg-gray-900 text-white shadow-md'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                                        }`}
+                                >
+                                    <span className={isActive ? 'text-brand-accent' : ''}>{item.icon}</span>
+                                    {item.label}
+                                </Link>
+                            );
+                        })}
+                    </nav>
 
-                    {/* Menu */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                        {menuItems.map(item => (
-                            <div
-                                key={item.path}
-                                className={`nav-item ${pathname === item.path ? 'active' : ''}`}
-                                onClick={() => router.push(item.path)}
-                            >
-                                <span style={{ opacity: 0.8, fontSize: '1.1rem' }}>{item.icon}</span>
-                                {item.label}
-                                {item.external && <span style={{ marginLeft: 'auto', fontSize: '0.7rem', opacity: 0.5 }}>↗</span>}
+                    {/* Footer / User */}
+                    <div className="mt-8 pt-6 border-t border-gray-100">
+                        <div className="flex items-center gap-3 px-2 mb-6">
+                            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center text-lg">
+                                👤
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* User Profile at Bottom */}
-                <div style={{ marginTop: 'auto', padding: '16px 24px', borderTop: '1px solid var(--color-border)', background: 'var(--color-bg-surface)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : 'var(--color-bg-page)', border: '1px solid var(--color-border)' }}></div>
-                        <div style={{ overflow: 'hidden' }}>
-                            <div style={{ fontSize: '0.9rem', fontWeight: '600', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--color-text-primary)' }}>{displayName}</div>
-                            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{address.slice(0, 6)}...{address.slice(-4)}</div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-sm font-bold truncate text-gray-900">My Creator Page</div>
+                                <div className="text-xs text-brand-primary truncate hover:underline cursor-pointer" onClick={() => router.push('/' + (address || ''))}>View Public Page ↗</div>
+                            </div>
                         </div>
-                    </div>
-                    <button
-                        onClick={() => { disconnect(); router.push('/'); }}
-                        style={{ background: 'none', border: 'none', color: 'var(--color-text-secondary)', fontSize: '0.85rem', cursor: 'pointer', padding: 0 }}
-                    >
-                        Sign Out
-                    </button>
 
-                    {/* Mobile Close */}
-                    <button
-                        onClick={() => setIsSidebarOpen(false)}
-                        style={{ display: 'none', marginTop: '16px', width: '100%', padding: '12px', background: 'var(--color-bg-page)', border: 'none', color: 'var(--color-text-primary)', borderRadius: '8px' }}
-                        className="mobile-close"
-                    >
-                        Close Menu
-                    </button>
-                    <style dangerouslySetInnerHTML={{ __html: `@media(max-width: 1024px) { .mobile-close { display: block !important; } }` }} />
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium"
+                        >
+                            <LogOut size={18} />
+                            Log Out
+                        </button>
+                    </div>
                 </div>
             </aside>
 

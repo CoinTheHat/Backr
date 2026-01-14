@@ -163,35 +163,37 @@ textarea {
    UTILITY CLASSES (DESIGN SYSTEM)
    ----------------------------------------------------------------------------- */
 
-/* Container */
+/* Container - Mobile First */
 .page-container {
   width: 100%;
   max-width: var(--max-width-page);
   margin: 0 auto;
-  padding: 0 var(--space-4);
+  padding: 0 16px;
+  /* standard mobile padding */
 }
 
-@media (min-width: 768px) {
+@media (min-width: 640px) {
   .page-container {
-    padding: 0 var(--space-6);
+    padding: 0 24px;
   }
 }
 
 @media (min-width: 1024px) {
   .page-container {
-    padding: 0 var(--space-8);
+    padding: 0 40px;
   }
 }
 
-/* Grid System */
+/* Grid System - Mobile First */
 .grid-system {
   display: grid;
-  gap: var(--space-6);
+  gap: 16px;
   grid-template-columns: 1fr;
 }
 
 @media (min-width: 640px) {
   .grid-system {
+    gap: 24px;
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -200,6 +202,20 @@ textarea {
   .grid-system {
     grid-template-columns: repeat(3, 1fr);
   }
+}
+
+/* Utilities for Mobile Scroll */
+.scroll-x-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 8px;
+  /* space for scrollbar */
+}
+
+.scroll-x-container table {
+  min-width: 600px;
+  /* Force scroll on small screens */
 }
 
 /* Components: Buttons */
