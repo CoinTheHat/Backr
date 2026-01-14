@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
-import ChatMockup from './components/ChatMockup';
+import CreatorCollage from './components/CreatorCollage';
 import ExclusiveContentMockup from './components/ExclusiveContentMockup';
 import { Reveal } from './hooks/useScrollReveal';
 
@@ -20,649 +20,325 @@ export default function Home() {
   }, []);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', color: '#111827', fontFamily: 'var(--font-family)', overflowX: 'hidden' }}>
+    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden font-sans">
 
-      <div className="global-page-background" />
-
-      {/* Global Styles & Animations */}
-      <style dangerouslySetInnerHTML={{
-        __html: `
-        :root {
-            --brand-blue: #5865F2;
-            --brand-text: #1a1a1a;
-            --section-padding-desktop: 96px 0;
-            --section-padding-mobile: 64px 0;
-            --section-separator-height: 160px;
-        }
-        
-        /* Animations */
-        @keyframes float { 
-          0%, 100% { transform: translateY(0) rotate(0deg); } 
-          50% { transform: translateY(-15px) rotate(1deg); } 
-        }
-        @keyframes slideDown {
-            from { transform: translateY(-100%); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .float-slow { animation: float 8s ease-in-out infinite; }
-        .float-medium { animation: float 6s ease-in-out infinite 1s; }
-        .float-fast { animation: float 5s ease-in-out infinite 0.5s; }
-        
-        .headline-huge {
-            font-family: var(--font-serif);
-            font-weight: 500;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-        }
-
-        /* Navbar */
-        .nav-scrolled {
-            background: rgba(255, 255, 255, 0.9) !important;
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-        }
-        .nav-mobile-menu {
-            position: fixed; top: 70px; left: 0; right: 0;
-            background: #fff; padding: 24px;
-            border-bottom: 1px solid var(--color-border);
-            animation: slideDown 0.3s ease-out;
-            z-index: 99;
-        }
-
-        /* Utilities */
-        .btn-primary {
-            padding: 14px 28px;
-            border-radius: 99px;
-            background: #111827;
-            color: #fff;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 16px rgba(0,0,0,0.15); }
-        
-        .btn-secondary {
-            padding: 14px 28px;
-            border-radius: 99px;
-            background: #fff;
-            color: #111827;
-            border: 1px solid var(--color-border);
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-secondary:hover { border-color: var(--color-brand-blue); color: var(--color-brand-blue); }
-
-        .stat-chip {
-            padding: 12px 20px;
-            background: #f9fafb;
-            border-radius: 12px;
-            border: 1px solid rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; align-items: flex-start;
-            min-width: 120px;
-        }
-
-        /* Responsive Breakpoints */
-        .desktop-only { display: flex; }
-        .mobile-only { display: none; }
-        
-        @media (max-width: 768px) {
-            .desktop-only { display: none !important; }
-            .mobile-only { display: flex !important; }
-            .hero-grid { grid-template-columns: 1fr !important; text-align: center; gap: 40px !important; }
-            .hero-left { margin: 0 auto; align-items: center !important; }
-            .hero-collage { display: none !important; } /* Hide complex collage on mobile */
-            .headline-huge { font-size: 3rem !important; }
-            .hero-kpi { justify-content: center; flex-wrap: wrap; gap: 12px !important; }
-            .btn-mobile-full { width: 100%; justify-content: center; }
-        }
-      `}} />
+      {/* Background Decor */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-dot-pattern opacity-50" />
+      <div className="fixed inset-0 z-0 pointer-events-none bg-motif-light opacity-60" />
 
       {/* ---------------------------------------------------------------------------
          NAVIGATION
          --------------------------------------------------------------------------- */}
       <nav
-        className={scrolled ? 'nav-scrolled' : ''}
-        style={{
-          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 100, height: '72px',
-          display: 'flex', alignItems: 'center', transition: 'all 0.3s ease',
-          background: scrolled ? 'rgba(255, 255, 255, 0.9)' : 'transparent',
-        }}>
-        <div className="page-container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-100' : 'bg-transparent'
+          }`}>
+        <div className="page-container flex justify-between items-center w-full">
           {/* Logo */}
-          <div onClick={() => router.push('/')} style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.02em' }}>
+          <div onClick={() => router.push('/')} className="font-serif text-2xl font-bold cursor-pointer tracking-tight">
             Backr
           </div>
 
           {/* Desktop Links */}
-          <div className="desktop-only" style={{ gap: '32px', alignItems: 'center' }}>
-            <span onClick={() => router.push('/explore')} style={{ cursor: 'pointer', fontWeight: 500, color: '#4b5563', transition: 'color 0.2s' }}>Find Creators</span>
-            <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} style={{ cursor: 'pointer', fontWeight: 500, color: '#4b5563', transition: 'color 0.2s' }}>How it Works</a>
+          <div className="hidden md:flex gap-8 items-center">
+            <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Find Creators</span>
+            <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">How it Works</a>
             <button className="btn-primary" onClick={() => router.push('/dashboard')}>Get Started</button>
           </div>
 
           {/* Mobile Hamburger */}
-          <div className="mobile-only" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} style={{ cursor: 'pointer', fontSize: '1.5rem', padding: '8px' }}>
+          <div className="md:hidden p-2 text-2xl cursor-pointer" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? '✕' : '☰'}
           </div>
         </div>
       </nav>
 
-      {/* Mobile Menu Slide-down */}
+      {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="nav-mobile-menu">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontSize: '1.1rem', fontWeight: 600 }}>
+        <div className="fixed top-[72px] inset-x-0 bg-white border-b border-gray-100 p-6 z-40 animate-slide-down shadow-lg md:hidden">
+          <div className="flex flex-col gap-5 text-lg font-semibold">
             <div onClick={() => router.push('/explore')}>Find Creators</div>
             <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
-            <div style={{ padding: '12px 0', borderTop: '1px solid #eee' }}>
-              <button className="btn-primary" style={{ width: '100%' }} onClick={() => router.push('/dashboard')}>Get Started</button>
+            <div className="pt-4 border-t border-gray-100">
+              <button className="btn-primary w-full justify-center" onClick={() => router.push('/dashboard')}>Get Started</button>
             </div>
           </div>
         </div>
       )}
 
-      <main style={{ paddingTop: '0px' }}>
+      <main className="relative pt-[72px]">
 
-        {/* SECTION 1: HERO */}
-        <section style={{
-          minHeight: '100vh',
-          background: 'transparent',
-          paddingTop: '140px',
-          paddingBottom: '80px',
-          position: 'relative',
-          overflow: 'hidden',
-          display: 'flex',
-          alignItems: 'center'
-        }}>
-          <div className="page-container hero-grid" style={{
-            display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '80px', alignItems: 'center', width: '100%'
-          }}>
+        {/* SECTION 1: HERO (Bento Style) */}
+        <section className="relative min-h-[85vh] flex items-center pt-10 pb-20 overflow-hidden">
+          <div className="page-container grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
 
-            {/* LEFT COLUMN */}
-            <div className="hero-left" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', zIndex: 10 }}>
+            {/* LEFT COLUMN: Editorial Copy */}
+            <div className="flex flex-col items-start z-10 text-center lg:text-left mx-auto lg:mx-0 max-w-xl lg:max-w-none">
 
               {/* Trust Badge */}
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                padding: '6px 12px', background: 'rgba(88, 101, 242, 0.1)',
-                borderRadius: '100px', marginBottom: '32px',
-                fontSize: '0.875rem', fontWeight: 600, color: 'var(--color-brand-blue)'
-              }}>
-                <span style={{ width: '8px', height: '8px', background: 'var(--color-brand-blue)', borderRadius: '50%' }}></span>
-                Built on Mantle Network
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/80 rounded-full mb-8 self-center lg:self-start border border-blue-100 backdrop-blur-sm">
+                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">Built on Mantle</span>
               </div>
 
-              {/* Headline */}
-              <h1 className="headline-huge" style={{ fontSize: 'clamp(3rem, 5vw, 4.5rem)', marginBottom: '24px', color: '#111827' }}>
+              <h1 className="text-display mb-6 text-gray-900 leading-[1.1]">
                 Unlock your <br />
-                <span style={{ color: 'var(--color-brand-blue)', fontStyle: 'italic' }}>creative potential</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 font-serif italic pr-2">creative potential</span>
               </h1>
 
-              {/* Subheadline */}
-              <p style={{ fontSize: '1.25rem', color: '#4b5563', marginBottom: '40px', maxWidth: '540px', lineHeight: 1.6 }}>
+              <p className="text-xl text-gray-600 mb-10 leading-relaxed">
                 The all-in-one platform for creators to build community, share exclusive content, and earn directly from fans without the middleman.
               </p>
 
-              {/* CTAs */}
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginBottom: '48px', width: '100%' }}>
-                <button className="btn-primary btn-mobile-full" onClick={() => router.push('/dashboard')}>Create on Backr</button>
-                <button className="btn-secondary btn-mobile-full" onClick={() => router.push('/explore')}>Find Creators</button>
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-12">
+                <button className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center" onClick={() => router.push('/dashboard')}>
+                  Create on Backr
+                </button>
+                <button className="btn-secondary px-8 py-4 text-lg w-full sm:w-auto justify-center" onClick={() => router.push('/explore')}>
+                  Find Creators
+                </button>
               </div>
 
-              {/* Trust Row */}
-              <div style={{ display: 'flex', gap: '24px', fontSize: '0.85rem', color: '#6b7280', marginBottom: '40px', alignItems: 'center' }}>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>🛡️ Cancel anytime</span>
-                <span style={{ height: '4px', width: '4px', background: '#d1d5db', borderRadius: '50%' }}></span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>⚡ Instant payouts</span>
-                <span style={{ height: '4px', width: '4px', background: '#d1d5db', borderRadius: '50%' }}></span>
-                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>💎 Low fees</span>
-              </div>
-
-              {/* KPI Stat Chips */}
-              <div className="hero-kpi" style={{ display: 'flex', gap: '16px', borderTop: '1px solid rgba(0,0,0,0.05)', paddingTop: '32px', width: '100%' }}>
-                {[
-                  { label: 'Active Creators', value: '10k+' },
-                  { label: 'Total Supporters', value: '250k+' },
-                  { label: 'Paid to Creators', value: '$5M+' }
-                ].map((stat, i) => (
-                  <div key={i} className="stat-chip hover-lift">
-                    <div style={{ fontWeight: 800, fontSize: '1.25rem', color: '#111827' }}>{stat.value}</div>
-                    <div style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>{stat.label}</div>
-                  </div>
-                ))}
+              <div className="flex gap-6 text-sm text-gray-500 font-medium justify-center lg:justify-start w-full">
+                <span className="flex items-center gap-2">🛡️ Data Ownership</span>
+                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span className="flex items-center gap-2">⚡ Instant Payouts</span>
+                <span className="w-1 h-1 bg-gray-300 rounded-full"></span>
+                <span className="flex items-center gap-2">💎 5% Flat Fee</span>
               </div>
             </div>
 
-            {/* RIGHT COLUMN (Collage) */}
-            <div className="hero-collage" style={{ position: 'relative', height: '650px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              {/* Background Orbit */}
-              <div style={{ position: 'absolute', width: '500px', height: '500px', borderRadius: '50%', border: '1px dashed rgba(88, 101, 242, 0.2)', animation: 'spin 60s linear infinite' }}></div>
+            {/* RIGHT COLUMN: Creator Collage (Desktop Only for Full Effect) */}
+            <div className="hidden lg:block relative h-[650px] w-full">
+              <CreatorCollage />
+            </div>
 
-              {/* Card 1: Creator Preview (Main) */}
-              <div className="card-surface float-slow" style={{
-                position: 'absolute', top: '5%', right: '5%', width: '340px', padding: '0', overflow: 'hidden', zIndex: 2,
-                boxShadow: '0 30px 60px -10px rgba(0,0,0,0.15)'
-              }}>
-                <div style={{ height: '380px', width: '100%', position: 'relative' }}>
-                  <img src="/images/home_visuals/creator1.png" style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="Creator" />
-                  <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, padding: '24px', background: 'linear-gradient(to top, rgba(0,0,0,0.9), transparent)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                      <div style={{ fontWeight: 700, fontSize: '1.4rem', color: '#fff' }}>Sarah Artist</div>
-                      <span style={{ background: '#5865F2', padding: '2px 6px', borderRadius: '4px', fontSize: '0.7rem', color: '#fff', fontWeight: 700 }}>PRO</span>
-                    </div>
-                    <div style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)' }}>creating digital illustrations & tutorials</div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card 2: Earnings */}
-              <div className="card-surface float-medium" style={{
-                position: 'absolute', bottom: '15%', left: '0%', width: '260px', padding: '24px', zIndex: 3
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-                  <div style={{ width: '32px', height: '32px', background: '#ecfdf5', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>💰</div>
-                  <div style={{ fontSize: '0.85rem', color: '#6b7280', fontWeight: 600 }}>Monthly Revenue</div>
-                </div>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#111827', marginBottom: '8px', letterSpacing: '-0.03em' }}>$4,250.00</div>
-                <div style={{ fontSize: '0.8rem', color: '#10b981', fontWeight: 600 }}>+12% this month</div>
-              </div>
-
-              {/* Card 3: New Member */}
-              <div className="card-surface float-fast" style={{
-                position: 'absolute', top: '25%', left: '-5%', padding: '12px 20px', display: 'flex', alignItems: 'center', gap: '16px', zIndex: 1, borderRadius: '100px',
-                background: '#fff', border: '1px solid rgba(0,0,0,0.05)'
-              }}>
-                <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%)', borderRadius: '50%', border: '2px solid #fff' }}></div>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#111827' }}>Alex B.</div>
-                  <div style={{ fontSize: '0.8rem', color: '#5865F2' }}>Just pledged $10/mo</div>
-                </div>
-              </div>
+            {/* Mobile Visual Fallback */}
+            <div className="lg:hidden w-full relative h-[400px] mt-8 bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 shadow-inner">
+              <img src="/images/home_visuals/creator1.png" className="absolute inset-0 w-full h-full object-cover opacity-80" alt="Mobile Hero" />
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-white via-white/80 to-transparent" />
             </div>
 
           </div>
 
           {/* Scroll Cue */}
-          <div style={{ position: 'absolute', bottom: '30px', left: '50%', transform: 'translateX(-50%)', opacity: 0.5, animation: 'bounce 2s infinite' }}>
-            ⬇
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce opacity-40">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" /></svg>
           </div>
         </section>
 
 
-        {/* SECTION 2: HOW IT WORKS */}
-        <section id="how-it-works" style={{ padding: 'var(--section-padding-desktop)', background: '#fff' }}>
+        {/* SECTION 2: HOW IT WORKS (Refined) */}
+        <section id="how-it-works" className="py-24 bg-white relative">
           <div className="page-container">
             <Reveal>
-              <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-                <h2 className="text-h2" style={{ marginBottom: '16px', fontFamily: 'var(--font-serif)' }}>How it works</h2>
-                <p className="text-body" style={{ color: '#4b5563', maxWidth: '600px', margin: '0 auto' }}>
+              <div className="text-center mb-16">
+                <h2 className="text-h2 font-serif mb-4">How it works</h2>
+                <p className="text-body text-gray-500 max-w-lg mx-auto">
                   Start building your membership business in three simple steps.
                 </p>
               </div>
             </Reveal>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '40px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
               {[
                 { icon: '🎨', title: 'Create your page', desc: 'Customize your creator profile, set up membership tiers, and define your brand.' },
-                { icon: '🔒', title: 'Share exclusive content', desc: 'Post behind-the-scenes updates, early access work, and member-only media.' },
-                { icon: '💸', title: 'Get paid instantly', desc: 'Receive support directly in crypto with low fees and instant settlements on Mantle.' }
+                { icon: '🔒', title: 'Share content', desc: 'Post behind-the-scenes updates, early access work, and member-only media.' },
+                { icon: '💸', title: 'Get paid instantly', desc: 'Receive support directly in crypto with low fees and instant settlements.' }
               ].map((step, i) => (
                 <Reveal key={i} delay={(i + 1) * 100}>
-                  <div className="card-surface hover-lift soft-hover" style={{
-                    padding: '32px', textAlign: 'left', border: '1px solid var(--color-border)',
-                    background: '#fff', borderRadius: '24px', display: 'flex', flexDirection: 'column', height: '100%'
-                  }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '24px', background: '#f9fafb', width: '80px', height: '80px', borderRadius: '20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{step.icon}</div>
-                    <h3 className="text-h3" style={{ marginBottom: '12px', fontSize: '1.5rem' }}>{step.title}</h3>
-                    <p className="text-body-sm" style={{ color: '#6b7280', lineHeight: 1.6, flex: 1 }}>{step.desc}</p>
+                  <div className="group p-8 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-start relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-32 bg-gray-50 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity group-hover:opacity-100 opacity-0 md:opacity-0" />
+
+                    <div className="text-4xl mb-6 bg-gray-50 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 group-hover:scale-110 transition-all duration-300">{step.icon}</div>
+                    <h3 className="text-xl font-bold mb-3 text-gray-900 z-10">{step.title}</h3>
+                    <p className="text-gray-500 leading-relaxed z-10">{step.desc}</p>
                   </div>
                 </Reveal>
               ))}
             </div>
 
-            <div style={{ textAlign: 'center', marginTop: '64px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
-              <button className="btn-secondary" onClick={() => router.push('/dashboard')} style={{ padding: '16px 40px', fontSize: '1.1rem' }}>
-                Start your page now
+            <div className="mt-16 text-center">
+              <button className="btn-secondary px-8 py-3 rounded-full hover:bg-gray-50" onClick={() => router.push('/dashboard')}>
+                Start your page now →
               </button>
-              <span style={{ fontSize: '0.875rem', color: '#9ca3af' }}>Takes ~2 minutes to set up</span>
             </div>
           </div>
         </section>
 
-        {/* SECTION 3: FEATURES (Creative Control) */}
-        <section style={{ padding: 'var(--section-padding-desktop)', background: 'transparent' }}>
-          <div className="page-container" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '80px', alignItems: 'center' }}>
-            <div style={{ order: 1 }}> {/* Content first on desktop, handled by grid flow usually but ensuring text is prominent */}
-              <div style={{
-                textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, fontSize: '0.875rem',
-                color: 'var(--color-brand-blue)', marginBottom: '16px', display: 'inline-block',
-                background: 'rgba(88, 101, 242, 0.1)', padding: '4px 12px', borderRadius: '4px'
-              }}>
-                Ownership
-              </div>
-              <h2 className="headline-huge" style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', marginBottom: '24px', color: '#111827' }}>
-                Complete<br />creative control
-              </h2>
-              <p className="text-body" style={{ fontSize: '1.25rem', marginBottom: '32px', color: '#4b5563', lineHeight: 1.6 }}>
-                You own your content, your list, and your payments. No algorithms standing between you and your biggest fans.
-              </p>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '40px' }}>
-                {['Direct audience relationships', 'Own your email list', 'Censorship-resistant payments'].map((item, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '0.8rem' }}>✓</div>
-                    <span style={{ fontWeight: 500, fontSize: '1.1rem', color: '#374151' }}>{item}</span>
-                  </div>
-                ))}
-              </div>
+        {/* BRIDGE SECTION: Visual Connector */}
+        <section className="py-16 bg-gradient-to-b from-white to-gray-50 overflow-hidden relative">
+          <div className="page-container flex flex-col items-center">
+            <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8">Trusted by creators</p>
 
-              <button className="btn-secondary" onClick={() => router.push('/explore')}>
-                See membership perks example
-              </button>
-            </div>
-
-            <div style={{ position: 'relative', order: 2 }}>
-              {/* Abstract Visual */}
-              <div style={{
-                background: '#fff', borderRadius: 'var(--radius-xl)', padding: '8px',
-                boxShadow: 'var(--shadow-xl)', transform: 'rotate(2deg)',
-                border: '1px solid var(--color-border)'
-              }}>
-                <ExclusiveContentMockup />
+            {/* Creator Avatars Strip */}
+            <div className="flex -space-x-4 mb-4">
+              {[1, 2, 3, 4, 5, 6].map(i => (
+                <div key={i} className={`w-12 h-12 rounded-full border-4 border-white bg-gray-200 bg-cover bg-center shadow-md`} style={{ backgroundImage: `url(https://i.pravatar.cc/150?u=${i + 20})` }} />
+              ))}
+              <div className="w-12 h-12 rounded-full border-4 border-white bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shadow-md transform translate-x-1">
+                +2k
               </div>
             </div>
+            <p className="text-gray-500 text-sm">Join thousands growing on Backr</p>
           </div>
         </section>
 
-        {/* SECTION 4: FEES & FEATURES */}
         <div className="separator-fade-to-dark" />
-        <section style={{ padding: 'var(--section-padding-desktop)', background: '#111827', color: '#fff', position: 'relative' }}>
-          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', background: 'radial-gradient(circle at 50% 0%, #1f2937 0%, #111827 50%)' }}></div>
 
-          <div className="page-container" style={{ position: 'relative', zIndex: 1 }}>
+
+        {/* SECTION 3: FEES & FEATURES (Dark Mode) */}
+        <section className="py-32 bg-gray-900 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,_#1f2937_0%,_#111827_60%)]" />
+
+          <div className="page-container relative z-10">
             <Reveal>
-              <div style={{ textAlign: 'center', marginBottom: '80px' }}>
-                <h2 className="headline-huge" style={{ color: '#fff', marginBottom: '24px', fontSize: 'clamp(2.5rem, 5vw, 3.5rem)' }}>Creators set the price.<br />We take a simple fee.</h2>
-                <p style={{ fontSize: '1.25rem', color: '#9ca3af', maxWidth: '680px', margin: '0 auto', lineHeight: 1.6 }}>
-                  You choose your tier prices. Backr only charges a transparent platform fee per successful transaction. No monthly subscription. No hidden fees.
+              <div className="text-center mb-20">
+                <h2 className="text-4xl md:text-6xl font-serif font-medium mb-6">
+                  Creators set the price.<br />
+                  <span className="text-blue-500">We take a simple fee.</span>
+                </h2>
+                <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                  You choose your tier prices. Backr only charges a transparent platform fee per successful transaction. No monthly subscription.
                 </p>
               </div>
             </Reveal>
 
-            {/* Value Cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '32px', marginBottom: '80px' }}>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 max-w-5xl mx-auto">
 
-              {/* Card A: Creator Control */}
+              {/* Card 1 */}
               <Reveal delay={100}>
-                <div className="card-surface hover-lift soft-hover" style={{
-                  padding: '32px',
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease-out',
-                  height: '100%'
-                }}>
-                  <div style={{ marginBottom: '24px', flex: 1 }}>
-                    <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>You set your prices</h3>
-                    <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px', fontSize: '0.95rem' }}>
-                      Set any price, anytime. Create tiers that work for your community, from free to VIP.
-                    </p>
-                    {/* Illustrative Chips */}
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
-                      <span style={{ padding: '6px 12px', background: 'rgba(52, 211, 153, 0.15)', border: '1px solid rgba(52, 211, 153, 0.3)', borderRadius: '20px', color: '#34d399', fontSize: '0.85rem', fontWeight: 600 }}>Bronze: 5 MNT</span>
-                      <span style={{ padding: '6px 12px', background: 'rgba(96, 165, 250, 0.15)', border: '1px solid rgba(96, 165, 250, 0.3)', borderRadius: '20px', color: '#60a5fa', fontSize: '0.85rem', fontWeight: 600 }}>Silver: 15 MNT</span>
-                      <span style={{ padding: '6px 12px', background: 'rgba(251, 191, 36, 0.15)', border: '1px solid rgba(251, 191, 36, 0.3)', borderRadius: '20px', color: '#fbbf24', fontSize: '0.85rem', fontWeight: 600 }}>Gold: 50 MNT</span>
-                    </div>
-                    <p style={{ fontSize: '0.75rem', color: '#6b7280', fontStyle: 'italic' }}>
-                      Illustrative examples — creators choose their own pricing.
-                    </p>
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 h-full hover:bg-white/10 transition-colors">
+                  <h3 className="text-2xl font-bold mb-4">You Control Pricing</h3>
+                  <p className="text-gray-400 mb-6">Set tiers from free to VIP. Monthly or one-time.</p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">5 MNT</span>
+                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">20 MNT</span>
+                    <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">100 MNT</span>
                   </div>
                 </div>
               </Reveal>
 
-              {/* Card B: Platform Fee (Highlight) */}
+              {/* Card 2 (Highlight) */}
               <Reveal delay={200}>
-                <div className="card-surface hover-lift soft-hover" style={{
-                  padding: '40px 32px',
-                  background: 'var(--brand-blue)',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  transform: 'scale(1.05)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.1)',
-                  position: 'relative',
-                  zIndex: 10,
-                  transition: 'all 0.3s ease-out',
-                  height: '100%'
-                }}>
-                  <div style={{ position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)', background: '#10b981', color: '#fff', padding: '4px 12px', borderRadius: '12px', fontSize: '0.8rem', fontWeight: 700 }}>TRANSPARENT</div>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>Platform Fee</h3>
-                  <div style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '8px', lineHeight: 1 }}>5%</div>
-                  <p style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.9)', marginBottom: '24px', lineHeight: 1.5 }}>
-                    Only on successful payments.<br />No monthly subscription.
-                  </p>
-                  <div style={{ borderTop: '1px solid rgba(255,255,255,0.2)', paddingTop: '24px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', marginBottom: '8px' }}>What's included:</div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Access control & token-gating</div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Creator page + memberships</div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Payout dashboard</div>
-                    <div style={{ display: 'flex', gap: '12px', alignItems: 'center', color: '#fff', fontSize: '0.9rem' }}><span style={{ color: '#a7f3d0', fontSize: '1.1rem' }}>✓</span> Audience management</div>
-                  </div>
-                </div>
-              </Reveal>
-
-              {/* Card C: Instant Payouts */}
-              <Reveal delay={300}>
-                <div className="card-surface hover-lift soft-hover" style={{
-                  padding: '32px',
-                  background: 'rgba(255,255,255,0.05)',
-                  borderRadius: '24px',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  transition: 'all 0.3s ease-out',
-                  height: '100%'
-                }}>
-                  <h3 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '16px', color: '#fff' }}>Instant Payouts</h3>
-                  <div style={{ fontSize: '3rem', marginBottom: '16px' }}>⚡</div>
-                  <p style={{ color: '#d1d5db', lineHeight: 1.6, marginBottom: '24px', fontSize: '0.95rem' }}>
-                    Settlements designed for instant processing on Mantle Network.
-                  </p>
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, color: '#d1d5db', display: 'flex', flexDirection: 'column', gap: '12px', fontSize: '0.9rem' }}>
-                    <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Funds to your wallet</li>
-                    <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Crypto-native payments</li>
-                    <li style={{ display: 'flex', gap: '8px' }}><span style={{ color: '#4ade80' }}>✓</span> Low gas fees on Mantle</li>
+                <div className="bg-blue-600 rounded-3xl p-8 h-full transform scale-105 shadow-2xl relative border border-white/20">
+                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-bold shadow-lg">FAIR PLAY</div>
+                  <h3 className="text-2xl font-bold mb-2">Platform Fee</h3>
+                  <div className="text-6xl font-bold mb-4">5%</div>
+                  <p className="text-blue-100 text-sm mb-6">Only when you get paid.</p>
+                  <ul className="space-y-3 text-sm">
+                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> No monthly costs</li>
+                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> No hidden charges</li>
+                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> Includes all features</li>
                   </ul>
                 </div>
               </Reveal>
+
+              {/* Card 3 */}
+              <Reveal delay={300}>
+                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 h-full hover:bg-white/10 transition-colors">
+                  <h3 className="text-2xl font-bold mb-4">Instant Payouts</h3>
+                  <p className="text-gray-400 mb-6">Funds settle directly to your wallet on Mantle Network.</p>
+                  <div className="text-3xl mb-2">⚡</div>
+                  <p className="text-xs text-gray-500">Processing time depends on network status.</p>
+                </div>
+              </Reveal>
+
             </div>
 
-            {/* Comparison Table */}
-            <Reveal delay={200}>
-              <div style={{ maxWidth: '900px', margin: '0 auto', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', padding: '40px', border: '1px solid rgba(255,255,255,0.05)' }}>
-                <h3 style={{ textAlign: 'center', fontSize: '1.5rem', fontWeight: 700, marginBottom: '32px', color: '#fff' }}>Backr vs. Patreon</h3>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '16px', fontSize: '0.95rem' }}>
-                  {/* Header */}
-                  <div style={{ color: '#9ca3af', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Feature</div>
-                  <div style={{ fontWeight: 700, color: '#fff', textAlign: 'center', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Backr</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', paddingBottom: '16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Patreon</div>
-
-                  {/* Rows */}
-                  <div style={{ color: '#d1d5db', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Platform Fee</div>
-                  <div style={{ color: '#4ade80', fontWeight: 700, textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>5% Flat</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>8% - 12%</div>
-
-                  <div style={{ color: '#d1d5db', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Payout Speed</div>
-                  <div style={{ color: '#fff', fontWeight: 700, textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Instant / Real-time</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Monthly</div>
-
-                  <div style={{ color: '#d1d5db', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Pricing Control</div>
-                  <div style={{ color: '#fff', fontWeight: 700, textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>You set the price</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>You set the price</div>
-
-                  <div style={{ color: '#d1d5db', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Payment Rails</div>
-                  <div style={{ color: '#fff', fontWeight: 700, textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Crypto (Mantle)</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', padding: '16px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>Cards / PayPal</div>
-
-                  <div style={{ color: '#d1d5db', padding: '16px 0' }}>Data Ownership</div>
-                  <div style={{ color: '#fff', fontWeight: 700, textAlign: 'center', padding: '16px 0' }}>100% You</div>
-                  <div style={{ color: '#9ca3af', textAlign: 'center', padding: '16px 0' }}>Platform Mediated</div>
-                </div>
+            {/* Comparison Table (Simplified) */}
+            <div className="max-w-3xl mx-auto bg-white/5 border border-white/5 rounded-2xl p-8 md:p-12">
+              <h3 className="text-center font-bold text-xl mb-8">Compare to Traditional Platforms</h3>
+              <div className="grid grid-cols-3 gap-4 text-sm md:text-base border-b border-white/10 pb-4 mb-4 text-gray-400 font-medium">
+                <div></div>
+                <div className="text-center text-white">Backr</div>
+                <div className="text-center opacity-50">Others</div>
               </div>
-            </Reveal>
-
-            {/* CTAs */}
-            <div style={{ textAlign: 'center', marginTop: '64px' }}>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', flexWrap: 'wrap' }}>
-                <button className="btn-primary hover-lift" onClick={() => router.push('/dashboard')} style={{ background: '#fff', color: '#111827', minWidth: '200px', transition: 'all 0.2s ease-out' }}>Create your page</button>
-                <button className="btn-secondary hover-lift" onClick={() => router.push('/explore')} style={{ background: 'transparent', color: '#fff', borderColor: 'rgba(255,255,255,0.3)', minWidth: '200px', transition: 'all 0.2s ease-out' }}>See example setups</button>
+              <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
+                <div className="text-gray-300">Total Fee</div>
+                <div className="text-center text-emerald-400 font-bold">5%</div>
+                <div className="text-center text-gray-500">8% - 12% +</div>
               </div>
-              <p style={{ marginTop: '16px', fontSize: '0.875rem', color: '#6b7280' }}>
-                Set your tier prices in minutes.
-              </p>
+              <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-white/5">
+                <div className="text-gray-300">Payouts</div>
+                <div className="text-center text-white font-bold">Instant</div>
+                <div className="text-center text-gray-500">Monthly</div>
+              </div>
+              <div className="grid grid-cols-3 gap-4 items-center py-3">
+                <div className="text-gray-300">Censorship</div>
+                <div className="text-center text-white font-bold">Resistant</div>
+                <div className="text-center text-gray-500">Risky</div>
+              </div>
             </div>
 
           </div>
         </section>
+
         <div className="separator-fade-to-light" />
 
-        {/* SECTION 5: FAQ */}
-        <section style={{ padding: 'var(--section-padding-desktop)', background: 'transparent' }}>
-          <div className="page-container" style={{ maxWidth: '800px' }}>
-            <div style={{ textAlign: 'center', marginBottom: '64px' }}>
-              <h2 className="text-h2" style={{ fontFamily: 'var(--font-serif)' }}>Frequently Asked Questions</h2>
-            </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '48px' }}>
-              {[
-                { q: 'What do I need to get started?', a: 'Just a crypto wallet (like MetaMask) and your creativity. No credit card required.' },
-                { q: 'How do I get paid?', a: 'Payments are streamed directly to your wallet in real-time. You can withdraw instantly.' },
-                { q: 'Can I offer free memberships?', a: 'Yes! You can create a free tier to build your mailing list and community.' },
-                { q: 'Is it secure?', a: 'We use audited smart contracts on the Mantle network. You own your data and funds at all times.' },
-                { q: 'What are the platform fees?', a: 'We charge a flat 5% fee on earnings. No hidden costs, no monthly subscriptions for creators.' },
-                { q: 'Can I export my supporter data?', a: 'Absolutely. You own your relationship with your fans. Export your data anytime.' }
-              ].map((item, i) => (
-                <details key={i} style={{
-                  padding: '24px',
-                  border: '1px solid var(--color-border)',
-                  borderRadius: 'var(--radius-lg)',
-                  cursor: 'pointer',
-                  background: 'var(--color-bg-surface)',
-                  transition: 'background 0.2s'
-                }} className="hover:bg-gray-50">
-                  <summary style={{ fontSize: '1.1rem', fontWeight: 600, listStyle: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    {item.q}
-                    <span style={{ fontSize: '1.5rem', fontWeight: 300, color: 'var(--color-text-secondary)' }}>+</span>
-                  </summary>
-                  <p style={{ marginTop: '16px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>{item.a}</p>
-                </details>
-              ))}
-            </div>
-
-            <div style={{ textAlign: 'center', padding: '32px', background: '#f9fafb', borderRadius: '16px' }}>
-              <p style={{ fontWeight: 600, marginBottom: '8px' }}>Still have questions?</p>
-              <div style={{ display: 'flex', gap: '16px', justifyContent: 'center' }}>
-                <a href="#" style={{ color: 'var(--color-brand-blue)', textDecoration: 'underline' }}>Read the docs</a>
-                <span style={{ color: '#d1d5db' }}>|</span>
-                <a href="#" style={{ color: 'var(--color-brand-blue)', textDecoration: 'underline' }}>Join Discord Support</a>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 6: NEWSLETTER */}
-        <section style={{ padding: '120px 0', background: 'linear-gradient(135deg, #FF9A9E 0%, #FECFEF 99%, #FECFEF 100%)', textAlign: 'center' }}>
-          <div className="page-container" style={{ maxWidth: '600px' }}>
-            <h2 className="headline-huge" style={{ fontSize: '3rem', marginBottom: '16px', color: '#000' }}>Stay in the loop</h2>
-            <p style={{ fontSize: '1.125rem', marginBottom: '32px', color: 'rgba(0,0,0,0.7)' }}>
-              Get the latest updates on creator economy features and Mantle ecosystem growth.
-            </p>
-
-            <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }} style={{ display: 'flex', gap: '16px', flexDirection: 'column' }}>
-              <div className="mobile-stack" style={{ display: 'flex', gap: '12px' }}>
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  required
-                  style={{
-                    flex: 1,
-                    padding: '16px 24px',
-                    borderRadius: 'var(--radius-full)',
-                    border: '2px solid rgba(255,255,255,0.5)',
-                    fontSize: '1rem',
-                    background: 'rgba(255,255,255,0.8)',
-                    backdropFilter: 'blur(4px)'
-                  }}
-                />
-                <button type="submit" style={{
-                  padding: '16px 32px',
-                  borderRadius: 'var(--radius-full)',
-                  background: '#000',
-                  color: '#fff',
-                  border: 'none',
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  minWidth: '140px',
-                  transition: 'transform 0.2s'
-                }} className="hover-lift">
-                  Subscribe
-                </button>
-              </div>
-              <p style={{ fontSize: '0.875rem', color: 'rgba(0,0,0,0.6)', marginTop: '8px' }}>
-                We respect your privacy. No spam. Unsubscribe at any time.
-              </p>
-            </form>
-          </div>
-        </section>
-
-
-        {/* FOOTER */}
-        <footer style={{ background: '#000', color: '#fff', padding: '80px 0' }}>
+        {/* FOOTER (Integrated Newsletter) */}
+        <footer className="bg-white border-t border-gray-100 pt-20 pb-10">
           <div className="page-container">
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '64px' }}>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-                <div className="headline-huge" style={{ fontSize: '2.5rem' }}>Backr</div>
-                <p style={{ color: '#9ca3af', lineHeight: 1.6 }}>Empowering creators with true ownership and decentralized monetization on Mantle.</p>
-                <div style={{ display: 'flex', gap: '16px' }}>
-                  {/* Social Icons Placeholder */}
-                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
-                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
-                  <div style={{ width: '32px', height: '32px', background: '#333', borderRadius: '50%' }}></div>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
+
+              {/* Brand & Newsletter Column */}
+              <div className="md:col-span-5">
+                <div className="font-serif text-3xl font-bold mb-6">Backr</div>
+                <p className="text-gray-500 mb-8 max-w-sm">
+                  Empowering creators with true ownership and decentralized monetization on Mantle Network.
+                </p>
+
+                {/* Inline Newsletter */}
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100 max-w-md">
+                  <h4 className="font-bold text-gray-900 mb-2">Stay in the loop</h4>
+                  <p className="text-sm text-gray-500 mb-4">Product updates and creator tips.</p>
+                  <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }} className="flex gap-2">
+                    <input
+                      type="email"
+                      placeholder="Enter email"
+                      className="flex-1 px-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      required
+                    />
+                    <button type="submit" className="bg-black text-white px-4 py-2 rounded-xl text-sm font-bold hover:bg-gray-800 transition-colors">
+                      Join
+                    </button>
+                  </form>
                 </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <strong style={{ marginBottom: '8px', color: '#fff' }}>Product</strong>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Pricing</a>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Success Stories</a>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Roadmap</a>
+              {/* Links Columns */}
+              <div className="md:col-span-7 flex flex-wrap gap-12 md:justify-end">
+                <div className="flex flex-col gap-4">
+                  <strong className="text-gray-900">Product</strong>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Features</a>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Pricing</a>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Showcase</a>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <strong className="text-gray-900">Resources</strong>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Documentation</a>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Help Center</a>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Brand Assets</a>
+                </div>
+                <div className="flex flex-col gap-4">
+                  <strong className="text-gray-900">Legal</strong>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Privacy</a>
+                  <a href="#" className="text-gray-500 hover:text-black transition-colors">Terms</a>
+                </div>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <strong style={{ marginBottom: '8px', color: '#fff' }}>Resources</strong>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Help Center</a>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Creator Handbook</a>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Mantle Network</a>
-              </div>
+            </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                <strong style={{ marginBottom: '8px', color: '#fff' }}>Legal</strong>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Privacy</a>
-                <a href="#" style={{ color: '#9ca3af', textDecoration: 'none' }}>Terms</a>
+            <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+              <p>© 2024 Backr. All rights reserved.</p>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                <span>Systems Operational</span>
               </div>
             </div>
 
-            <div style={{ marginTop: '80px', paddingTop: '32px', borderTop: '1px solid #333', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-              <p style={{ color: '#666', fontSize: '0.9rem' }}>© 2024 Backr. All rights reserved.</p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#666', fontSize: '0.9rem' }}>
-                <span style={{ width: '8px', height: '8px', background: '#4ade80', borderRadius: '50%' }}></span>
-                All systems operational
-              </div>
-            </div>
           </div>
         </footer>
 
