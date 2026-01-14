@@ -492,10 +492,11 @@ textarea {
 }
 
 /* Section Separators (Visual Bridges) */
+/* Section Separators (Visual Bridges) */
 .separator-fade-to-dark {
-  height: 160px;
+  height: 180px;
   width: 100%;
-  background: linear-gradient(to bottom, transparent 0%, rgba(17, 24, 39, 0.05) 30%, #111827 100%);
+  background: linear-gradient(to bottom, transparent, #111827);
   margin-bottom: -1px;
   position: relative;
   z-index: 2;
@@ -503,14 +504,15 @@ textarea {
 }
 
 .separator-fade-to-light {
-  height: 160px;
+  height: 180px;
   width: 100%;
-  background: linear-gradient(to bottom, #111827 0%, rgba(17, 24, 39, 0.05) 70%, transparent 100%);
+  background: linear-gradient(to bottom, #111827, transparent);
   margin-top: -1px;
   position: relative;
   z-index: 2;
   pointer-events: none;
 }
+
 
 /* Scroll Reveal Animation Classes */
 @keyframes reveal-up {
