@@ -71,7 +71,7 @@ export default function Home() {
                         <div style={{ fontSize: '1.5rem' }}>✕</div>
                     </button>
 
-                    <div className="flex flex-col gap-6 text-xl font-semibold">
+                    <div className="flex flex-col gap-6 text-xl font-semibold text-white">
                         <div onClick={() => router.push('/explore')}>Explore</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('fees-and-features')?.scrollIntoView(); }}>Fees</div>
