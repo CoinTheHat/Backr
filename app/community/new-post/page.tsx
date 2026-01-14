@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react';
 import { useCommunity } from '../../context/CommunityContext';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown, Bold, Italic, Type, Quote, List } from 'lucide-react';
 import Button from '../../components/Button';
 import { useAccount } from 'wagmi';
 
@@ -62,6 +62,31 @@ export default function NewPostPage() {
             </div>
         );
     }
+
+    // Helper to insert markdown at cursor
+    const insertMarkdown = (prefix: string, suffix: string) => {
+        if (!textareaRef.current) return;
+
+        const start = textareaRef.current.selectionStart;
+        const end = textareaRef.current.selectionEnd;
+        const text = content;
+        const before = text.substring(0, start);
+        const selection = text.substring(start, end);
+        const after = text.substring(end);
+
+        const newText = before + prefix + selection + suffix + after;
+        setContent(newText);
+
+        // Restore focus and position cursor inside the tags
+        setTimeout(() => {
+            if (textareaRef.current) {
+                textareaRef.current.focus();
+                // Move cursor to end of inserted content (or middle if it was a wrapper)
+                const newCursorPos = end + prefix.length;
+                textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
+            }
+        }, 0);
+    };
 
     const handlePost = async () => {
         if (!title.trim() || !content.trim()) return alert('Please add a title and some content.');
@@ -139,9 +164,44 @@ export default function NewPostPage() {
                         placeholder="Title"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-5xl font-serif font-bold text-brand-dark placeholder-gray-300 border-none focus:ring-0 bg-transparent p-0 mb-6 leading-tight"
+                        className="w-full text-5xl font-serif font-bold text-brand-dark placeholder-gray-300 border-none focus:ring-0 bg-transparent p-0 mb-8 leading-tight selection:bg-brand-primary/20"
                         autoFocus
                     />
+
+                    {/* Formatting Toolbar */}
+                    <div className="flex items-center gap-1 mb-6 p-1.5 bg-white shadow-sm border border-gray-100 rounded-xl w-fit sticky top-20 z-10">
+                        <button
+                            onClick={() => insertMarkdown('**', '**')}
+                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
+                            title="Bold">
+                            <Bold size={18} />
+                        </button>
+                        <button
+                            onClick={() => insertMarkdown('*', '*')}
+                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
+                            title="Italic">
+                            <Italic size={18} />
+                        </button>
+                        <div className="w-px h-4 bg-gray-200 mx-1"></div>
+                        <button
+                            onClick={() => insertMarkdown('## ', '')}
+                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
+                            title="Heading">
+                            <Type size={18} />
+                        </button>
+                        <button
+                            onClick={() => insertMarkdown('> ', '')}
+                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
+                            title="Quote">
+                            <Quote size={18} />
+                        </button>
+                        <button
+                            onClick={() => insertMarkdown('- ', '')}
+                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
+                            title="List">
+                            <List size={18} />
+                        </button>
+                    </div>
 
                     {/* Content Input */}
                     <textarea
