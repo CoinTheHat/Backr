@@ -21,8 +21,10 @@
     > Here, I can see my total revenue, active members, and recent activity. All this data is pulled directly from the blockchain and Supabase."
 *   **Action:** Click "Settings" tab.
 *   **Script:**
-    > "In Settings, I can deploy my own Membership Contract. This is a real smart contract on Mantle that *I* own.
-    > I can also customize my public profile."
+    > "In Settings, I can deploy my own Membership Contract. This is a real smart contract on Mantle that *I* own."
+*   **Action:** Click "Deploy Membership Contract". Confirm transaction. Show the status change to "LIVE".
+*   **Script:**
+    > "Once deployed, my page is live on the blockchain. Now I can accept payments."
 
 ### Scene 3: Content & Tiers (1:30 - 2:30)
 *   **Action:** Click "Community" -> "Manage Tiers".
@@ -75,8 +77,10 @@
     > Burada toplam gelirimi, aktif üyelerimi ve son aktiviteleri görebiliyorum. Bu verilerin tamamı doğrudan blokzincirden ve veritabanımızdan anlık çekiliyor."
 *   **Aksiyon:** "Settings" (Ayarlar) sekmesine tıklayın.
 *   **Senaryo:**
-    > "Ayarlar kısmında, kendi Üyelik Kontratımı deploy edebilirim. Bu, Mantle üzerinde tamamen *bana* ait gerçek bir akıllı kontrat.
-    > Ayrıca buradan herkese açık profilimi de özelleştirebilirim."
+    > "Ayarlar kısmında, kendi Üyelik Kontratımı deploy edebilirim. Bu, Mantle üzerinde tamamen *bana* ait gerçek bir akıllı kontrat."
+*   **Aksiyon:** "Deploy Membership Contract" butonuna basın. İşlemi onaylayın ve statünün "LIVE" olarak değişmesini bekleyin.
+*   **Senaryo:**
+    > "Deploy işlemi bittiğinde, sayfam blokzincir üzerinde aktif hale geliyor. Artık ödeme alabilirim."
 
 ### Sahne 3: İçerik & Seviyeler (1:30 - 2:30)
 *   **Aksiyon:** "Community" -> "Manage Tiers" menüsüne gidin.
