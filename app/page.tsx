@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAccount } from 'wagmi';
-import { Palette, Lock, Zap, ShieldCheck, DollarSign, Wallet } from 'lucide-react';
+import { Palette, Lock, Zap, ShieldCheck, DollarSign, Wallet, PlayCircle, BarChart3, Users } from 'lucide-react';
 import CreatorCollage from './components/CreatorCollage';
 import { Reveal } from './hooks/useScrollReveal';
 
@@ -20,44 +20,41 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden font-sans selection:bg-teal-100">
+    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden font-sans selection:bg-purple-200">
 
       {/* Background Decor (Persistent) */}
-      <div className="fixed inset-0 z-0 pointer-events-none bg-dot-pattern opacity-40 mix-blend-multiply" />
-      <div className="fixed inset-0 z-0 pointer-events-none bg-motif-light opacity-60" />
+      <div className="fixed inset-0 z-0 pointer-events-none bg-dot-pattern opacity-30 mix-blend-multiply" />
       <div className="fixed inset-0 z-0 pointer-events-none bg-motif-grain opacity-40 mix-blend-overlay" />
 
       {/* ---------------------------------------------------------------------------
          NAVIGATION
          --------------------------------------------------------------------------- */}
       <nav
-        className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md border-b border-gray-100 shadow-sm' : 'bg-transparent'
+        className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md border-b border-purple-100 shadow-sm' : 'bg-transparent'
           }`}>
         <div className="page-container flex justify-between items-center w-full">
-          {/* Logo */}
-          <div onClick={() => router.push('/')} className="font-serif text-2xl font-bold cursor-pointer tracking-tight hover:opacity-80 transition-opacity">
+          <div onClick={() => router.push('/')} className="font-serif text-2xl font-bold cursor-pointer tracking-tight text-gray-900">
             Backr
           </div>
 
-          {/* Desktop Links */}
           <div className="hidden md:flex gap-8 items-center">
-            <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Find Creators</span>
-            <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">How it Works</a>
-            <button className="btn-primary" onClick={() => router.push('/dashboard')}>Get Started</button>
+            <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-purple-600 transition-colors">Discover Creators</span>
+            <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-purple-600 transition-colors">How it Works</a>
+            <button className="px-6 py-2.5 rounded-full bg-gray-900 text-white font-medium hover:bg-black transition-colors" onClick={() => router.push('/dashboard')}>
+              Sign In
+            </button>
           </div>
 
-          {/* Mobile Hamburger */}
-          <button className="md:hidden p-2 text-2xl focus:outline-none" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+          <button className="md:hidden p-2 text-2xl focus:outline-none" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
             {mobileMenuOpen ? '✕' : '☰'}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu */}
       {mobileMenuOpen && (
         <div className="fixed top-[72px] inset-x-0 bg-white border-b border-gray-100 p-6 z-40 animate-slide-down shadow-lg md:hidden">
           <div className="flex flex-col gap-5 text-lg font-semibold">
-            <div onClick={() => router.push('/explore')}>Find Creators</div>
+            <div onClick={() => router.push('/explore')}>Discover Creators</div>
             <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
             <div className="pt-4 border-t border-gray-100">
               <button className="btn-primary w-full justify-center" onClick={() => router.push('/dashboard')}>Get Started</button>
@@ -68,315 +65,228 @@ export default function Home() {
 
       <main className="relative pt-[72px]">
 
-        {/* SECTION 1: HERO (Bento Style) */}
-        {/* Adjusted padding to reduce bottom gap */}
-        <section className="relative min-h-[80vh] flex items-center pt-8 pb-12 lg:pb-0 overflow-hidden">
-          <div className="page-container grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+        {/* SECTION 1: HERO (Cosmic Light) */}
+        <section className="relative min-h-[90vh] flex items-center pb-32 overflow-hidden">
+          {/* Top Gradient Blur */}
+          <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-200 rounded-full blur-[100px] opacity-40 -z-10 translate-x-1/2 -translate-y-1/2" />
 
-            {/* LEFT COLUMN: Editorial Copy */}
-            <div className="flex flex-col items-start z-10 text-center lg:text-left mx-auto lg:mx-0 max-w-xl lg:max-w-none">
+          <div className="page-container grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
 
-              {/* Trust Badge */}
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50/80 rounded-full mb-8 self-center lg:self-start border border-blue-100 backdrop-blur-sm shadow-sm hover:shadow-md transition-shadow cursor-default">
-                <span className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
-                <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">Built on Mantle</span>
-              </div>
+            {/* LEFT COLUMN: 5 cols */}
+            <div className="lg:col-span-5 flex flex-col items-start z-10 text-center lg:text-left mx-auto lg:mx-0">
 
-              <h1 className="text-display mb-6 text-gray-900 leading-[1.1] tracking-tight">
-                Unlock your <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 font-serif italic pr-2">creative potential</span>
+              <h1 className="text-[3.5rem] lg:text-[4.5rem] font-bold text-gray-900 leading-[1.05] tracking-tight mb-6">
+                Empower <br />
+                Your <span className="text-gradient-cosmic">Creativity</span>
               </h1>
 
-              <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light">
-                The all-in-one platform for creators to build community, share exclusive content, and earn directly from fans without the middleman.
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed font-medium max-w-md mx-auto lg:mx-0">
+                Build a thriving community and earn directly from your fans. All on Mantle, with no middleman.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-12">
-                <button className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-lg shadow-teal-500/20 hover:shadow-teal-500/30 transition-all" onClick={() => router.push('/dashboard')}>
-                  Create on Backr
+              <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-10">
+                <button className="px-8 py-4 rounded-full bg-[#1e1b4b] text-white font-bold text-lg hover:shadow-xl hover:shadow-purple-500/20 transition-all transform hover:-translate-y-1" onClick={() => router.push('/dashboard')}>
+                  Create your page
                 </button>
-                <button className="btn-secondary px-8 py-4 text-lg w-full sm:w-auto justify-center" onClick={() => router.push('/explore')}>
-                  Find Creators
+                <button className="px-8 py-4 rounded-full bg-white border border-gray-200 text-gray-900 font-bold text-lg hover:bg-gray-50 transition-all" onClick={() => router.push('/explore')}>
+                  Discover creators
                 </button>
               </div>
 
-              <div className="flex flex-wrap gap-4 sm:gap-6 text-sm text-gray-500 font-medium justify-center lg:justify-start w-full opacity-80">
-                <span className="flex items-center gap-2"><ShieldCheck size={16} className="text-gray-400" /> Data Ownership</span>
-                <span className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></span>
-                <span className="flex items-center gap-2"><Zap size={16} className="text-gray-400" /> Instant Payouts</span>
-                <span className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full"></span>
-                <span className="flex items-center gap-2"><DollarSign size={16} className="text-gray-400" /> 5% Flat Fee</span>
+              {/* Stats Strip */}
+              <div className="flex items-center gap-6 text-sm font-medium bg-white/60 backdrop-blur-md px-6 py-3 rounded-2xl border border-white/50 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <div className="flex -space-x-2">
+                    {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white" />)}
+                  </div>
+                  <span className="text-gray-700"><strong>180k+</strong> from creators</span>
+                </div>
+                <div className="w-px h-4 bg-gray-300" />
+                <div className="flex items-center gap-1 text-purple-700">
+                  <BarChart3 size={16} />
+                  <span><strong>Earnings</strong></span>
+                </div>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: Creator Collage (Desktop Only) */}
-            <div className="hidden lg:block relative h-[650px] w-full">
+            {/* RIGHT COLUMN: 7 cols (Collage) */}
+            <div className="hidden lg:block lg:col-span-7 relative h-[700px] w-full mt-10 lg:mt-0">
               <CreatorCollage />
             </div>
 
-            {/* Mobile Visual Fallback */}
-            <div className="lg:hidden w-full relative h-[400px] mt-4 bg-gray-50 rounded-3xl overflow-hidden border border-gray-100 shadow-inner">
-              <img src="/images/home_visuals/creator1.png" className="absolute inset-0 w-full h-full object-cover opacity-90" alt="Mobile Hero" />
-              <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-white via-white/40 to-transparent" />
+            {/* Mobile Fallback */}
+            <div className="lg:hidden w-full h-[400px] bg-purple-50 rounded-3xl relative overflow-hidden border border-purple-100">
+              <div className="absolute inset-0 bg-gradient-to-tr from-purple-100 to-white opacity-50" />
+              <img src="/images/home_visuals/creator1.png" className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 rounded-t-2xl shadow-2xl" alt="Creator" />
             </div>
 
-          </div>
-
-          {/* Scroll Cue */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 animate-bounce opacity-30 text-gray-400 pointer-events-none">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M7 13l5 5 5-5M7 6l5 5 5-5" /></svg>
           </div>
         </section>
 
 
-        {/* SECTION 2: HOW IT WORKS (Refined) */}
-        {/* Adjusted padding to reduce gap from Hero */}
-        <section id="how-it-works" className="py-16 md:py-24 relative">
-          <div className="page-container">
-            <Reveal>
-              <div className="text-center mb-16">
-                <h2 className="text-h2 font-serif mb-4">How it works</h2>
-                <p className="text-body text-gray-500 max-w-lg mx-auto">
-                  Start building your membership business in three simple steps.
-                </p>
-              </div>
-            </Reveal>
+        {/* CONTINUOUS COSMIC BACKGROUND CONTAINER */}
+        <div className="bg-cosmic text-white relative">
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10">
-              {[
-                { icon: <Palette size={32} className="text-indigo-600" />, title: 'Create your page', desc: 'Customize your creator profile, set up membership tiers, and define your brand.' },
-                { icon: <Lock size={32} className="text-pink-600" />, title: 'Share content', desc: 'Post behind-the-scenes updates, early access work, and member-only media.' },
-                { icon: <Wallet size={32} className="text-emerald-600" />, title: 'Get paid instantly', desc: 'Receive support directly in crypto with low fees and instant settlements.' }
-              ].map((step, i) => (
-                <Reveal key={i} delay={(i + 1) * 100}>
-                  <div className="group p-8 rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 h-full flex flex-col items-start relative overflow-hidden">
-                    {/* Subtle inner grain */}
-                    <div className="absolute inset-0 bg-motif-grain opacity-[0.03] pointer-events-none" />
-
-                    <div className="absolute top-0 right-0 p-32 bg-gray-50 rounded-full blur-3xl -mr-16 -mt-16 transition-opacity group-hover:opacity-100 opacity-0 md:opacity-0" />
-
-                    <div className="mb-6 bg-gray-50 w-16 h-16 rounded-2xl flex items-center justify-center group-hover:bg-blue-50 group-hover:scale-110 transition-all duration-300 relative z-10">
-                      {step.icon}
-                    </div>
-                    <h3 className="text-xl font-bold mb-3 text-gray-900 z-10">{step.title}</h3>
-                    <p className="text-gray-500 leading-relaxed z-10">{step.desc}</p>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-
-            <div className="mt-16 text-center">
-              <button className="btn-secondary px-8 py-3 rounded-full hover:bg-gray-50 border-gray-200" onClick={() => router.push('/dashboard')}>
-                Start your page now
-              </button>
-            </div>
-          </div>
-        </section>
-
-
-        {/* BRIDGE SECTION: Visual Connector (Ownership -> Fees) */}
-        {/* Reduced top padding to pull it closer to 'How it works' if needed, mostly handled by flow */}
-        <section className="pt-24 pb-0 overflow-hidden relative">
-          <div className="page-container flex flex-col items-center relative z-10">
-            <p className="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8">Trusted by creators</p>
-
-            {/* Creator Avatars Strip */}
-            <div className="flex -space-x-4 mb-8">
-              {[1, 2, 3, 4, 5, 6].map(i => (
-                <div key={i} className={`w-14 h-14 rounded-full border-4 border-white bg-gray-200 bg-cover bg-center shadow-lg transition-transform hover:scale-110 hover:z-20`} style={{ backgroundImage: `url(https://i.pravatar.cc/150?u=${i + 30})` }} />
-              ))}
-              <div className="w-14 h-14 rounded-full border-4 border-white bg-gray-100 flex items-center justify-center text-xs font-bold text-gray-500 shadow-md">
-                +2k
-              </div>
-            </div>
-            <p className="text-gray-400 text-sm font-medium mb-12">Join thousands growing on Backr</p>
+          {/* SVG Wave Divider (Transition from White to Cosmic) */}
+          <div className="wave-divider-top absolute top-0 transform -translate-y-[99%] w-full pointer-events-none">
+            <svg data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 120" preserveAspectRatio="none">
+              <path d="M321.39,56.44c58-10.79,114.16-30.13,172-41.86,82.39-16.72,168.19-17.73,250.45-.39C823.78,31,906.67,72,985.66,92.83c70.05,18.48,146.53,26.09,214.34,3V0H0V27.35A600.21,600.21,0,0,0,321.39,56.44Z" fill="#ffffff"></path>
+            </svg>
           </div>
 
-          {/* Soft Fade to Dark Divider */}
-          <div className="separator-fade-to-dark w-full" />
-        </section>
-
-
-        {/* SECTION 3: FEES & FEATURES (Dark Mode) */}
-        {/* Adjusted padding: reduced top to merge with fade, standard desktop padding */}
-        <section className="bg-[#111827] text-white relative overflow-hidden pb-16 pt-0">
-
-          <div className="page-container relative z-10 pt-16">
-            <Reveal>
-              <div className="text-center mb-20">
-                <h2 className="text-4xl md:text-6xl font-serif font-medium mb-6">
-                  Creators set the price.<br />
-                  <span className="text-blue-500">We take a simple fee.</span>
-                </h2>
-                <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                  You choose your tier prices. Backr only charges a transparent platform fee per successful transaction. No monthly subscription.
-                </p>
-              </div>
-            </Reveal>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-24 max-w-5xl mx-auto">
-
-              {/* Card 1 */}
-              <Reveal delay={100}>
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 h-full hover:bg-white/10 transition-colors">
-                  <h3 className="text-2xl font-bold mb-4">You Control Pricing</h3>
-                  <p className="text-gray-400 mb-6">Set tiers from free to VIP. Monthly or one-time.</p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">5 MNT</span>
-                    <span className="px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-500/30">20 MNT</span>
-                    <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">100 MNT</span>
-                  </div>
+          {/* SECTION 2: FEATURES (Glass Cards on Cosmic) */}
+          <section id="how-it-works" className="py-32 relative z-10">
+            <div className="page-container">
+              <Reveal>
+                <div className="text-center mb-20">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">Complete creative control</h2>
+                  <p className="text-xl text-purple-200/80 max-w-2xl mx-auto">
+                    Own your content, your list, and your <span className="text-white font-bold border-b-2 border-purple-400">revenue</span>.
+                  </p>
                 </div>
               </Reveal>
 
-              {/* Card 2 (Highlight) */}
-              <Reveal delay={200}>
-                <div className="bg-blue-600 rounded-3xl p-8 h-full transform scale-105 shadow-2xl relative border border-white/20">
-                  <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white text-blue-600 px-3 py-1 rounded-full text-xs font-bold shadow-lg">FAIR PLAY</div>
-                  <h3 className="text-2xl font-bold mb-2">Platform Fee</h3>
-                  <div className="text-6xl font-bold mb-4">5%</div>
-                  <p className="text-blue-100 text-sm mb-6">Only when you get paid.</p>
-                  <ul className="space-y-3 text-sm">
-                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> No monthly costs</li>
-                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> No hidden charges</li>
-                    <li className="flex gap-2 items-center"><span className="text-blue-200">✓</span> Includes all features</li>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {[
+                  { icon: <Palette className="text-purple-600" size={32} />, title: 'Create your page', bg: 'bg-purple-100' },
+                  { icon: <Lock className="text-amber-600" size={32} />, title: 'Share exclusive content', bg: 'bg-amber-100' },
+                  { icon: <Zap className="text-emerald-600" size={32} />, title: 'Get paid instantly', bg: 'bg-emerald-100' }
+                ].map((item, i) => (
+                  <Reveal key={i} delay={i * 100}>
+                    <div className="glass-panel-light p-8 rounded-[2rem] h-full hover:transform hover:-translate-y-2 transition-transform duration-300">
+                      <div className={`w-14 h-14 ${item.bg} rounded-full flex items-center justify-center mb-6`}>
+                        {item.icon}
+                      </div>
+                      <h3 className="text-gray-900 text-2xl font-bold mb-4">{item.title}</h3>
+                      <p className="text-gray-500 leading-relaxed">
+                        Build a space that truly represents you. No algorithms, just your community.
+                      </p>
+                    </div>
+                  </Reveal>
+                ))}
+              </div>
+
+              <div className="text-center mt-16">
+                <button className="px-8 py-3 rounded-full bg-white/10 text-white font-bold border border-white/20 hover:bg-white/20 backdrop-blur-sm transition-all" onClick={() => router.push('/dashboard')}>
+                  Start your page now
+                </button>
+                <p className="text-purple-300/60 text-xs mt-4 uppercase tracking-widest">Creators keep 95% of earnings</p>
+              </div>
+            </div>
+          </section>
+
+          {/* SECTION 3: FEES (Dark Glass on Cosmic) */}
+          <section className="py-24 relative z-10 border-t border-white/5">
+            <div className="page-container">
+              <Reveal>
+                <div className="text-center mb-16">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-4">Creators set the price.</h2>
+                  <h2 className="text-3xl md:text-4xl font-light text-purple-200">We take a simple fee.</h2>
+                </div>
+              </Reveal>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+                {/* Left: Pricing Config */}
+                <div className="lg:col-span-4 glass-panel-dark p-8 rounded-3xl min-h-[400px] flex flex-col justify-center">
+                  <h3 className="text-2xl font-bold mb-2">You set your prices</h3>
+                  <p className="text-gray-400 mb-8">Set any price, anytime. Recurring or one-time.</p>
+
+                  <div className="space-y-4">
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                        <span className="font-mono text-sm">Bronze Tier</span>
+                      </div>
+                      <span className="font-bold">5 MNT</span>
+                    </div>
+                    <div className="bg-white/5 p-4 rounded-xl border border-white/10 flex justify-between items-center opacity-60">
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 rounded-full bg-amber-400" />
+                        <span className="font-mono text-sm">Silver Tier</span>
+                      </div>
+                      <span className="font-bold">25 MNT</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Middle: Platform Fee (Highlight) */}
+                <div className="lg:col-span-4 bg-gradient-to-br from-blue-600 to-indigo-700 p-8 rounded-3xl shadow-[0_20px_50px_rgba(79,70,229,0.4)] transform scale-105 relative z-20">
+                  <div className="absolute top-0 right-0 p-4 opacity-20">
+                    <img src="/logo-white.svg" className="w-16 h-16" alt="" />
+                  </div>
+                  <h3 className="text-xl font-bold text-blue-100 mb-1">Platform Fee</h3>
+                  <div className="text-[6rem] font-bold leading-none mb-2 tracking-tighter">5%</div>
+                  <p className="text-blue-100 mb-8 font-medium">Only on successful payments.<br />No monthly subscription.</p>
+
+                  <div className="border-t border-white/20 pt-6 space-y-3">
+                    {['Access Control', 'Memberships', 'Analytics', 'Payouts'].map((item) => (
+                      <div key={item} className="flex gap-2 items-center text-sm font-semibold">
+                        <span className="text-blue-200">✓</span> {item}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Right: Payouts */}
+                <div className="lg:col-span-4 glass-panel-dark p-8 rounded-3xl min-h-[400px] flex flex-col justify-center">
+                  <h3 className="text-2xl font-bold mb-2">Instant Payouts</h3>
+                  <div className="text-4xl mb-6">⚡</div>
+                  <ul className="space-y-4 text-gray-300">
+                    <li className="flex gap-3">
+                      <span className="text-emerald-400">✓</span> Direct wallet transfers
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="text-emerald-400">✓</span> Earn crypto (MNT, INT)
+                    </li>
+                    <li className="flex gap-3">
+                      <span className="text-emerald-400">✓</span> Predictable fees
+                    </li>
                   </ul>
                 </div>
-              </Reveal>
-
-              {/* Card 3 */}
-              <Reveal delay={300}>
-                <div className="bg-white/5 border border-white/10 rounded-3xl p-8 h-full hover:bg-white/10 transition-colors">
-                  <h3 className="text-2xl font-bold mb-4">Instant Payouts</h3>
-                  <p className="text-gray-400 mb-6">Funds settle directly to your wallet on Mantle Network.</p>
-                  <div className="text-3xl mb-2">⚡</div>
-                  <p className="text-xs text-gray-500">Processing time depends on network status.</p>
-                </div>
-              </Reveal>
+              </div>
             </div>
-
-          </div>
-        </section>
-
-        {/* Soft Fade to Light Divider (Fees -> Comparison/FAQ) */}
-        <div className="separator-fade-to-light w-full bg-white" />
+          </section>
+        </div>
 
 
-        {/* COMPARISON & FAQ SECTION (Light Mode) */}
-        {/* Replaced standalone Comparison table with this integrated section to use the fade */}
-        <section className="pv-24 bg-white relative -mt-20 pt-20">
+        {/* FOOTER (Integrated Newsletter) */}
+        <footer className="bg-[#0f172a] text-white pt-24 pb-12 border-t border-white/5">
           <div className="page-container">
-
-            {/* Comparison Table */}
-            <div className="max-w-3xl mx-auto rounded-3xl p-8 md:p-12 border border-gray-100 shadow-sm bg-white relative z-10 mb-24">
-              <h3 className="text-center font-serif text-2xl mb-8">Compare to Traditional Platforms</h3>
-              <div className="grid grid-cols-3 gap-4 text-sm md:text-base border-b border-gray-100 pb-4 mb-4 text-gray-400 font-medium">
-                <div></div>
-                <div className="text-center text-black font-bold">Backr</div>
-                <div className="text-center opacity-50">Others</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-gray-50">
-                <div className="text-gray-500">Total Fee</div>
-                <div className="text-center text-emerald-600 font-bold bg-emerald-50 rounded-full py-1">5%</div>
-                <div className="text-center text-gray-400">8% - 12% +</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center py-3 border-b border-gray-50">
-                <div className="text-gray-500">Payouts</div>
-                <div className="text-center text-black font-bold">Instant</div>
-                <div className="text-center text-gray-400">Monthly</div>
-              </div>
-              <div className="grid grid-cols-3 gap-4 items-center py-3">
-                <div className="text-gray-500">Censorship</div>
-                <div className="text-center text-black font-bold">Resistant</div>
-                <div className="text-center text-gray-400">Risky</div>
-              </div>
-              <div className="text-center text-xs text-gray-400 mt-6 italic">
-                * Fees and policies may vary by region and legacy platforms.
-              </div>
-            </div>
-
-
-            {/* FAQ (Simplified) */}
-            <div className="max-w-2xl mx-auto text-center mb-12">
-              <h2 className="text-h2 font-serif mb-6">Frequently Asked Questions</h2>
-              <div className="space-y-4 text-left">
-                <div className="p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer border border-transparent hover:border-gray-100">
-                  <h4 className="font-bold mb-1">Do I need crypto to start?</h4>
-                  <p className="text-sm text-gray-500">You need a wallet (like MetaMask) to receive funds. Your supporters can pay easily on the Mantle network.</p>
-                </div>
-                <div className="p-4 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer border border-transparent hover:border-gray-100">
-                  <h4 className="font-bold mb-1">Is there a monthly fee?</h4>
-                  <p className="text-sm text-gray-500">No. We only make money when you do. Usage is free forever.</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
-        </section>
-
-
-        {/* FOOTER (Integrated Newsletter - Option 1) */}
-        <footer className="bg-white border-t border-gray-100 pt-16 pb-10 relative">
-          <div className="page-container">
-
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-16">
-
-              {/* Brand & Newsletter Column (Merged) */}
-              <div className="md:col-span-5 flex flex-col items-start">
-                <div className="font-serif text-3xl font-bold mb-4">Backr</div>
-                <p className="text-gray-500 mb-8 max-w-sm text-sm leading-relaxed">
-                  Empowering creators with true ownership and decentralized monetization on Mantle Network.
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+              <div className="lg:col-span-2">
+                <h4 className="text-3xl font-serif font-bold mb-6">Backr</h4>
+                <p className="text-gray-400 max-w-sm mb-8">
+                  Reimagining the creator economy on Mantle Network. True ownership, fair fees, infinite possibilities.
                 </p>
-
-                {/* Inline Newsletter - Elegant Compact Style */}
-                <div className="w-full max-w-sm">
-                  <h4 className="font-bold text-gray-900 mb-2 text-sm">Subscribe to updates</h4>
-                  <form onSubmit={(e) => { e.preventDefault(); alert('Subscribed!'); }} className="flex gap-2">
-                    <input
-                      type="email"
-                      placeholder="Email address"
-                      className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 bg-gray-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black/5 text-sm transition-all"
-                      required
-                    />
-                    <button type="submit" className="bg-black text-white px-5 py-2.5 rounded-lg text-sm font-bold hover:bg-gray-800 transition-all hover:shadow-lg">
-                      Join
-                    </button>
-                  </form>
-                  <p className="text-xs text-gray-400 mt-2">No spam, unsubscribe anytime.</p>
+                <div className="flex gap-4">
+                  {/* Social placeholders */}
+                  <div className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer">𝕏</div>
+                  <div className="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-colors flex items-center justify-center cursor-pointer">Discord</div>
                 </div>
               </div>
 
-              {/* Links Columns */}
-              <div className="md:col-span-7 flex flex-wrap gap-12 md:justify-end">
-                <div className="flex flex-col gap-4">
-                  <strong className="text-gray-900 text-sm uppercase tracking-wider">Product</strong>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Features</a>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Pricing</a>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Showcase</a>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <strong className="text-gray-900 text-sm uppercase tracking-wider">Resources</strong>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Documentation</a>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Help Center</a>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Brand Assets</a>
-                </div>
-                <div className="flex flex-col gap-4">
-                  <strong className="text-gray-900 text-sm uppercase tracking-wider">Legal</strong>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Privacy</a>
-                  <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Terms</a>
-                </div>
+              <div>
+                <h5 className="font-bold mb-6">Platform</h5>
+                <ul className="space-y-4 text-gray-400 text-sm">
+                  <li className="hover:text-white cursor-pointer transition-colors">Features</li>
+                  <li className="hover:text-white cursor-pointer transition-colors">Pricing</li>
+                  <li className="hover:text-white cursor-pointer transition-colors">Explore</li>
+                </ul>
               </div>
 
-            </div>
-
-            <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-              <p>© 2024 Backr. All rights reserved.</p>
-              <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="font-mono text-xs">SYSTEMS NORMAL</span>
+              <div>
+                <h5 className="font-bold mb-6">Legal</h5>
+                <ul className="space-y-4 text-gray-400 text-sm">
+                  <li className="hover:text-white cursor-pointer transition-colors">Privacy Policy</li>
+                  <li className="hover:text-white cursor-pointer transition-colors">Terms of Service</li>
+                </ul>
               </div>
             </div>
 
+            <div className="text-center text-gray-600 text-sm pt-8 border-t border-white/5">
+              &copy; 2024 Backr Protocol. Built on Mantle.
+            </div>
           </div>
         </footer>
 
