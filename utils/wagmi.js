@@ -14,6 +14,6 @@ export const config = createConfig({
         coinbaseWallet({ appName: 'Backr' }),
     ],
     client({ chain }) {
-        return createClient({ chain, transport: http() });
+        return createClient({ chain, transport: http('https://mantle-rpc.publicnode.com') });
     },
 });

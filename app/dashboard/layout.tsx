@@ -5,13 +5,16 @@ import { usePathname, useRouter } from 'next/navigation';
 import Button from '../components/Button';
 import WalletButton from '../components/WalletButton';
 import { useAccount, useDisconnect } from 'wagmi';
+import BrandLogo from '../components/BrandLogo';
 import { supabase } from '@/utils/supabase';
+import { useCommunity } from '../context/CommunityContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { address } = useAccount();
     const { disconnect } = useDisconnect();
+    const { isDeployed } = useCommunity(); // Use shared state
     const [mounted, setMounted] = useState(false);
     const [profile, setProfile] = useState<any>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -25,7 +28,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setIsSidebarOpen(false);
     }, [pathname]);
 
-    // Fetch Profile for Sidebar
+    // Fetch Profile for Sidebar (Name/Avatar)
     useEffect(() => {
         const fetchProfile = async () => {
             if (!address) return;
@@ -38,20 +41,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
     if (!mounted) return null;
 
-    const isCreator = profile?.contractAddress;
     const displayName = profile?.name || 'Creator';
 
     const menuItems = [
         { label: 'Overview', path: '/dashboard', icon: '📊' },
-        ...(isCreator ? [
+        ...(isDeployed ? [
             { label: 'My Page', path: `/${address}`, icon: '🎨', external: true },
+            { label: 'Community', path: '/community', icon: '📝' },
             { label: 'Audience', path: '/dashboard/audience', icon: '👥' },
-            { label: 'Posts', path: '/dashboard/posts', icon: '📝' },
-            { label: 'Membership', path: '/dashboard/membership', icon: '💎' },
+            { label: 'Membership', path: '/community/manage-tiers', icon: '💎' },
             { label: 'Payouts', path: '/dashboard/earnings', icon: '💰' },
         ] : []),
         { label: 'Settings', path: '/dashboard/settings', icon: '⚙️' },
-        { label: 'Discover', path: '/dashboard/taxonomy', icon: '🌍' },
     ];
 
     // Access Control: Enforce Wallet Connection
@@ -76,9 +77,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     const currentTitle = menuItems.find(i => i.path === pathname)?.label || 'Dashboard';
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--color-bg-page)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-family)' }}>
+        <div className="dashboard-root" style={{ background: 'var(--color-bg-page)', color: 'var(--color-text-primary)', fontFamily: 'var(--font-family)' }}>
             <style dangerouslySetInnerHTML={{
                 __html: `
+                .dashboard-root {
+                    display: flex;
+                    flex-wrap: nowrap;
+                    min-height: 100vh;
+                }
+
                 .dashboard-sidebar {
                     width: var(--sidebar-width);
                     border-right: 1px solid var(--color-border);
@@ -103,9 +110,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 }
 
                 @media (max-width: 1024px) {
+                    .dashboard-root {
+                        flex-direction: column;
+                    }
                     .dashboard-sidebar { transform: translateX(-100%); }
                     .dashboard-sidebar.open { transform: translateX(0); }
                     .main-content { margin-left: 0 !important; }
+                    
+                    .mobile-header-trigger {
+                        display: flex !important;
+                        padding: 16px 24px;
+                        justify-content: space-between;
+                        align-items: center;
+                        border-bottom: 1px solid var(--color-border);
+                        position: sticky;
+                        top: 0;
+                        background: var(--color-bg-surface);
+                        z-index: 40;
+                        width: 100%;
+                    }
                 }
 
                 .nav-item {
@@ -132,41 +155,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
             {/* Mobile Header */}
             <div style={{ display: 'none' }} className="mobile-header-trigger">
-                <style dangerouslySetInnerHTML={{
-                    __html: `
-                    @media (max-width: 1024px) {
-                        .mobile-header-trigger {
-                            display: flex !important;
-                            padding: 16px 24px;
-                            justify-content: space-between;
-                            align-items: center;
-                            border-bottom: 1px solid var(--color-border);
-                            position: sticky;
-                            top: 0;
-                            background: var(--color-bg-surface);
-                            z-index: 40;
-                        }
-                    }
-                 `}} />
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <button onClick={() => setIsSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--color-text-primary)', fontSize: '1.5rem' }}>☰</button>
                     <span style={{ fontWeight: 'bold' }}>Backr Studio</span>
                 </div>
-                <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'var(--color-text-primary)' }}></div>
+
             </div>
 
             {/* Sidebar */}
             <aside className={`dashboard-sidebar ${isSidebarOpen ? 'open' : ''}`}>
                 <div style={{ padding: '24px 24px 12px' }}>
                     <div
-                        style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', marginBottom: '32px' }}
+                        style={{ display: 'flex', alignItems: 'center', cursor: 'pointer', marginBottom: '40px' }}
                         onClick={() => router.push('/')}
                     >
-                        {/* Logo */}
-                        <div style={{ width: '32px', height: '32px', background: 'var(--color-primary)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <div style={{ width: '14px', height: '14px', background: '#fff', borderRadius: '2px' }}></div>
-                        </div>
-                        <div style={{ fontSize: '1.25rem', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>Backr</div>
+                        {/* Logo - Text Only */}
+                        <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-text-primary)', letterSpacing: '-0.03em' }}>Backr</div>
                         <span style={{ fontSize: '0.7rem', padding: '2px 6px', background: 'var(--color-bg-page)', borderRadius: '4px', color: 'var(--color-text-secondary)', border: '1px solid var(--color-border)', marginLeft: 'auto' }}>STUDIO</span>
                     </div>
 
@@ -256,16 +260,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
                     {/* Right: Network Status + Profile/Wallet */}
                     <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                        {/* Network Pill */}
-                        <div style={{
-                            display: 'flex', alignItems: 'center', gap: '8px',
-                            padding: '6px 12px', borderRadius: '20px',
-                            background: 'var(--color-bg-page)', border: '1px solid var(--color-border)',
-                            fontSize: '0.85rem', fontWeight: 500
-                        }}>
-                            <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--color-success)' }}></div>
-                            <span>Mantle Network</span>
-                        </div>
+                        <WalletButton />
                     </div>
                 </header>
 

@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
 
+const DEFAULT_HASHTAGS = [
+    { id: 'crypto', label: 'crypto', isActive: true, sortOrder: 1 },
+    { id: 'web3', label: 'web3', isActive: true, sortOrder: 2 },
+    { id: 'nft', label: 'nft', isActive: true, sortOrder: 3 },
+    { id: 'indie', label: 'indie', isActive: true, sortOrder: 4 }
+];
+
 export async function GET() {
     const { data, error } = await supabase
         .from('hashtags')
@@ -8,7 +15,7 @@ export async function GET() {
         .order('sortOrder', { ascending: true });
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json(DEFAULT_HASHTAGS);
     }
 
     return NextResponse.json(data);

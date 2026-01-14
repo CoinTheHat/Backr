@@ -1,6 +1,14 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/utils/supabase';
 
+const DEFAULT_CATEGORIES = [
+    { id: 'art', name: 'Art', icon: '🎨', isActive: true, sortOrder: 1 },
+    { id: 'gaming', name: 'Gaming', icon: '🎮', isActive: true, sortOrder: 2 },
+    { id: 'music', name: 'Music', icon: '🎵', isActive: true, sortOrder: 3 },
+    { id: 'tech', name: 'Tech', icon: '💻', isActive: true, sortOrder: 4 },
+    { id: 'podcast', name: 'Podcast', icon: '🎙️', isActive: true, sortOrder: 5 }
+];
+
 export async function GET() {
     const { data, error } = await supabase
         .from('categories')
@@ -8,7 +16,8 @@ export async function GET() {
         .order('sortOrder', { ascending: true });
 
     if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        // Table likely doesn't exist, return defaults
+        return NextResponse.json(DEFAULT_CATEGORIES);
     }
 
     return NextResponse.json(data);

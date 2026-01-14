@@ -27,6 +27,20 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Missing address' }, { status: 400 });
     }
 
+    // Check for unique username if name is being updated
+    if (name) {
+        const { data: taken, error: checkError } = await supabase
+            .from('creators')
+            .select('address')
+            .ilike('name', name)
+            .neq('address', address)
+            .maybeSingle();
+
+        if (taken) {
+            return NextResponse.json({ error: 'Username is already taken. Please choose another.' }, { status: 409 });
+        }
+    }
+
     const { data, error } = await supabase.from('creators').upsert({
         address,
         name,

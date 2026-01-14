@@ -113,5 +113,5 @@ export const SUBSCRIPTION_ABI = [
 ];
 
 // Provide a default address or load from env
-export const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS || "0x5a91d29B8AA65B0a90d8861fEA0dF3f184f88E17"; // New Mantle Mainnet Factory (Platform Fee Enabled)
+export const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS || "0x48c87643EE7A20B5741F7d78B09ba23CF246D59F"; // New Mantle Mainnet Factory (Platform Fee Enabled - Custom Treasury)
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Button from '../components/Button';
+import BrandLogo from '../components/BrandLogo';
 import WalletButton from '../components/WalletButton';
 import { useAccount } from 'wagmi';
 
@@ -95,20 +96,9 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
             }}>
                 {/* Left: Logo + Desktop Nav */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '48px' }}>
-                    <h1
-                        style={{
-                            fontFamily: 'var(--font-serif)',
-                            fontSize: '1.5rem',
-                            fontWeight: '700',
-                            color: 'var(--color-text-primary)',
-                            cursor: 'pointer',
-                            letterSpacing: '-0.02em',
-                            margin: 0
-                        }}
-                        onClick={() => router.push('/')}
-                    >
-                        Backr
-                    </h1>
+                    <div onClick={() => router.push('/')} className="cursor-pointer">
+                        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: '700', color: 'var(--color-text-primary)', letterSpacing: '-0.03em', margin: 0 }}>Backr</h1>
+                    </div>
 
                     <div className="desktop-nav" style={{ gap: '32px', alignItems: 'center' }}>
                         {navItems.map(item => (

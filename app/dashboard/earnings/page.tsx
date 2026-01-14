@@ -9,9 +9,13 @@ import { formatEther, parseAbiItem } from 'viem';
 import { FACTORY_ABI, SUBSCRIPTION_ABI, FACTORY_ADDRESS } from '@/utils/abis';
 import { supabase } from '@/utils/supabase';
 import { useToast } from '../../components/Toast';
+import RevenueChart from '../../components/RevenueChart';
+
+import { useCommunity } from '../../context/CommunityContext';
 
 export default function EarningsPage() {
     const { address } = useAccount();
+    const { contractAddress } = useCommunity();
     const { showToast, ToastComponent } = useToast();
     const [withdrawOpen, setWithdrawOpen] = useState(false);
 
@@ -26,13 +30,7 @@ export default function EarningsPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
 
-    // 1. Contract Address
-    const { data: contractAddress } = useReadContract({
-        address: FACTORY_ADDRESS as `0x${string}`,
-        abi: FACTORY_ABI, functionName: 'getProfile', args: [address],
-    });
-
-    // 2. Balance
+    // 2. Balance (Contract Balance)
     const { data: balanceData, refetch: refetchBalance } = useBalance({
         address: contractAddress as `0x${string}`,
     });
@@ -44,10 +42,17 @@ export default function EarningsPage() {
     useEffect(() => {
         const fetchRevenue = async () => {
             if (!address) return;
-            const { data } = await supabase.from('subscriptions').select('price').eq('creatorAddress', address);
+            const { data } = await supabase
+                .from('subscriptions')
+                .select('price')
+                .ilike('creatorAddress', address);
+
             if (data) {
                 let total = 0;
-                data.forEach(sub => { const val = parseFloat(sub.price.split(' ')[0]); if (!isNaN(val)) total += val; });
+                data.forEach(sub => {
+                    const val = parseFloat(String(sub.price).replace(/[^0-9.]/g, ''));
+                    if (!isNaN(val)) total += val;
+                });
                 setRevenue(total.toFixed(2));
             }
         };
@@ -57,11 +62,20 @@ export default function EarningsPage() {
     // 4. Fetch Payouts (Chain)
     useEffect(() => {
         const fetchPayouts = async () => {
-            if (!contractAddress || !publicClient) return;
+            if (!contractAddress || !publicClient) {
+                setLoadingPayouts(false);
+                return;
+            };
             setLoadingPayouts(true);
             try {
+                // Fix RPC Limit: Get last 5000 blocks only
+                const currentBlock = await publicClient.getBlockNumber();
+                const fromBlock = currentBlock - BigInt(5000) > BigInt(0) ? currentBlock - BigInt(5000) : BigInt(0);
+
                 const logs = await publicClient.getLogs({
-                    address: contractAddress as `0x${string}`, event: parseAbiItem('event Withdrawn(uint256 amount)'), fromBlock: 'earliest'
+                    address: contractAddress as `0x${string}`,
+                    event: parseAbiItem('event Withdrawn(uint256 amount)'),
+                    fromBlock: fromBlock
                 });
 
                 const history = await Promise.all(logs.map(async (log: any) => {
@@ -78,8 +92,9 @@ export default function EarningsPage() {
                 const sorted = history.sort((a, b) => b.timestamp - a.timestamp);
                 setPayouts(sorted);
                 if (sorted.length > 0) setLastPayout(parseFloat(sorted[0].amount).toFixed(2));
-            } catch (e) { console.error("Error fetching payouts:", e); }
-            finally { setLoadingPayouts(false); }
+            } catch (e) {
+                console.error("Error fetching payouts:", e);
+            } finally { setLoadingPayouts(false); }
         };
         if (contractAddress) fetchPayouts();
     }, [contractAddress, publicClient, address, balanceData]);
@@ -108,6 +123,27 @@ export default function EarningsPage() {
     // Derived Logic
     const totalPages = Math.ceil(payouts.length / itemsPerPage);
     const paginatedPayouts = payouts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+    // Real Chart Data Logic
+    const getChartData = () => {
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const currentMonth = new Date().getMonth(); // 0-11
+        const data = [];
+
+        for (let i = 5; i >= 0; i--) {
+            // Handle month wrap-around logic
+            let mIndex = currentMonth - i;
+            if (mIndex < 0) mIndex += 12;
+
+            data.push({
+                name: months[mIndex],
+                revenue: (i === 0) ? (parseFloat(revenue) || 0) : 0 // Only showing current month for now as we don't have history in DB
+            });
+        }
+        return data;
+    };
+
+    const chartData = getChartData();
 
     return (
         <div className="page-container" style={{ paddingBottom: '100px' }}>
@@ -167,34 +203,10 @@ export default function EarningsPage() {
             <Card padding="lg" style={{ marginBottom: '32px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                     <h3 className="text-h3" style={{ fontSize: '1.25rem' }}>Revenue Trends</h3>
-                    <select className="focus-ring" style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid var(--color-border)', background: 'var(--color-bg-page)', fontSize: '0.9rem' }}>
-                        <option>Last 30 Days</option>
-                        <option>Last 3 Months</option>
-                        <option>Year to Date</option>
-                    </select>
                 </div>
-                {/* Mock Chart Area */}
-                <div style={{ height: '240px', display: 'flex', alignItems: 'flex-end', gap: '12px', paddingBottom: '24px', borderBottom: '1px solid var(--color-border)' }}>
-                    {Array.from({ length: 30 }).map((_, i) => {
-                        const h = Math.floor(Math.random() * 80) + 10;
-                        return (
-                            <div key={i} style={{
-                                flex: 1,
-                                height: `${h}%`,
-                                background: i > 24 ? 'var(--color-primary)' : 'var(--color-border)',
-                                borderRadius: '4px 4px 0 0',
-                                opacity: i > 24 ? 1 : 0.5,
-                                transition: 'all 0.2s'
-                            }}
-                                className="chart-bar"
-                                title={`Day ${i + 1}: ${h} MNT`}
-                            ></div>
-                        );
-                    })}
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '12px', color: 'var(--color-text-tertiary)', fontSize: '0.8rem' }}>
-                    <span>30 days ago</span>
-                    <span>Today</span>
+                {/* Real Chart Area */}
+                <div style={{ height: '240px', width: '100%' }}>
+                    <RevenueChart data={chartData} />
                 </div>
             </Card>
 

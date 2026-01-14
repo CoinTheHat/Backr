@@ -29,7 +29,18 @@ export default function DiscoverySettings({ address }: DiscoverySettingsProps) {
                 fetch(`/api/creators/${address}/taxonomy`).then(r => r.json())
             ]);
 
-            if (Array.isArray(catsRes)) setCategories(catsRes);
+            if (Array.isArray(catsRes) && catsRes.length > 0) {
+                setCategories(catsRes);
+            } else {
+                // Fallback if DB is empty so user can still select categories
+                setCategories([
+                    { id: 'art', name: 'Art', icon: '🎨', isActive: true },
+                    { id: 'gaming', name: 'Gaming', icon: '🎮', isActive: true },
+                    { id: 'music', name: 'Music', icon: '🎵', isActive: true },
+                    { id: 'tech', name: 'Tech', icon: '💻', isActive: true },
+                    { id: 'podcast', name: 'Podcast', icon: '🎙️', isActive: true }
+                ]);
+            }
             if (Array.isArray(tagsRes)) setHashtags(tagsRes);
 
             if (myRes) {

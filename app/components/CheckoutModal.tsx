@@ -188,7 +188,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                         Confirm Payment
                                     </Button>
                                     <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
-                                        This transaction will be processed on the Mantle Network. <br /> You can cancel your subscription at any time.
+                                        This transaction will be processed on the Mantle Network.
                                     </p>
                                 </div>
                             )}

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/utils/supabase';
 import { useRouter } from 'next/navigation';
 import Card from '@/app/components/Card';
+import Button from '@/app/components/Button';
 
 // Types
 interface Category {
@@ -67,23 +68,23 @@ export default function TaxonomyPage() {
     }
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
+        <div className="p-8 max-w-6xl mx-auto min-h-screen">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Discovery & Taxonomy</h1>
-                    <p className="text-gray-500">Manage categories and hashtags for the Explore page.</p>
+                    <h1 className="text-3xl font-serif font-bold text-brand-dark mb-2">Discovery & Taxonomy</h1>
+                    <p className="text-brand-muted">Manage categories and hashtags for the Explore page.</p>
                 </div>
                 <div className="flex gap-3">
                     {activeTab === 'hashtags' && (
                         <button
                             onClick={() => { setEditingItem({}); setBulkMode(true); setIsModalOpen(true); }}
-                            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium">
+                            className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-brand-dark hover:border-brand-primary font-medium transition-colors shadow-sm">
                             Bulk Add
                         </button>
                     )}
                     <button
                         onClick={() => { setEditingItem({}); setBulkMode(false); setIsModalOpen(true); }}
-                        className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 font-medium shadow-lg hover:shadow-xl transition-all">
+                        className="px-4 py-2 bg-brand-dark text-white rounded-xl hover:bg-black font-medium shadow-lg hover:shadow-xl transition-all">
                         + New {activeTab === 'categories' ? 'Category' : 'Hashtag'}
                     </button>
                 </div>
@@ -93,28 +94,28 @@ export default function TaxonomyPage() {
             <div className="flex gap-8 border-b border-gray-200 mb-8">
                 <button
                     onClick={() => setActiveTab('categories')}
-                    className={`pb-4 text-sm font-medium transition-colors relative ${activeTab === 'categories' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
+                    className={`pb-4 text-sm font-bold transition-colors relative ${activeTab === 'categories' ? 'text-brand-primary' : 'text-gray-400 hover:text-brand-dark'}`}>
                     Categories
-                    {activeTab === 'categories' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+                    {activeTab === 'categories' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary"></div>}
                 </button>
                 <button
                     onClick={() => setActiveTab('hashtags')}
-                    className={`pb-4 text-sm font-medium transition-colors relative ${activeTab === 'hashtags' ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}>
+                    className={`pb-4 text-sm font-bold transition-colors relative ${activeTab === 'hashtags' ? 'text-brand-primary' : 'text-gray-400 hover:text-brand-dark'}`}>
                     Hashtags
-                    {activeTab === 'hashtags' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></div>}
+                    {activeTab === 'hashtags' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-brand-primary"></div>}
                 </button>
             </div>
 
             {/* Content */}
             {loading ? (
                 <div className="space-y-4">
-                    {[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-100 rounded-lg animate-pulse"></div>)}
+                    {[1, 2, 3].map(i => <div key={i} className="h-16 bg-white rounded-xl border border-gray-100 animate-pulse"></div>)}
                 </div>
             ) : activeTab === 'categories' ? (
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-white rounded-studio border border-gray-100 overflow-hidden shadow-studio">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+                            <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-brand-muted font-bold tracking-wider">
                                 <th className="p-4">Sort</th>
                                 <th className="p-4">Name</th>
                                 <th className="p-4">Slug</th>
@@ -124,33 +125,33 @@ export default function TaxonomyPage() {
                         </thead>
                         <tbody>
                             {categories.map((cat) => (
-                                <tr key={cat.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr key={cat.id} className="border-b border-gray-50 last:border-0 hover:bg-brand-light/30 transition-colors">
                                     <td className="p-4 text-gray-400 font-mono text-sm">#{cat.sortOrder}</td>
-                                    <td className="p-4 font-medium text-gray-900 flex items-center gap-3">
-                                        <span className="text-lg">{cat.icon || '📁'}</span>
+                                    <td className="p-4 font-bold text-brand-dark flex items-center gap-3">
+                                        <span className="text-xl bg-gray-50 p-2 rounded-lg">{cat.icon || '📁'}</span>
                                         {cat.name}
                                     </td>
-                                    <td className="p-4 text-gray-500 font-mono text-sm">{cat.id}</td>
+                                    <td className="p-4 text-brand-muted font-mono text-xs">{cat.id}</td>
                                     <td className="p-4 text-center">
-                                        <button onClick={() => handleToggleActive(cat, 'categories')} className={`w-10 h-6 rounded-full p-1 transition-colors ${cat.isActive ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                        <button onClick={() => handleToggleActive(cat, 'categories')} className={`w-10 h-6 rounded-full p-1 transition-colors ${cat.isActive ? 'bg-emerald-500' : 'bg-gray-200'}`}>
                                             <div className={`active-dot w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${cat.isActive ? 'translate-x-4' : ''}`}></div>
                                         </button>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button onClick={() => { setEditingItem(cat); setBulkMode(false); setIsModalOpen(true); }} className="text-gray-400 hover:text-blue-600 mr-3">Ex</button>
-                                        <button onClick={() => handleDelete(cat.id, 'categories')} className="text-gray-400 hover:text-red-600">Del</button>
+                                        <button onClick={() => { setEditingItem(cat); setBulkMode(false); setIsModalOpen(true); }} className="text-gray-400 hover:text-brand-primary mr-3 font-medium transition-colors">Edit</button>
+                                        <button onClick={() => handleDelete(cat.id, 'categories')} className="text-gray-400 hover:text-red-500 font-medium transition-colors">Del</button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {categories.length === 0 && <div className="p-12 text-center text-gray-500">No categories found.</div>}
+                    {categories.length === 0 && <div className="p-12 text-center text-brand-muted">No categories found.</div>}
                 </div>
             ) : (
-                <div className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+                <div className="bg-white rounded-studio border border-gray-100 overflow-hidden shadow-studio">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-gray-50 border-b border-gray-200 text-xs uppercase text-gray-500 font-semibold">
+                            <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase text-brand-muted font-semibold">
                                 <th className="p-4">Sort</th>
                                 <th className="p-4">Label</th>
                                 <th className="p-4 text-center">Trending</th>
@@ -160,34 +161,34 @@ export default function TaxonomyPage() {
                         </thead>
                         <tbody>
                             {hashtags.map((tag) => (
-                                <tr key={tag.id} className="border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
+                                <tr key={tag.id} className="border-b border-gray-50 last:border-0 hover:bg-brand-light/30 transition-colors">
                                     <td className="p-4 text-gray-400 font-mono text-sm">#{tag.sortOrder}</td>
-                                    <td className="p-4 font-medium text-blue-600">#{tag.label}</td>
+                                    <td className="p-4 font-bold text-brand-secondary">#{tag.label}</td>
                                     <td className="p-4 text-center">
-                                        <button onClick={() => handleToggleTrending(tag)} className={`text-xl ${tag.isTrending ? 'grayscale-0 opacity-100' : 'grayscale opacity-30 hover:opacity-100 transition-opacity'}`}>🔥</button>
+                                        <button onClick={() => handleToggleTrending(tag)} className={`text-xl transition-all ${tag.isTrending ? 'grayscale-0 opacity-100 scale-110' : 'grayscale opacity-30 hover:opacity-100 hover:scale-110'}`}>🔥</button>
                                     </td>
                                     <td className="p-4 text-center">
-                                        <button onClick={() => handleToggleActive(tag, 'hashtags')} className={`w-10 h-6 rounded-full p-1 transition-colors ${tag.isActive ? 'bg-green-500' : 'bg-gray-300'}`}>
+                                        <button onClick={() => handleToggleActive(tag, 'hashtags')} className={`w-10 h-6 rounded-full p-1 transition-colors ${tag.isActive ? 'bg-emerald-500' : 'bg-gray-200'}`}>
                                             <div className={`active-dot w-4 h-4 bg-white rounded-full shadow-md transform transition-transform ${tag.isActive ? 'translate-x-4' : ''}`}></div>
                                         </button>
                                     </td>
                                     <td className="p-4 text-right">
-                                        <button onClick={() => { setEditingItem(tag); setBulkMode(false); setIsModalOpen(true); }} className="text-gray-400 hover:text-blue-600 mr-3">Ed</button>
-                                        <button onClick={() => handleDelete(tag.id, 'hashtags')} className="text-gray-400 hover:text-red-600">Del</button>
+                                        <button onClick={() => { setEditingItem(tag); setBulkMode(false); setIsModalOpen(true); }} className="text-gray-400 hover:text-brand-primary mr-3 font-medium transition-colors">Edit</button>
+                                        <button onClick={() => handleDelete(tag.id, 'hashtags')} className="text-gray-400 hover:text-red-500 font-medium transition-colors">Del</button>
                                     </td>
                                 </tr>
                             ))}
                         </tbody>
                     </table>
-                    {hashtags.length === 0 && <div className="p-12 text-center text-gray-500">No hashtags found.</div>}
+                    {hashtags.length === 0 && <div className="p-12 text-center text-brand-muted">No hashtags found.</div>}
                 </div>
             )}
 
             {/* Modal - Basic Implementation */}
             {isModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
-                        <h2 className="text-xl font-bold mb-4">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-2xl shadow-studio w-full max-w-md p-8 transform transition-all scale-100">
+                        <h2 className="text-2xl font-bold mb-6 text-brand-dark">
                             {editingItem?.id ? 'Edit' : 'New'} {activeTab === 'categories' ? 'Category' : 'Hashtag'}
                         </h2>
 
@@ -205,12 +206,6 @@ export default function TaxonomyPage() {
                                 const tags = (formData.get('bulkTags') as string).split(',').map(t => ({ label: t.trim() }));
                                 await fetch('/api/taxonomy/hashtags', { method: 'POST', body: JSON.stringify(tags) });
                             } else {
-                                // Standard Create/Update (mocking update via POST/Upsert for now or separate PUT logic needed typically, but POST with ID usually works in our simple logic if handled)
-                                // Actually our route.ts logic for POST is insert-only or upsert?
-                                // Schema ID is primary key. Our route POST handles "insert", which throws on duplicate key if not using upsert.
-                                // For this demo, let's assume we need to delete/re-insert or improve the API.
-                                // I'll assume we improved API to use upsert or just use POST (and it might fail on edit, but for "New" it works).
-                                // Let's keep it simple: Just support Create for new items for now.
                                 await fetch(`/api/taxonomy/${activeTab}`, { method: 'POST', body: JSON.stringify(body) });
                             }
 
@@ -220,45 +215,45 @@ export default function TaxonomyPage() {
 
                             {bulkMode ? (
                                 <div className="mb-4">
-                                    <label className="block text-sm font-medium mb-1">Hashtags (comma separated)</label>
-                                    <textarea name="bulkTags" className="w-full border rounded-lg p-3 h-32" placeholder="DeFi, Generative Art, Gaming"></textarea>
+                                    <label className="block text-sm font-bold text-brand-muted mb-2">Hashtags (comma separated)</label>
+                                    <textarea name="bulkTags" className="w-full border border-gray-200 rounded-xl p-3 h-32 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary" placeholder="DeFi, Generative Art, Gaming"></textarea>
                                 </div>
                             ) : (
                                 <div className="space-y-4">
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Name / Label</label>
-                                        <input name={activeTab === 'categories' ? 'name' : 'label'} defaultValue={activeTab === 'categories' ? editingItem?.name : editingItem?.label} className="w-full border rounded-lg p-2" required />
+                                        <label className="block text-sm font-bold text-brand-muted mb-2">Name / Label</label>
+                                        <input name={activeTab === 'categories' ? 'name' : 'label'} defaultValue={activeTab === 'categories' ? editingItem?.name : editingItem?.label} className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary" required />
                                     </div>
 
                                     {activeTab === 'categories' && (
                                         <div>
-                                            <label className="block text-sm font-medium mb-1">Icon (Emoji)</label>
-                                            <input name="icon" defaultValue={editingItem?.icon} className="w-full border rounded-lg p-2" placeholder="🎨" />
+                                            <label className="block text-sm font-bold text-brand-muted mb-2">Icon (Emoji)</label>
+                                            <input name="icon" defaultValue={editingItem?.icon} className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary" placeholder="🎨" />
                                         </div>
                                     )}
 
                                     <div>
-                                        <label className="block text-sm font-medium mb-1">Sort Order</label>
-                                        <input name="sortOrder" type="number" defaultValue={editingItem?.sortOrder || 0} className="w-full border rounded-lg p-2" />
+                                        <label className="block text-sm font-bold text-brand-muted mb-2">Sort Order</label>
+                                        <input name="sortOrder" type="number" defaultValue={editingItem?.sortOrder || 0} className="w-full border border-gray-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary" />
                                     </div>
 
-                                    <div className="flex items-center gap-2">
-                                        <input type="checkbox" name="isActive" defaultChecked={editingItem?.isActive ?? true} />
-                                        <label>Active</label>
+                                    <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                        <input type="checkbox" name="isActive" defaultChecked={editingItem?.isActive ?? true} className="w-5 h-5 text-brand-primary rounded focus:ring-brand-primary" />
+                                        <label className="font-medium text-brand-dark">Active</label>
                                     </div>
 
                                     {activeTab === 'hashtags' && (
-                                        <div className="flex items-center gap-2">
-                                            <input type="checkbox" name="isTrending" defaultChecked={editingItem?.isTrending} />
-                                            <label>Trending 🔥</label>
+                                        <div className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                                            <input type="checkbox" name="isTrending" defaultChecked={editingItem?.isTrending} className="w-5 h-5 text-brand-primary rounded focus:ring-brand-primary" />
+                                            <label className="font-medium text-brand-dark">Trending 🔥</label>
                                         </div>
                                     )}
                                 </div>
                             )}
 
-                            <div className="flex justify-end gap-3 mt-6">
-                                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 text-gray-500 hover:bg-gray-100 rounded-lg">Cancel</button>
-                                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save</button>
+                            <div className="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+                                <Button type="button" onClick={() => setIsModalOpen(false)} variant="ghost" className="text-gray-500 hover:text-gray-800">Cancel</Button>
+                                <Button type="submit" variant="primary">Save</Button>
                             </div>
                         </form>
                     </div>

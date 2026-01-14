@@ -14,20 +14,24 @@ export default function MyMembershipsPage() {
     const { address } = useAccount();
     const [memberships, setMemberships] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [recommended, setRecommended] = useState<any[]>([]);
 
     useEffect(() => {
         if (!address) return;
         setLoading(true);
-        fetch(`/api/subscriptions?subscriber=${address.toLowerCase()}`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setMemberships(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
+
+        // Parallel fetch
+        Promise.all([
+            fetch(`/api/subscriptions?subscriber=${address.toLowerCase()}`).then(res => res.json()),
+            fetch('/api/creators').then(res => res.json())
+        ]).then(([subs, creators]) => {
+            if (Array.isArray(subs)) setMemberships(subs);
+            if (Array.isArray(creators)) setRecommended(creators.slice(0, 3)); // Simple "top 3" for now
+            setLoading(false);
+        }).catch(err => {
+            console.error(err);
+            setLoading(false);
+        });
     }, [address]);
 
     const categories = ['Art', 'Music', 'Podcast', 'Writing', 'Gaming', 'Education'];
@@ -113,31 +117,38 @@ export default function MyMembershipsPage() {
                                 <div className="card-surface" style={{ padding: '24px' }}>
                                     <h4 style={{ fontWeight: 700, marginBottom: '16px' }}>Recommended for you</h4>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        {[1, 2, 3].map(i => (
+                                        {recommended.map((creator, i) => (
                                             <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eee' }}></div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Creator {i}</div>
-                                                    <div className="text-caption">3.2k Backrs</div>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#eee', overflow: 'hidden' }}>
+                                                    {creator.avatarUrl ? <img src={creator.avatarUrl} alt="" className="w-full h-full object-cover" /> : null}
                                                 </div>
-                                                <Button size="sm" variant="ghost">View</Button>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer' }} onClick={() => router.push('/' + creator.address)}>
+                                                        {creator.name}
+                                                    </div>
+                                                    <div className="text-caption">{creator.backrCount || 0} Backrs</div>
+                                                </div>
+                                                <Button size="sm" variant="ghost" onClick={() => router.push('/' + creator.address)}>View</Button>
                                             </div>
                                         ))}
+                                        {recommended.length === 0 && <div className="text-caption">No new creators found.</div>}
                                     </div>
                                 </div>
 
-                                {/* Trending */}
+                                {/* Trending - Keeping static for now or can reuse recommended sorted by backrs */}
                                 <div className="card-surface" style={{ padding: '24px' }}>
                                     <h4 style={{ fontWeight: 700, marginBottom: '16px' }}>Trending now</h4>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                                        {[1, 2, 3].map(i => (
+                                        {recommended.slice().reverse().map((creator, i) => (
                                             <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e0f2fe' }}></div>
-                                                <div style={{ flex: 1 }}>
-                                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>Project {i}</div>
-                                                    <div className="text-caption">Trending in Tech</div>
+                                                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e0f2fe', overflow: 'hidden' }}>
+                                                    {creator.avatarUrl ? <img src={creator.avatarUrl} alt="" className="w-full h-full object-cover" /> : null}
                                                 </div>
-                                                <Button size="sm" variant="ghost">View</Button>
+                                                <div style={{ flex: 1 }}>
+                                                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{creator.name}</div>
+                                                    <div className="text-caption">Trending in Global</div>
+                                                </div>
+                                                <Button size="sm" variant="ghost" onClick={() => router.push('/' + creator.address)}>View</Button>
                                             </div>
                                         ))}
                                     </div>
@@ -148,56 +159,70 @@ export default function MyMembershipsPage() {
                 ) : (
                     <>
                         <div className="membership-grid" style={{ marginBottom: '64px' }}>
-                            {memberships.map((sub, i) => (
-                                <div
-                                    key={i}
-                                    className="card-surface hover-lift"
-                                    style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        padding: '24px',
-                                        position: 'relative',
-                                        overflow: 'hidden'
-                                    }}
-                                >
-                                    <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px' }}>
-                                        <div
-                                            onClick={() => router.push(`/${sub.creatorAddress}`)}
-                                            style={{
-                                                width: '72px', height: '72px', borderRadius: '50%',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                color: '#fff', fontWeight: 'bold', fontSize: '1.75rem', flexShrink: 0, cursor: 'pointer',
-                                                boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
-                                            }}
-                                        >
-                                            {sub.creators?.name?.charAt(0).toUpperCase() || sub.creatorAddress.charAt(2).toUpperCase()}
-                                        </div>
-                                        <div>
-                                            <h3
+                            {memberships.map((sub, i) => {
+                                const isExpired = new Date(sub.expiresAt) < new Date();
+                                return (
+                                    <div
+                                        key={i}
+                                        className="card-surface hover-lift"
+                                        style={{
+                                            display: 'flex',
+                                            flexDirection: 'column',
+                                            padding: '24px',
+                                            position: 'relative',
+                                            overflow: 'hidden',
+                                            border: isExpired ? '1px solid var(--color-warning)' : undefined
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', marginBottom: '24px' }}>
+                                            <div
                                                 onClick={() => router.push(`/${sub.creatorAddress}`)}
-                                                style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '4px', color: 'var(--color-text-primary)', cursor: 'pointer' }}
+                                                style={{
+                                                    width: '72px', height: '72px', borderRadius: '50%',
+                                                    background: sub.creators?.avatarUrl ? `url(${sub.creators.avatarUrl}) center/cover` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    color: '#fff', fontWeight: 'bold', fontSize: '1.75rem', flexShrink: 0, cursor: 'pointer',
+                                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                                                }}
                                             >
-                                                {sub.creators?.name || `Creator ${sub.creatorAddress.slice(0, 6)}...`}
-                                            </h3>
-                                            <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
-                                                Tier 1 Member • <span style={{ fontWeight: 600 }}>5.00 MNT/mo</span>
+                                                {!sub.creators?.avatarUrl && (sub.creators?.name?.charAt(0).toUpperCase() || sub.creatorAddress.charAt(2).toUpperCase())}
                                             </div>
-                                            <span className="badge badge-success">Active</span>
+                                            <div>
+                                                <h3
+                                                    onClick={() => router.push(`/${sub.creatorAddress}`)}
+                                                    style={{ fontSize: '1.25rem', fontWeight: '700', marginBottom: '4px', color: 'var(--color-text-primary)', cursor: 'pointer' }}
+                                                >
+                                                    {sub.creators?.name || `Creator ${sub.creatorAddress.slice(0, 6)}...`}
+                                                </h3>
+                                                <div style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', marginBottom: '8px' }}>
+                                                    Member • <span style={{ fontWeight: 600 }}>Active</span>
+                                                </div>
+                                                {isExpired ? (
+                                                    <span className="badge" style={{ background: '#FECACA', color: '#991B1B' }}>Expired</span>
+                                                ) : (
+                                                    <span className="badge badge-success">Active</span>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
-                                        <div className="text-caption">
-                                            Renews: <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{new Date(sub.expiresAt).toLocaleDateString()}</span>
+                                        <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid var(--color-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px' }}>
+                                            <div className="text-caption">
+                                                {isExpired ? 'Expired on:' : 'Renews:'} <span style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{new Date(sub.expiresAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <Button
+                                                variant={isExpired ? 'primary' : 'outline'}
+                                                size="sm"
+                                                onClick={() => router.push(`/${sub.creatorAddress}`)} // Redirect to creator page to re-subscribe
+                                            >
+                                                {isExpired ? 'Renew Membership' : 'Manage'}
+                                            </Button>
                                         </div>
-                                        <Button variant="outline" size="sm" onClick={() => router.push(`/${sub.creatorAddress}`)}>Manage</Button>
                                     </div>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
 
-                        {/* History Table (Simplified for brevity as focus is on cards/empty state) */}
+                        {/* History Table */}
                         <div style={{ marginTop: '40px' }}>
                             <h3 className="text-h3" style={{ marginBottom: '24px' }}>Payment History</h3>
                             <div className="card-surface" style={{ overflow: 'hidden', padding: 0 }}>

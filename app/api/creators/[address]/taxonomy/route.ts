@@ -5,17 +5,20 @@ export async function GET(request: Request, { params }: { params: Promise<{ addr
     const resolvedParams = await params;
     const { address } = resolvedParams;
 
+    // Use 'creators' table 'socials' column (JSONB) to store taxonomy
     const { data, error } = await supabase
-        .from('creatorTaxonomy')
-        .select('*')
-        .eq('creatorAddress', address)
+        .from('creators')
+        .select('socials')
+        .eq('address', address)
         .single();
 
-    if (error && error.code !== 'PGRST116') { // Ignore "Row not found"
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error) {
+        // Return empty if creator not found or error
+        return NextResponse.json({ categoryIds: [], hashtagIds: [] });
     }
 
-    return NextResponse.json(data || { categoryIds: [], hashtagIds: [] });
+    const taxonomy = data?.socials?.taxonomy || { categoryIds: [], hashtagIds: [] };
+    return NextResponse.json(taxonomy);
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ address: string }> }) {
@@ -26,20 +29,34 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ad
         const body = await request.json();
         const { categoryIds, hashtagIds } = body;
 
+        // 1. Get existing socials
+        const { data: creator, error: fetchError } = await supabase
+            .from('creators')
+            .select('socials')
+            .eq('address', address)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        // 2. Merge taxonomy into socials
+        const currentSocials = creator?.socials || {};
+        const updatedSocials = {
+            ...currentSocials,
+            taxonomy: { categoryIds, hashtagIds }
+        };
+
+        // 3. Update
         const { data, error } = await supabase
-            .from('creatorTaxonomy')
-            .upsert({
-                creatorAddress: address,
-                categoryIds,
-                hashtagIds,
-                updatedAt: new Date().toISOString()
-            })
+            .from('creators')
+            .update({ socials: updatedSocials })
+            .eq('address', address)
             .select()
             .single();
 
         if (error) throw error;
 
-        return NextResponse.json(data);
+        return NextResponse.json({ categoryIds, hashtagIds });
+
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }

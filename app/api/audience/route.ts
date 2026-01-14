@@ -29,32 +29,35 @@ export async function GET(request: Request) {
 
     // Filter out obvious mock data (starts with 0x1010, 0x2020, etc from previous tests)
     // and enrich with tier names
-    const enrichedSubs = subs
-        .filter(s => !s.subscriberAddress.startsWith('0x1010') && !s.subscriberAddress.startsWith('0x2020') && !s.subscriberAddress.startsWith('0x3030'))
-        .map(sub => {
-            // tierId in contract corresponds to the index in the text-based Tiers list usually, 
-            // OR we match by ID if we saved it. 
-            // In our system we just save 'tierId' (0, 1, 2).
-            // We need to assume the `tiers` fetched are in created order or have some ID mapping.
-            // For now, let's try to find a tier with that 'id' or just match by index if needed.
-            // Actually, in `dashboard/membership`, we probably save them.
-            // Let's fallback to "Tier X" if looking up fails.
+    const validSubs = subs
+        .filter(s => !s.subscriberAddress.startsWith('0x1010') && !s.subscriberAddress.startsWith('0x2020') && !s.subscriberAddress.startsWith('0x3030'));
 
-            // Note: DB `tiers` has its own `id` (bigint). Contract has `tierId` (0,1,2).
-            // We haven't stored the mapping. 
-            // However, usually they are ordered. Let's try to just return the sub as is for now 
-            // but add a helper.
+    // Fetch profiles for these subscribers
+    const subscriberAddresses = validSubs.map(s => s.subscriberAddress);
 
-            // Better strategy: The tiers array from DB might not match index 0,1,2 if deleted.
-            // BUT for this Hackathon, we probably didn't delete tiers.
-            const matchedTier = tiers?.find((t, index) => index === sub.tierId);
+    // Only fetch if we have addresses
+    let profiles: any[] = [];
+    if (subscriberAddresses.length > 0) {
+        const { data: p } = await supabase
+            .from('creators') // Assuming 'creators' table holds all user profiles
+            .select('address, name, avatarUrl')
+            .in('address', subscriberAddresses);
+        if (p) profiles = p;
+    }
 
-            return {
-                ...sub,
-                tierName: matchedTier?.name || sub.tierName || `Tier ${sub.tierId}`,
-                price: matchedTier?.price || sub.price || '-'
-            };
-        });
+    const enrichedSubs = validSubs.map(sub => {
+        const matchedTier = tiers?.find((t, index) => index === sub.tierId);
+        // Search profile case-insensitively just in case
+        const profile = profiles.find(p => p.address.toLowerCase() === sub.subscriberAddress.toLowerCase());
+
+        return {
+            ...sub,
+            tierName: matchedTier?.name || sub.tierName || `Tier ${sub.tierId}`,
+            price: matchedTier?.price || sub.price || '-',
+            subscriberName: profile?.name,
+            subscriberAvatar: profile?.avatarUrl
+        };
+    });
 
     return NextResponse.json(enrichedSubs);
 }

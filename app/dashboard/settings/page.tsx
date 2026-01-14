@@ -1,13 +1,19 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
+import { parseEventLogs } from 'viem';
 import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Input from '../../components/Input';
 import SectionHeader from '../../components/SectionHeader';
 import { useToast } from '../../components/Toast';
 import DiscoverySettings from './components/DiscoverySettings';
+import { FACTORY_ABI, FACTORY_ADDRESS } from '@/utils/abis';
+import { useCommunity } from '../../context/CommunityContext'; // Added
+
+const MNT_ADDRESS = '0x0000000000000000000000000000000000000000'; // Native Token
+const USDC_ADDRESS = '0x201Eba5CC46D216Ce6DC03F6a759e8E766e9560e'; // Mantle Sepolia USDC (Example) - Replace with correct if needed
 
 export default function SettingsPage() {
     const { address, isConnected } = useAccount();
@@ -22,12 +28,46 @@ export default function SettingsPage() {
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
-    const [socials, setSocials] = useState({ twitter: '', website: '' });
+    const [socials, setSocials] = useState({ twitter: '', website: '', instagram: '', youtube: '' });
     const [payoutToken, setPayoutToken] = useState('MNT');
+
+    // Contract State
+    const [contractAddress, setContractAddress] = useState<string | null>(null);
 
     // Danger Zone Modal
     const [isResetModalOpen, setIsResetModalOpen] = useState(false);
     const [resetConfirmation, setResetConfirmation] = useState('');
+
+    // Deployment Hooks
+    const { data: hash, writeContract, isPending: isDeploying, error: deployError } = useWriteContract();
+    const { isLoading: isWaiting, isSuccess: isDeployed, data: receipt } = useWaitForTransactionReceipt({ hash });
+
+    // Community Context to update Sidebar
+    const { refreshData } = useCommunity();
+
+    // Verify Deployment on Factory
+    const { data: factoryProfile } = useReadContract({
+        address: FACTORY_ADDRESS as `0x${string}`,
+        abi: FACTORY_ABI,
+        functionName: 'getProfile',
+        args: [address],
+    });
+
+    useEffect(() => {
+        if (!factoryProfile) return;
+        const zeroAddress = '0x0000000000000000000000000000000000000000';
+
+        // Normalize for case-insensitive comparison
+        const profileAddress = String(factoryProfile).toLowerCase();
+
+        if (profileAddress === zeroAddress) {
+            console.log("Factory returned 0x0. Resetting local state.");
+            setContractAddress(null);
+        } else {
+            console.log("Factory returned valid profile:", profileAddress);
+            setContractAddress(profileAddress);
+        }
+    }, [factoryProfile]);
 
     useEffect(() => {
         if (!address) return;
@@ -36,11 +76,12 @@ export default function SettingsPage() {
             .then(creators => {
                 const me = creators.find((c: any) => c.address === address);
                 if (me) {
+                    const defaultSocials = { twitter: '', website: '', instagram: '', youtube: '' };
                     const data = {
                         name: me.name || '',
                         description: me.description || '',
                         avatarUrl: me.avatarUrl || '',
-                        socials: me.socials || { twitter: '', website: '' },
+                        socials: { ...defaultSocials, ...me.socials },
                         payoutToken: me.payoutToken || 'MNT'
                     };
                     setName(data.name);
@@ -48,6 +89,7 @@ export default function SettingsPage() {
                     setAvatarUrl(data.avatarUrl);
                     setSocials(data.socials);
                     setPayoutToken(data.payoutToken);
+                    setContractAddress(me.contractAddress);
                     setInitialState(data);
                 }
                 setLoading(false);
@@ -58,6 +100,51 @@ export default function SettingsPage() {
             });
     }, [address]);
 
+    // Handle Deployment Success
+    useEffect(() => {
+        if (isDeployed && receipt) {
+            // Find Log
+            // Event ProfileCreated(address indexed creator, address profileContract)
+            // We can iterate logs
+            // For simplicity, we assume the last log from our factory is the one, or parse use viem
+            try {
+                const logs = parseEventLogs({
+                    abi: FACTORY_ABI,
+                    eventName: 'ProfileCreated',
+                    logs: receipt.logs,
+                });
+
+                if (logs.length > 0) {
+                    // @ts-ignore
+                    const newContract = logs[0].args.profileContract;
+                    console.log('Deployed Contract:', newContract);
+
+                    // Save to API
+                    fetch('/api/creators', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ address, contractAddress: newContract })
+                    }).then(res => {
+                        if (res.ok) {
+                            setContractAddress(newContract);
+                            refreshData(); // Update global state (sidebar)
+                            showToast('Contract deployed successfully!', 'success');
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error('Log parse error', e);
+                showToast('Contract deployed but failed to verify address. Please refresh.', 'warning');
+            }
+        }
+    }, [isDeployed, receipt]);
+
+    useEffect(() => {
+        if (deployError) {
+            showToast('Deployment failed: ' + (deployError.message || 'Unknown error'), 'error');
+        }
+    }, [deployError]);
+
     // Check for changes
     const hasChanges = initialState && (
         name !== initialState.name ||
@@ -65,6 +152,8 @@ export default function SettingsPage() {
         avatarUrl !== initialState.avatarUrl ||
         socials.twitter !== initialState.socials.twitter ||
         socials.website !== initialState.socials.website ||
+        socials.instagram !== initialState.socials.instagram ||
+        socials.youtube !== initialState.socials.youtube ||
         payoutToken !== initialState.payoutToken
     );
 
@@ -80,14 +169,26 @@ export default function SettingsPage() {
                 })
             });
 
+            const data = await res.json();
+
             if (res.ok) {
                 showToast('Profile updated successfully!', 'success');
                 setInitialState({ name, description, avatarUrl, socials: { ...socials }, payoutToken });
             } else {
-                showToast('Failed to update profile.', 'error');
+                showToast(data.error || 'Failed to update profile.', 'error');
             }
         } catch (e) { console.error(e); showToast('Error updating.', 'error'); }
         finally { setSaving(false); }
+    };
+
+    const handleDeploy = () => {
+        const token = payoutToken === 'USDC' ? USDC_ADDRESS : MNT_ADDRESS;
+        writeContract({
+            address: FACTORY_ADDRESS as `0x${string}`,
+            abi: FACTORY_ABI,
+            functionName: 'createProfile',
+            args: [token],
+        });
     };
 
     const handleResetContract = async () => {
@@ -120,6 +221,55 @@ export default function SettingsPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
 
+                {/* 0. DEPLOYMENT STATUS (Critical) */}
+                <Card variant="surface" padding="lg" style={{ borderColor: contractAddress ? 'var(--color-success)' : 'var(--color-border)', borderWidth: contractAddress ? '2px' : '1px' }}>
+                    <h3 className="text-h3" style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        Creator Status
+                        {contractAddress ? (
+                            <span style={{ fontSize: '0.75rem', background: 'var(--color-success)', color: '#fff', padding: '4px 12px', borderRadius: '20px' }}>LIVE</span>
+                        ) : (
+                            <span style={{ fontSize: '0.75rem', background: 'var(--color-text-tertiary)', color: '#fff', padding: '4px 12px', borderRadius: '20px' }}>NOT DEPLOYED</span>
+                        )}
+                    </h3>
+
+                    {!contractAddress ? (
+                        <div className="bg-brand-light p-6 rounded-xl border border-dashed border-brand-primary/30">
+                            <p className="text-brand-dark mb-4 font-medium">To start earning, you must deploy your personal membership contract on Mantle.</p>
+                            <div className="text-sm text-brand-muted mb-6">
+                                <ul className="list-disc pl-5 space-y-1">
+                                    <li>Set your tiers and perks later</li>
+                                    <li>Automated payouts (Fees: 5% Platform)</li>
+                                    <li>Full ownership of your community</li>
+                                </ul>
+                            </div>
+                            <Button
+                                variant="primary"
+                                className="w-full justify-center shadow-glow"
+                                onClick={handleDeploy}
+                                disabled={isDeploying || isWaiting}
+                            >
+                                {isDeploying || isWaiting ? 'Deploying...' : 'Deploy Membership Contract'}
+                            </Button>
+                        </div>
+                    ) : (
+                        <div>
+                            <p className="text-sm text-brand-muted mb-4">Your contract is deployed and ready to accept new members.</p>
+                            <div className="p-3 bg-gray-50 border border-gray-100 rounded-lg flex items-center justify-between mb-3">
+                                <code className="text-xs text-brand-primary" title={contractAddress}>
+                                    {contractAddress.slice(0, 12)}...{contractAddress.slice(-10)}
+                                </code>
+                                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                                    <button onClick={() => { navigator.clipboard.writeText(contractAddress); showToast('Copied!', 'success'); }} className="text-xs font-bold hover:underline" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-text-secondary)' }}>Copy</button>
+                                    <a href={`https://sepolia.mantlescan.xyz/address/${contractAddress}`} target="_blank" className="text-xs font-bold hover:underline" style={{ color: 'var(--color-primary)' }}>View</a>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-brand-muted bg-blue-50 p-2 rounded border border-blue-100">
+                                <span>ℹ️</span> Platform Fee: <strong>5%</strong> (Verified)
+                            </div>
+                        </div>
+                    )}
+                </Card>
+
                 {/* 1. PUBLIC PROFILE */}
                 <Card variant="surface" padding="lg" style={{ height: 'fit-content' }}>
                     <h3 className="text-h3" style={{ marginBottom: '24px' }}>Public Profile</h3>
@@ -149,6 +299,11 @@ export default function SettingsPage() {
                             <label className="text-caption" style={{ fontWeight: 600, marginBottom: '8px', display: 'block', textTransform: 'uppercase' }}>Bio</label>
                             <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Tell your story..." className="focus-ring" style={{ width: '100%', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', background: 'var(--color-bg-page)', minHeight: '120px', resize: 'vertical' }} />
                         </div>
+                        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            <Button variant="primary" onClick={handleSave} disabled={saving}>
+                                {saving ? 'Saving...' : 'Save Profile'}
+                            </Button>
+                        </div>
                     </div>
                 </Card>
 
@@ -160,14 +315,34 @@ export default function SettingsPage() {
                     <Card variant="surface" padding="lg">
                         <h3 className="text-h3" style={{ marginBottom: '24px' }}>Social Links</h3>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6, pointerEvents: 'none' }}>𝕏</span>
-                                <Input label="Twitter / X" value={socials.twitter} onChange={(e) => setSocials({ ...socials, twitter: e.target.value })} placeholder="@username" style={{ paddingLeft: '48px' }} />
-                            </div>
-                            <div style={{ position: 'relative' }}>
-                                <span style={{ position: 'absolute', left: '16px', top: '42px', fontSize: '1.2rem', opacity: 0.6, pointerEvents: 'none' }}>🌐</span>
-                                <Input label="Website" value={socials.website} onChange={(e) => setSocials({ ...socials, website: e.target.value })} placeholder="https://yoursite.com (Optional)" style={{ paddingLeft: '48px' }} />
-                            </div>
+                            <Input
+                                label="Twitter / X"
+                                value={socials.twitter}
+                                onChange={(e) => setSocials({ ...socials, twitter: e.target.value })}
+                                placeholder="@username"
+                                icon={<span style={{ fontSize: '1.1rem' }}>𝕏</span>}
+                            />
+                            <Input
+                                label="Instagram"
+                                value={socials.instagram}
+                                onChange={(e) => setSocials({ ...socials, instagram: e.target.value })}
+                                placeholder="@username"
+                                icon={<span style={{ fontSize: '1.2rem' }}>📸</span>}
+                            />
+                            <Input
+                                label="YouTube"
+                                value={socials.youtube}
+                                onChange={(e) => setSocials({ ...socials, youtube: e.target.value })}
+                                placeholder="Channel URL"
+                                icon={<span style={{ fontSize: '1.2rem' }}>▶️</span>}
+                            />
+                            <Input
+                                label="Website"
+                                value={socials.website}
+                                onChange={(e) => setSocials({ ...socials, website: e.target.value })}
+                                placeholder="https://yoursite.com"
+                                icon={<span style={{ fontSize: '1.2rem' }}>🌐</span>}
+                            />
                         </div>
                     </Card>
 

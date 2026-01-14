@@ -184,18 +184,22 @@ export default function AudiencePage() {
                                     <tr key={i} className="table-row-hover" style={{ borderBottom: '1px solid var(--color-border)', transition: 'background 0.2s' }}>
                                         <td style={{ padding: '16px 24px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                {/* Identicon */}
+                                                {/* Identicon or Avatar */}
                                                 <div style={{
-                                                    width: '36px', height: '36px', borderRadius: '50%',
-                                                    background: `hsl(${parseInt(m.subscriberAddress.slice(2, 4), 16)}, 70%, 60%)`,
+                                                    width: '40px', height: '40px', borderRadius: '50%',
+                                                    background: m.subscriberAvatar ? `url(${m.subscriberAvatar}) center/cover` : `hsl(${parseInt(m.subscriberAddress.slice(2, 4), 16)}, 70%, 60%)`,
                                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    color: '#fff', fontSize: '0.8rem', fontWeight: 'bold'
+                                                    color: '#fff', fontSize: '0.8rem', fontWeight: 'bold',
+                                                    flexShrink: 0
                                                 }}>
-                                                    {m.subscriberAddress.substring(2, 4).toUpperCase()}
+                                                    {!m.subscriberAvatar && m.subscriberAddress.substring(2, 4).toUpperCase()}
                                                 </div>
                                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    {m.subscriberName && (
+                                                        <div style={{ fontWeight: 600, color: 'var(--color-text-primary)' }}>{m.subscriberName}</div>
+                                                    )}
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                                        <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                                                        <span style={{ fontFamily: 'monospace', fontWeight: m.subscriberName ? 400 : 600, color: m.subscriberName ? 'var(--color-text-secondary)' : 'var(--color-text-primary)', fontSize: m.subscriberName ? '0.8rem' : '0.9rem' }}>
                                                             {m.subscriberAddress.slice(0, 6)}...{m.subscriberAddress.slice(-4)}
                                                         </span>
                                                         <button onClick={() => copyAddress(m.subscriberAddress)} title="Copy" style={{ border: 'none', background: 'none', cursor: 'pointer', opacity: 0.5, fontSize: '0.9rem' }}>📋</button>
@@ -272,14 +276,18 @@ export default function AudiencePage() {
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                     <div style={{
                                         width: '40px', height: '40px', borderRadius: '50%',
-                                        background: `hsl(${parseInt(m.subscriberAddress.slice(2, 4), 16)}, 70%, 60%)`,
+                                        background: m.subscriberAvatar ? `url(${m.subscriberAvatar}) center/cover` : `hsl(${parseInt(m.subscriberAddress.slice(2, 4), 16)}, 70%, 60%)`,
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                        color: '#fff', fontSize: '0.9rem', fontWeight: 'bold'
+                                        color: '#fff', fontSize: '0.9rem', fontWeight: 'bold',
+                                        flexShrink: 0
                                     }}>
-                                        {m.subscriberAddress.substring(2, 4).toUpperCase()}
+                                        {!m.subscriberAvatar && m.subscriberAddress.substring(2, 4).toUpperCase()}
                                     </div>
                                     <div>
-                                        <div style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.9rem' }}>{m.subscriberAddress.slice(0, 6)}...{m.subscriberAddress.slice(-4)}</div>
+                                        {m.subscriberName && <div style={{ fontWeight: 600, fontSize: '1rem' }}>{m.subscriberName}</div>}
+                                        <div style={{ fontWeight: m.subscriberName ? 400 : 600, fontFamily: 'monospace', fontSize: '0.85rem', color: m.subscriberName ? 'var(--color-text-secondary)' : 'var(--color-text-primary)' }}>
+                                            {m.subscriberAddress.slice(0, 6)}...{m.subscriberAddress.slice(-4)}
+                                        </div>
                                         <div className="text-caption">{m.tierName}</div>
                                     </div>
                                 </div>

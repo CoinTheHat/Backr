@@ -24,7 +24,7 @@ export default function WalletButton({ className = '', style = {}, size = 'md', 
             fetch('/api/creators?includePending=true')
                 .then(res => res.json())
                 .then(creators => {
-                    const found = creators.find((c: any) => c.address === address);
+                    const found = creators.find((c: any) => c.address.toLowerCase() === address?.toLowerCase());
                     if (found) setProfile(found);
                 });
         }
@@ -50,17 +50,42 @@ export default function WalletButton({ className = '', style = {}, size = 'md', 
                 {showConnectModal && (
                     <div style={{
                         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                        background: 'rgba(0,0,0,0.7)', zIndex: 100,
+                        background: 'rgba(0,0,0,0.5)', zIndex: 9999,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        backdropFilter: 'blur(5px)'
+                        backdropFilter: 'blur(8px)',
+                        padding: '24px',
+                        animation: 'fadeIn 0.2s ease-out'
                     }} onClick={() => setShowConnectModal(false)}>
+                        <style dangerouslySetInnerHTML={{
+                            __html: `
+                            @keyframes slideUp { from { opacity: 0; transform: translateY(20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+                            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+                        `}} />
                         <div style={{
-                            background: '#1a1d24', border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px',
-                            boxShadow: '0 20px 50px rgba(0,0,0,0.5)'
+                            background: '#fff',
+                            borderRadius: '24px',
+                            boxShadow: '0 40px 80px -12px rgba(0, 0, 0, 0.2)',
+                            width: '100%', maxWidth: '420px',
+                            display: 'flex', flexDirection: 'column',
+                            overflow: 'hidden',
+                            animation: 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
                         }} onClick={e => e.stopPropagation()}>
-                            <h3 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '24px', textAlign: 'center' }}>Connect Wallet</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+
+                            <div style={{ padding: '24px', borderBottom: '1px solid var(--color-border)' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                    <h3 style={{ fontSize: '1.25rem', fontWeight: 800, margin: 0, color: 'var(--color-text-primary)' }}>Connect Wallet</h3>
+                                    <button
+                                        onClick={() => setShowConnectModal(false)}
+                                        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.5rem', color: 'var(--color-text-tertiary)', lineHeight: 1, padding: '4px' }}>
+                                        &times;
+                                    </button>
+                                </div>
+                                <p style={{ fontSize: '0.9rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                                    Choose a wallet to connect to Backr.
+                                </p>
+                            </div>
+
+                            <div style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '60vh', overflowY: 'auto' }}>
                                 {connectors.map((connector) => (
                                     <button
                                         key={connector.uid}
@@ -68,34 +93,51 @@ export default function WalletButton({ className = '', style = {}, size = 'md', 
                                         style={{
                                             padding: '16px',
                                             borderRadius: '16px',
-                                            background: 'rgba(255,255,255,0.03)',
-                                            border: '1px solid rgba(255,255,255,0.05)',
-                                            color: '#fff',
+                                            background: 'var(--color-bg-page)',
+                                            border: '1px solid var(--color-border)',
+                                            color: 'var(--color-text-primary)',
                                             fontSize: '1rem',
-                                            fontWeight: 'bold',
+                                            fontWeight: 600,
                                             cursor: 'pointer',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'space-between',
-                                            transition: 'all 0.2s'
+                                            transition: 'all 0.2s',
+                                            boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
                                         }}
-                                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-                                        onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                        onMouseEnter={e => {
+                                            e.currentTarget.style.borderColor = 'var(--color-primary)';
+                                            e.currentTarget.style.transform = 'translateY(-1px)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                                        }}
+                                        onMouseLeave={e => {
+                                            e.currentTarget.style.borderColor = 'var(--color-border)';
+                                            e.currentTarget.style.transform = 'none';
+                                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+                                        }}
                                     >
-                                        {connector.name}
-                                        {connector.name === 'WalletConnect' && <span style={{ fontSize: '0.8rem', opacity: 0.5 }}>Mobile</span>}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                            {/* Generic wallet icons mapping for visual flair */}
+                                            <div style={{
+                                                width: '32px', height: '32px', borderRadius: '8px',
+                                                background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem'
+                                            }}>
+                                                {connector.name.toLowerCase().includes('metamask') ? '🦊' :
+                                                    connector.name.toLowerCase().includes('coinbase') ? '🔵' :
+                                                        connector.name.toLowerCase().includes('walletconnect') ? '📡' :
+                                                            connector.name.toLowerCase().includes('phantom') ? '👻' : '👛'}
+                                            </div>
+                                            {connector.name}
+                                        </div>
+                                        {connector.name === 'WalletConnect' && <span style={{ fontSize: '0.7rem', background: '#e0f2fe', color: '#0284c7', padding: '2px 8px', borderRadius: '12px', fontWeight: 700 }}>MOBILE</span>}
+                                        <span style={{ color: 'var(--color-text-tertiary)' }}>→</span>
                                     </button>
                                 ))}
                             </div>
-                            <button
-                                onClick={() => setShowConnectModal(false)}
-                                style={{
-                                    marginTop: '24px', width: '100%', padding: '12px',
-                                    background: 'transparent', border: 'none', color: '#a1a1aa', cursor: 'pointer'
-                                }}
-                            >
-                                Close
-                            </button>
+
+                            <div style={{ padding: '16px 24px', background: '#f9fafb', borderTop: '1px solid var(--color-border)', fontSize: '0.8rem', color: 'var(--color-text-tertiary)', textAlign: 'center' }}>
+                                By connecting, you agree to our Terms of Service.
+                            </div>
                         </div>
                     </div>
                 )}
@@ -129,17 +171,18 @@ export default function WalletButton({ className = '', style = {}, size = 'md', 
                     alignItems: 'center',
                     gap: '12px',
                     height: '44px',
-                    background: 'rgba(255,255,255,0.05)',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'var(--color-bg-surface)', // Adapt to theme
+                    border: '1px solid var(--color-border)',
                     borderRadius: '9999px',
-                    backdropFilter: 'blur(10px)',
-                    transition: 'all 0.2s'
+                    color: 'var(--color-text-primary)', // Fix text color
+                    transition: 'all 0.2s',
+                    ...style
                 }}
             >
                 {/* Network Dot */}
                 <div style={{
                     display: 'flex', alignItems: 'center', gap: '6px',
-                    paddingRight: '12px', borderRight: '1px solid rgba(255,255,255,0.1)'
+                    paddingRight: '12px', borderRight: '1px solid var(--color-border)'
                 }}>
                     <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></div>
                     <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#10b981' }}>Mantle</span>
@@ -147,16 +190,16 @@ export default function WalletButton({ className = '', style = {}, size = 'md', 
 
                 {/* Balance */}
                 {balance && (
-                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: '#fff' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--color-text-primary)' }}>
                         {(Number(balance.value) / Math.pow(10, balance.decimals)).toFixed(3)} {balance.symbol}
                     </div>
                 )}
 
                 {/* Avatar */}
-                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : 'linear-gradient(135deg, #65b3ad, #8b5cf6)', border: '1px solid rgba(255,255,255,0.2)' }}></div>
+                <div style={{ width: '28px', height: '28px', borderRadius: '50%', background: profile?.avatarUrl ? `url(${profile.avatarUrl}) center/cover` : 'linear-gradient(135deg, #65b3ad, #8b5cf6)', border: '1px solid var(--color-border)' }}></div>
 
-                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: '#fff' }}>
-                    {formatAddress(address as string)}
+                <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--color-text-primary)' }}>
+                    {profile?.name || formatAddress(address as string)}
                 </span>
             </Button>
 

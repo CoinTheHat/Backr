@@ -8,6 +8,8 @@ import {
     ChevronDown, CheckCircle, ArrowRight
 } from 'lucide-react';
 import CreatorCollage from './components/CreatorCollage';
+import BrandLogo from './components/BrandLogo';
+import CategoryShowcase from './components/CategoryShowcase';
 import WalletButton from './components/WalletButton';
 import { Reveal } from './hooks/useScrollReveal';
 
@@ -29,34 +31,25 @@ export default function Home() {
     };
 
     return (
-        <div className="min-h-screen home-page-bg home-page-overlay text-gray-900 overflow-x-hidden font-sans selection:bg-indigo-100">
+        <div className="min-h-screen home-page-bg home-page-overlay text-brand-dark overflow-x-hidden font-sans selection:bg-brand-primary-light">
 
-            {/* Background Decor - Optional add-ons can be removed if galaxy is enough, keeping for texture if needed
-                But user requested ONLY galaxy. Let's comment out or remove old motifs to be clean.
-            */}
-            {/* <div className="fixed inset-0 z-0 pointer-events-none bg-motif-light opacity-60" /> */}
-            {/* <div className="fixed inset-0 z-0 pointer-events-none bg-motif-grain opacity-40 mix-blend-overlay" /> */}
-
-            {/* ---------------------------------------------------------------------------
-         NAVIGATION
-         --------------------------------------------------------------------------- */}
+            {/* NAVIGATION */}
             <nav
-                className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-100' : 'bg-transparent'
+                className={`fixed top-0 inset-x-0 z-50 h-[72px] flex items-center transition-all duration-300 ${scrolled ? 'bg-black/40 backdrop-blur-md border-b border-white/10' : 'bg-transparent'
                     }`}>
-                {/* ... (Navigation content stays same) ... */}
                 <div className="page-container flex justify-between items-center w-full">
-                    {/* Logo */}
+                    {/* Logo - Text Only */}
                     <div onClick={() => router.push('/')} className="cursor-pointer hover:opacity-80 transition-opacity">
-                        <img src="/logo/backr-mark-b.svg" alt="Backr Logo" className="h-10 w-10" />
+                        <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.75rem', fontWeight: '700', color: 'white', letterSpacing: '-0.03em', margin: 0 }}>Backr</h1>
                     </div>
 
                     {/* Desktop Links */}
                     <div className="hidden md:flex gap-8 items-center">
-                        <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Explore</span>
-                        <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">How it Works</a>
-                        <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Fees</a>
-                        <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">FAQ</a>
-                        <span onClick={() => router.push('/dashboard')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">For Creators</span>
+                        <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-200 hover:text-white transition-colors">Explore</span>
+                        <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-200 hover:text-white transition-colors">How it Works</a>
+                        <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-200 hover:text-white transition-colors">Fees</a>
+                        <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-200 hover:text-white transition-colors">FAQ</a>
+                        <span onClick={() => router.push('/dashboard')} className="cursor-pointer font-medium text-gray-200 hover:text-white transition-colors">For Creators</span>
                     </div>
 
                     {/* Right Action */}
@@ -65,7 +58,7 @@ export default function Home() {
                     </div>
 
                     {/* Mobile Hamburger */}
-                    <button className="md:hidden p-2 text-2xl focus:outline-none" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
+                    <button className="md:hidden p-2 text-2xl focus:outline-none text-white" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle menu">
                         {mobileMenuOpen ? '✕' : '☰'}
                     </button>
                 </div>
@@ -73,13 +66,13 @@ export default function Home() {
 
             {/* Mobile Menu */}
             {mobileMenuOpen && (
-                <div className="fixed top-[72px] inset-x-0 bg-white border-b border-gray-100 p-6 z-40 animate-slide-down shadow-lg md:hidden">
+                <div className="fixed top-[72px] inset-x-0 bg-black/90 backdrop-blur-xl border-b border-white/10 p-6 z-40 animate-slide-down shadow-lg md:hidden text-white">
                     <div className="flex flex-col gap-6 text-xl font-semibold">
                         <div onClick={() => router.push('/explore')}>Explore</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('fees-and-features')?.scrollIntoView(); }}>Fees</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('faq')?.scrollIntoView(); }}>FAQ</div>
-                        <div className="pt-4 border-t border-gray-100 flex justify-center">
+                        <div className="pt-4 border-t border-white/10 flex justify-center">
                             <WalletButton />
                         </div>
                     </div>
@@ -87,8 +80,6 @@ export default function Home() {
             )}
 
             <main className="relative pt-[72px]">
-
-                {/* Hero Background Wrapper Removed - Now Full Page */}
 
                 {/* SECTION 1: HERO EDITORIAL */}
                 <section className="relative z-10 min-h-[90vh] flex items-center pt-8 pb-16 lg:pb-0 overflow-hidden">
@@ -99,13 +90,13 @@ export default function Home() {
 
                             {/* Trust Badge */}
                             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full mb-8 self-center lg:self-start border border-white/20 backdrop-blur-sm">
-                                <span className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                                <span className="w-2 h-2 bg-brand-accent rounded-full animate-pulse"></span>
                                 <span className="text-xs font-bold text-white uppercase tracking-wide">Built on Mantle Network</span>
                             </div>
 
                             <h1 className="text-display mb-6 text-white leading-[1.05] tracking-tight">
                                 Empower <br />
-                                Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-indigo-300 font-serif italic pr-2">Creativity</span>
+                                Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-secondary to-brand-primary font-serif italic pr-2">Creativity</span>
                             </h1>
 
                             <p className="text-xl text-gray-200 mb-10 leading-relaxed font-light max-w-lg mx-auto lg:mx-0 font-medium">
@@ -116,12 +107,12 @@ export default function Home() {
                                 {/* Conditional Primary CTA */}
                                 {!isConnected ? (
                                     <WalletButton
-                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all"
+                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-glow hover:-translate-y-1 transition-all"
                                         size="lg"
                                     />
                                 ) : (
                                     <button
-                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all"
+                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-glow hover:-translate-y-1 transition-all"
                                         onClick={() => router.push('/dashboard')}
                                     >
                                         Go to Studio
@@ -133,19 +124,6 @@ export default function Home() {
                                 </button>
                             </div>
 
-                            {/* Social Stats */}
-                            <div className="flex flex-wrap gap-8 text-sm font-medium justify-center lg:justify-start w-full opacity-90 text-white">
-                                <div className="flex items-center gap-2">
-                                    <div className="flex -space-x-2">
-                                        {[1, 2, 3].map(i => <div key={i} className={`w-6 h-6 rounded-full bg-gray-200 border-2 border-white bg-cover`} style={{ backgroundImage: `url(https://i.pravatar.cc/100?u=${i + 10})` }} />)}
-                                    </div>
-                                    <span>1,200+ Creators</span>
-                                </div>
-                                <div className="w-px h-4 bg-white/30 hidden sm:block"></div>
-                                <div>$500k+ Paid Out</div>
-                                <div className="w-px h-4 bg-white/30 hidden sm:block"></div>
-                                <div>Instant Settlement</div>
-                            </div>
                         </div>
 
                         {/* RIGHT COLUMN: Large Creator Collage */}
@@ -164,26 +142,25 @@ export default function Home() {
 
 
                 {/* SECTION 2: HOW IT WORKS */}
-                {/* Kept transparent to show galaxy, removed border wrapper styles if not needed or adapted */}
                 <section id="how-it-works" className="relative z-10 py-24 border-b border-white/10">
                     <div className="page-container">
                         <Reveal>
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl font-bold mb-4 font-serif text-white">How Backr Works</h2>
-                                <p className="text-body text-indigo-100 font-medium">Simple, transparent, and built for you.</p>
+                                <p className="text-body text-brand-secondary/80 font-medium">Simple, transparent, and built for you.</p>
                             </div>
                         </Reveal>
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
-                                { icon: <Palette size={28} className="text-indigo-600" />, title: 'Create your page', desc: 'Customize your creator page, set your tier prices, and start creating.' },
-                                { icon: <Lock size={28} className="text-pink-600" />, title: 'Share exclusive content', desc: 'Your members only content and connect with your biggest fans.' },
-                                { icon: <Wallet size={28} className="text-emerald-600" />, title: 'Get paid instantly', desc: 'Earn crypto payouts in seconds & settle, directly on Mantle.' }
+                                { icon: <Palette size={28} className="text-brand-secondary" />, title: 'Create your page', desc: 'Customize your creator page, set your tier prices, and start creating.' },
+                                { icon: <Lock size={28} className="text-brand-primary" />, title: 'Share exclusive content', desc: 'Your members only content and connect with your biggest fans.' },
+                                { icon: <Wallet size={28} className="text-brand-accent" />, title: 'Get paid instantly', desc: 'Earn crypto payouts in seconds & settle, directly on Mantle.' }
                             ].map((step, i) => (
                                 <Reveal key={i} delay={(i + 1) * 100}>
                                     <div className="flex flex-col items-start p-8 rounded-2xl glass-card bg-white/90 shadow-xl hover:bg-white hover:shadow-2xl transition-all duration-300">
-                                        <div className="mb-4 bg-indigo-50 p-3 rounded-full shadow-sm">{step.icon}</div>
-                                        <h3 className="text-lg font-bold mb-2 text-gray-900">{step.title}</h3>
+                                        <div className="mb-4 bg-brand-light p-3 rounded-full shadow-sm">{step.icon}</div>
+                                        <h3 className="text-lg font-bold mb-2 text-brand-dark">{step.title}</h3>
                                         <p className="text-sm text-gray-700 leading-relaxed font-medium">{step.desc}</p>
                                     </div>
                                 </Reveal>
@@ -196,62 +173,40 @@ export default function Home() {
                 {/* SECTION 3: OWNERSHIP PROPOSITION */}
                 <section className="py-24 relative overflow-hidden">
                     <div className="page-container grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-
-                        {/* Product Visual */}
                         <Reveal>
-                            <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-gray-900 aspect-video lg:aspect-square">
-                                {/* Simulated Video/Dashboard UI */}
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="w-16 h-16 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center cursor-pointer hover:scale-110 transition-transform">
-                                        <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[18px] border-l-white border-b-[10px] border-b-transparent ml-1"></div>
-                                    </div>
-                                </div>
-                                <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/80 to-transparent text-white">
-                                    <div className="flex items-center gap-3 mb-2">
-                                        <div className="w-10 h-10 rounded-full bg-indigo-500 border-2 border-white"></div>
-                                        <div>
-                                            <div className="font-bold text-sm">Sarah Artist</div>
-                                            <div className="text-xs text-gray-300">Studio Tour & Gear Setup</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <CategoryShowcase />
                         </Reveal>
 
-                        {/* Copy */}
-                        <div className="lg:pl-8">
-                            <Reveal delay={100}>
-                                <h2 className="text-4xl md:text-5xl font-serif font-medium mb-6 text-gray-900 leading-tight">
+                        <Reveal delay={0.2}>
+                            <div>
+                                <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-white">
                                     Complete creative control. <br />
-                                    <span className="text-indigo-600">Own your content, your list, and your revenue.</span>
+                                    <span className="text-brand-primary">Own your content, your list, and your revenue.</span>
                                 </h2>
-                                <p className="text-xl text-gray-600 mb-10 leading-relaxed">
+                                <p className="text-xl text-gray-300 mb-8 leading-relaxed">
                                     No algorithms dictating between you and your biggest fans.
                                 </p>
 
-                                <ul className="space-y-6">
+                                <ul className="space-y-4">
                                     {[
-                                        "Decentralized settlements on Mantle",
-                                        "Own your email list & data",
-                                        "Consistent, sustainable payments"
+                                        'Decentralized settlements on Mantle',
+                                        'Own your email list & data',
+                                        'Consistent, sustainable payments'
                                     ].map((item, i) => (
-                                        <li key={i} className="flex items-center gap-4">
-                                            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
-                                                <CheckCircle size={14} strokeWidth={3} />
-                                            </div>
-                                            <span className="text-lg text-gray-700 font-medium">{item}</span>
+                                        <li key={i} className="flex items-center gap-3 text-gray-200">
+                                            <CheckCircle className="w-6 h-6 text-brand-secondary flex-shrink-0" />
+                                            <span>{item}</span>
                                         </li>
                                     ))}
                                 </ul>
-                            </Reveal>
-                        </div>
-
+                            </div>
+                        </Reveal>
                     </div>
                 </section>
 
 
-                {/* SECTION 4: FEES & FEATURES (Cosmic Dark) */}
-                <section id="fees-and-features" className="py-32 bg-cosmic text-white relative">
+                {/* SECTION 4: FEES & FEATURES */}
+                <section id="fees-and-features" className="py-32 relative text-white">
                     <div className="page-container relative z-10">
                         <Reveal>
                             <div className="text-center mb-20 max-w-3xl mx-auto">
@@ -268,20 +223,20 @@ export default function Home() {
                             <Reveal delay={100}>
                                 <div className="glass-card-dark rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
                                     <div className="mb-6 bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center">
-                                        <DollarSign className="text-amber-300" size={28} />
+                                        <DollarSign className="text-white" size={28} />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-4">You set your prices</h3>
                                     <p className="text-gray-400 mb-8 flex-1">Set any price, anytime. Create membership tiers that work for your audience.</p>
                                     <div className="flex gap-2 opacity-80">
-                                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">Bronze 0.05 MNT</span>
-                                        <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">Silver 0.1 MNT</span>
+                                        <span className="px-3 py-1 rounded-full bg-brand-secondary/20 text-brand-secondary text-xs font-bold border border-brand-secondary/30">Bronze 0.05 MNT</span>
+                                        <span className="px-3 py-1 rounded-full bg-brand-primary/20 text-brand-primary text-xs font-bold border border-brand-primary/30">Silver 0.1 MNT</span>
                                     </div>
                                 </div>
                             </Reveal>
 
                             {/* Value Card B (Highlight) */}
                             <Reveal delay={200}>
-                                <div className="bg-gradient-to-b from-indigo-500 to-indigo-700 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-white/20 flex flex-col">
+                                <div className="glass-card-dark bg-brand-secondary/10 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-brand-secondary/30 flex flex-col">
                                     <div className="absolute top-0 right-0 p-6">
                                         <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Simple</span>
                                     </div>
@@ -291,10 +246,10 @@ export default function Home() {
 
                                     <div className="border-t border-white/20 pt-6 space-y-3">
                                         <div className="flex items-center gap-3 text-sm font-medium">
-                                            <CheckCircle size={16} className="text-indigo-200" /> No monthly subscription
+                                            <CheckCircle size={16} className="text-brand-accent" /> No monthly subscription
                                         </div>
                                         <div className="flex items-center gap-3 text-sm font-medium">
-                                            <CheckCircle size={16} className="text-indigo-200" /> Includes all features
+                                            <CheckCircle size={16} className="text-brand-accent" /> Includes all features
                                         </div>
                                     </div>
                                 </div>
@@ -304,20 +259,20 @@ export default function Home() {
                             <Reveal delay={300}>
                                 <div className="glass-card-dark rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
                                     <div className="mb-6 bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center">
-                                        <Zap className="text-emerald-400" size={28} />
+                                        <Zap className="text-brand-accent" size={28} />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-4">Instant Payouts</h3>
                                     <p className="text-gray-400 mb-8 flex-1">Funds are settled directly to your wallet on the Mantle Network.</p>
 
                                     <div className="space-y-3">
                                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                                            <CheckCircle size={14} className="text-emerald-500" /> Creator wallet payouts
+                                            <CheckCircle size={14} className="text-brand-accent" /> Creator wallet payouts
                                         </div>
                                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                                            <CheckCircle size={14} className="text-emerald-500" /> Earn friendly crypto payments
+                                            <CheckCircle size={14} className="text-brand-accent" /> Earn friendly crypto payments
                                         </div>
                                         <div className="flex items-center gap-3 text-sm text-gray-400">
-                                            <CheckCircle size={14} className="text-emerald-500" /> Predictable fees
+                                            <CheckCircle size={14} className="text-brand-accent" /> Predictable fees
                                         </div>
                                     </div>
                                 </div>
@@ -326,7 +281,7 @@ export default function Home() {
                         </div>
 
                         <div className="mt-20 text-center">
-                            <button className="bg-white text-indigo-900 px-10 py-4 rounded-full font-bold text-lg hover:bg-indigo-50 transition-colors shadow-lg shadow-indigo-900/20" onClick={() => router.push('/dashboard')}>
+                            <button className="bg-white text-brand-dark px-10 py-4 rounded-full font-bold text-lg hover:bg-gray-100 transition-colors shadow-lg shadow-white/20" onClick={() => router.push('/dashboard')}>
                                 Create your page
                             </button>
                         </div>
@@ -335,17 +290,16 @@ export default function Home() {
                 </section>
 
 
-
                 {/* SECTION 5: COMPETITOR COMPARISON */}
-                <section id="compare" className="py-24 bg-white">
+                <section id="compare" className="py-24 relative">
                     <div className="page-container">
                         <div className="max-w-4xl mx-auto">
-                            <h2 className="text-3xl font-serif font-bold text-center mb-16">Backr vs. The Old Way</h2>
+                            <h2 className="text-3xl font-serif font-bold text-center mb-16 text-white">Backr vs. The Old Way</h2>
 
-                            <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                                <div className="grid grid-cols-3 bg-gray-50 border-b border-gray-100 text-sm font-bold text-gray-500 uppercase tracking-wider">
+                            <div className="glass-card-dark rounded-3xl overflow-hidden shadow-xl border border-white/10">
+                                <div className="grid grid-cols-3 bg-white/5 border-b border-white/10 text-sm font-bold text-gray-400 uppercase tracking-wider">
                                     <div className="p-6">Feature</div>
-                                    <div className="p-6 text-center text-indigo-600 bg-indigo-50/50">Backr</div>
+                                    <div className="p-6 text-center text-brand-secondary bg-brand-secondary/10">Backr</div>
                                     <div className="p-6 text-center">Patreon</div>
                                 </div>
 
@@ -356,10 +310,10 @@ export default function Home() {
                                     { feature: 'Censorship', backr: 'Resistant', patreon: 'Risk of de-platforming' },
                                     { feature: 'Audience Data', backr: 'Owned by You', patreon: 'Owned by Platform' },
                                 ].map((row, i) => (
-                                    <div key={i} className="grid grid-cols-3 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors text-sm md:text-base">
-                                        <div className="p-6 font-medium text-gray-900">{row.feature}</div>
-                                        <div className="p-6 text-center font-bold text-indigo-700 bg-indigo-50/30">{row.backr}</div>
-                                        <div className="p-6 text-center text-gray-500">{row.patreon}</div>
+                                    <div key={i} className="grid grid-cols-3 border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors text-sm md:text-base">
+                                        <div className="p-6 font-medium text-white">{row.feature}</div>
+                                        <div className="p-6 text-center font-bold text-brand-secondary bg-brand-secondary/10 shadow-[inset_0_0_20px_rgba(107,139,255,0.1)]">{row.backr}</div>
+                                        <div className="p-6 text-center text-gray-400">{row.patreon}</div>
                                     </div>
                                 ))}
                             </div>
@@ -368,9 +322,9 @@ export default function Home() {
                 </section>
 
                 {/* SECTION 6: FAQ */}
-                <section id="faq" className="py-24 bg-gray-50 border-t border-gray-200">
+                <section id="faq" className="py-24 relative border-t border-white/10">
                     <div className="page-container max-w-3xl">
-                        <h2 className="text-3xl font-serif font-bold text-center mb-12">Frequently Asked Questions</h2>
+                        <h2 className="text-3xl font-serif font-bold text-center mb-12 text-white">Frequently Asked Questions</h2>
 
                         <div className="space-y-4">
                             {[
@@ -379,15 +333,15 @@ export default function Home() {
                                 { q: "Can I migrate my Patreon subscribers?", a: "We provide tools to help you import your email list, but your subscribers will need to set up a new payment method on Backr." },
                                 { q: "What is Mantle Network?", a: "Mantle is a high-performance Ethereum Layer 2 network that enables fast, cheap transactions while maintaining security." }
                             ].map((item, i) => (
-                                <div key={i} className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+                                <div key={i} className="glass-card-dark rounded-2xl border border-white/10 overflow-hidden">
                                     <button
-                                        className="w-full flex justify-between items-center p-6 text-left font-bold text-gray-900 focus:outline-none"
+                                        className="w-full flex justify-between items-center p-6 text-left font-bold text-white focus:outline-none hover:bg-white/5 transition-colors"
                                         onClick={() => toggleFaq(i)}
                                     >
                                         {item.q}
                                         <ChevronDown className={`transform transition-transform duration-300 text-gray-400 ${openFaq === i ? 'rotate-180' : ''}`} />
                                     </button>
-                                    <div className={`px-6 text-gray-600 overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-40 pb-6' : 'max-h-0'}`}>
+                                    <div className={`px-6 text-gray-300 overflow-hidden transition-all duration-300 ${openFaq === i ? 'max-h-40 pb-6' : 'max-h-0'}`}>
                                         {item.a}
                                     </div>
                                 </div>
@@ -398,54 +352,46 @@ export default function Home() {
 
 
                 {/* SECTION 7: FOOTER */}
-                <footer className="bg-white border-t border-gray-100 pt-20 pb-12">
+                <footer className="relative border-t border-white/10 pt-20 pb-12 bg-black/20 backdrop-blur-lg">
                     <div className="page-container">
 
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mb-20 text-sm">
 
                             {/* Column 1: Brand */}
                             <div className="md:col-span-1">
-                                <div className="font-serif text-2xl font-bold mb-4 flex items-center gap-2">
-                                    <div className="w-8 h-8 bg-indigo-600 rounded-lg"></div> Backr
+                                <div className="font-serif text-2xl font-bold mb-4 flex items-center gap-2 text-white">
+                                    <span>Backr</span>
                                 </div>
-                                <p className="text-gray-500 mb-6 leading-relaxed">
+                                <p className="text-gray-400 mb-6 leading-relaxed">
                                     The future of creator monetization. Built on Mantle. Owned by you.
                                 </p>
                             </div>
 
                             {/* Column 2: Platform */}
                             <div className="flex flex-col gap-4">
-                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Platform</strong>
-                                <a href="/explore" onClick={(e) => { e.preventDefault(); router.push('/explore') }} className="text-gray-500 hover:text-indigo-600 transition-colors">Explore Creators</a>
-                                <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">How it works</a>
-                                <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">Fees & Features</a>
-                                <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">FAQ</a>
+                                <strong className="text-white font-bold uppercase tracking-wider text-xs">Platform</strong>
+                                <a href="/explore" onClick={(e) => { e.preventDefault(); router.push('/explore') }} className="text-gray-400 hover:text-brand-secondary transition-colors">Explore Creators</a>
+                                <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-400 hover:text-brand-secondary transition-colors">How it works</a>
+                                <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-400 hover:text-brand-secondary transition-colors">Fees & Features</a>
+                                <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-400 hover:text-brand-secondary transition-colors">FAQ</a>
                             </div>
 
-                            {/* Column 3: Support */}
+                            {/* Column 3: Company & Community */}
                             <div className="flex flex-col gap-4">
-                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Support</strong>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Help Center</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Community</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Documentation</a>
-                            </div>
-
-                            {/* Column 4: Company */}
-                            <div className="flex flex-col gap-4">
-                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Company</strong>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">About</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Careers</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Terms of Service</a>
-                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Privacy Policy</a>
+                                <strong className="text-white font-bold uppercase tracking-wider text-xs">Company</strong>
+                                <a href="/about" onClick={(e) => { e.preventDefault(); router.push('/about') }} className="text-gray-400 hover:text-brand-secondary transition-colors">About</a>
+                                <a href="/community" onClick={(e) => { e.preventDefault(); router.push('/community') }} className="text-gray-400 hover:text-brand-secondary transition-colors">Community</a>
+                                <a href="/terms" onClick={(e) => { e.preventDefault(); router.push('/terms') }} className="text-gray-400 hover:text-brand-secondary transition-colors">Terms of Service</a>
+                                <a href="/privacy" onClick={(e) => { e.preventDefault(); router.push('/privacy') }} className="text-gray-400 hover:text-brand-secondary transition-colors">Privacy Policy</a>
                             </div>
 
                         </div>
 
-                        <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
-                            <div>© 2024 Backr Inc. All rights reserved.</div>
-                            <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 rounded-full border border-gray-100">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span className="font-medium text-gray-600 text-xs">Powered by Mantle</span>
+                        <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500">
+                            <div>© 2026 Backr Inc. All rights reserved.</div>
+                            <div className="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-full border border-white/10">
+                                <span className="w-2 h-2 rounded-full bg-brand-accent animate-pulse"></span>
+                                <span className="font-medium text-gray-400 text-xs">Powered by Mantle</span>
                             </div>
                         </div>
 
@@ -453,6 +399,6 @@ export default function Home() {
                 </footer>
 
             </main>
-        </div>
+        </div >
     );
 }

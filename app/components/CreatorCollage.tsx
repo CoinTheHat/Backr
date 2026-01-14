@@ -15,7 +15,7 @@ export default function CreatorCollage() {
         <div className="relative w-full h-[650px] overflow-visible perspective-[1200px] pointer-events-none select-none">
 
             {/* Background Decor */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-blue-50/50 to-teal-50/30 rounded-full blur-3xl opacity-60 animate-pulse-slow" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-gradient-to-tr from-brand-secondary/20 to-brand-primary/10 rounded-full blur-3xl opacity-60 animate-pulse-slow" />
 
             {/* 1. Main Portrait (Center) */}
             <div className="absolute top-[10%] left-[15%] w-[280px] md:w-[320px] aspect-[3/4] rounded-2xl shadow-2xl overflow-hidden z-20 border-[6px] border-white rotate-[-3deg] hover:rotate-0 transition-transform duration-700 ease-out">
@@ -25,37 +25,34 @@ export default function CreatorCollage() {
                     alt="Creator Portrait"
                 />
                 <div className="absolute bottom-0 inset-x-0 p-4 bg-gradient-to-t from-black/80 to-transparent text-white">
-                    <p className="font-playfair text-xl font-bold">Sarah Artist</p>
-                    <p className="text-xs opacity-90 uppercase tracking-widest">Illustrator</p>
+                    <p className="font-playfair text-xl font-bold">Your Name</p>
+                    <p className="text-xs opacity-90 uppercase tracking-widest">Creator</p>
                 </div>
             </div>
 
-            {/* 2. Video Snippet (Top Right) */}
-            <div className="absolute top-[5%] right-[5%] w-[200px] aspect-video bg-black rounded-xl shadow-xl z-30 border-4 border-white rotate-[6deg] animate-float-slow">
-                <div className="w-full h-full relative overflow-hidden bg-gray-800 flex items-center justify-center group">
-                    <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <div className="w-0 h-0 border-t-[8px] border-t-transparent border-l-[14px] border-l-white border-b-[8px] border-b-transparent ml-1" />
-                    </div>
-                    {/* Abstract thumbnail fallback */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-500 to-purple-600 opacity-50 -z-10" />
-                </div>
+            <div className="absolute top-[5%] right-[5%] w-[200px] aspect-video bg-black rounded-xl shadow-xl z-30 border-4 border-white rotate-[6deg] animate-float-slow overflow-hidden">
+                <img
+                    src="/images/home_visuals/artist-work.png"
+                    className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-700"
+                    alt="Art Piece"
+                />
             </div>
 
             {/* 3. Audio Player (Bottom Left) */}
             <div className="absolute bottom-[20%] left-[5%] w-[240px] bg-white rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.12)] z-30 p-4 border border-gray-100 rotate-[4deg] animate-float-medium">
                 <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600">🎙️</div>
+                    <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary">🎙️</div>
                     <div className="flex-1 min-w-0">
                         <div className="h-2 w-3/4 bg-gray-200 rounded mb-1.5" />
                         <div className="h-2 w-1/2 bg-gray-100 rounded" />
                     </div>
                 </div>
                 <div className="w-full h-1 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="w-2/3 h-full bg-pink-500 rounded-full" />
+                    <div className="w-2/3 h-full bg-brand-primary rounded-full" />
                 </div>
                 <div className="flex justify-between text-[10px] text-gray-400 mt-1 font-mono">
-                    <span>12:30</span>
-                    <span>-04:20</span>
+                    <span>--:--</span>
+                    <span>--:--</span>
                 </div>
             </div>
 
@@ -68,7 +65,7 @@ export default function CreatorCollage() {
                     <div className="h-2 w-full bg-gray-100 rounded" />
                 </div>
                 <div className="mt-4 flex items-center gap-2">
-                    <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold">POST</span>
+                    <span className="text-[10px] bg-brand-secondary/10 text-brand-secondary px-2 py-0.5 rounded-full font-bold">POST</span>
                     <span className="text-[10px] text-gray-400">2h ago</span>
                 </div>
             </div>
@@ -83,7 +80,7 @@ export default function CreatorCollage() {
                     ))}
                 </div>
                 <div className="pr-1">
-                    <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">New Backrs</p>
+                    <p className="text-xs text-brand-secondary font-bold uppercase tracking-wider">New Backrs</p>
                 </div>
             </div>
 

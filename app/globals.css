@@ -4,35 +4,38 @@
 
 :root {
   /* Brand Colors */
-  --color-primary: #009F7F;
-  /* Mantle Teal */
-  --color-primary-hover: #008f72;
-  --color-primary-light: #e6f7f4;
+  /* Brand Colors */
+  --color-primary: #FF6EB5;
+  /* Galaxy Pink */
+  --color-primary-hover: #E85DA0;
+  --color-primary-light: #FFD4EA;
 
-  --color-brand-blue: #5865F2;
-  /* Retain for Legacy references, treat as Accent */
-  --color-accent: #6366f1;
-  /* Indigo/Purple mix */
-  --color-accent-light: #eef2ff;
+  --color-brand-blue: #6B8BFF;
+  /* Nebula Blue (Secondary) */
+  --color-accent: #88E9CE;
+  /* Starlight Cyan */
+  --color-accent-light: #E0FAF5;
 
   /* Neutral Scale */
-  --color-bg-page: #F9FAFB;
+  --color-bg-page: #F2F2FA;
+  /* Nebula Pastel (Light) */
+  --color-bg-dark: #0D0B1D;
+  /* Cosmic Ink (Dark) */
   --color-bg-surface: #FFFFFF;
   --color-bg-surface-hover: #FAFAFA;
-  --color-bg-skeleton: #e5e7eb;
+  --color-bg-skeleton: #e2e4ea;
 
-  --color-text-primary: #111827;
-  /* Gray 900 */
-  --color-text-secondary: #4B5563;
-  /* Gray 600 */
-  --color-text-tertiary: #9CA3AF;
-  /* Gray 400 */
+  --color-text-primary: #0D0B1D;
+  /* Deep Cosmic Ink */
+  --color-text-secondary: #475569;
+  /* Slate 600 */
+  --color-text-tertiary: #94A3B8;
+  /* Slate 400 */
 
   /* Borders */
-  --color-border: #E5E7EB;
-  /* Gray 200 */
-  --color-border-hover: #D1D5DB;
-  /* Gray 300 */
+  --color-border: #E2E8F0;
+  /* Slate 200 */
+  --color-border-hover: #CBD5E1;
   --color-border-focus: var(--color-primary);
 
   /* Status Colors */
@@ -673,12 +676,16 @@ textarea {
    FULL HOME PAGE BACKGROUND
 -------------------------------------------------------------------------- */
 .home-page-bg {
-  background-image: url('/backgrounds/hero-bg.png');
+  background-image:
+    radial-gradient(circle at top, rgba(0, 0, 0, 0.25) 0, transparent 45%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45)),
+    url('/backgrounds/hero-bg.png');
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top center;
   background-attachment: fixed;
-  /* Fixed to cover scroll */
+  background-color: #05010f;
+  /* dark purple fallback, NOT grey */
 }
 
 /* Fallback for mobile if fixed background causing issues */
@@ -691,8 +698,7 @@ textarea {
 }
 
 .home-page-overlay {
-  background: radial-gradient(circle at top, rgba(0, 0, 0, 0.25) 0, transparent 45%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45));
+  /* background merged into home-page-bg to prevent override */
 }
 
 /* --------------------------------------------------------------------------
