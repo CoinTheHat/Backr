@@ -242,7 +242,7 @@ export default function Home() {
 
                             {/* Value Card B (Highlight) */}
                             <Reveal delay={200}>
-                                <div className="glass-card-dark bg-brand-secondary/10 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-brand-secondary/30 flex flex-col">
+                                <div className="glass-card-dark bg-black/60 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-brand-secondary/50 flex flex-col backdrop-blur-xl">
                                     <div className="absolute top-0 right-0 p-6">
                                         <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Simple</span>
                                     </div>
