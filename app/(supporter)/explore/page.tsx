@@ -28,11 +28,10 @@ function ExploreContent() {
             setLoading(true);
             try {
                 // Parallel fetching for speed
-                const [creatorsRes, catRes, tagRes, assignRes] = await Promise.all([
+                const [creatorsRes, catRes, tagRes] = await Promise.all([
                     fetch('/api/creators').then(r => r.json()),
                     fetch('/api/taxonomy/categories').then(r => r.json()),
-                    fetch('/api/taxonomy/hashtags').then(r => r.json()),
-                    supabase.from('creatorTaxonomy').select('*') // Direct fetch for assignments for filtering
+                    fetch('/api/taxonomy/hashtags').then(r => r.json())
                 ]);
 
                 if (Array.isArray(creatorsRes)) setCreators(creatorsRes);
@@ -64,25 +63,28 @@ function ExploreContent() {
 
     // Filter Logic
     const filteredCreators = creators.filter(c => {
-        const assignment = assignments.find(a => a.creatorAddress === c.address);
+        // Taxonomy is stored in socials.taxonomy
+        const taxonomy = c.socials?.taxonomy || {};
+        const categoryIds = taxonomy.categoryIds || [];
+        const hashtagIds = taxonomy.hashtagIds || [];
 
         // 1. Search Query
         const matchesQuery = !query ||
             c.name?.toLowerCase().includes(query) ||
             c.description?.toLowerCase().includes(query) ||
             c.address?.toLowerCase().includes(query) ||
-            (assignment?.hashtagIds?.some((tagId: string) => {
-                const tag = trendingTags.find(t => t.id === tagId); // Inefficient lookup but acceptable for small datasets
+            (hashtagIds.some((tagId: string) => {
+                const tag = trendingTags.find(t => t.id === tagId);
                 return tag?.label.toLowerCase().includes(query);
             }));
 
         // 2. Category Filter
         const matchesCategory = categoryId === 'All' ||
-            (assignment?.categoryIds?.includes(categoryId));
+            (categoryIds.includes(categoryId));
 
         // 3. Hashtag Filter (from URL param)
         const matchesTag = !hashtag ||
-            (assignment?.hashtagIds?.includes(hashtag));
+            (hashtagIds.includes(hashtag));
 
         return matchesQuery && matchesCategory && matchesTag;
     });
