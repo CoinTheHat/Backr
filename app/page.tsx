@@ -8,6 +8,7 @@ import {
     ChevronDown, CheckCircle, ArrowRight
 } from 'lucide-react';
 import CreatorCollage from './components/CreatorCollage';
+import WalletButton from './components/WalletButton';
 import { Reveal } from './hooks/useScrollReveal';
 
 export default function Home() {
@@ -48,9 +49,16 @@ export default function Home() {
 
                     {/* Desktop Links */}
                     <div className="hidden md:flex gap-8 items-center">
-                        <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Find Creators</span>
+                        <span onClick={() => router.push('/explore')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Explore</span>
                         <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">How it Works</a>
-                        <button className="btn-primary" onClick={() => router.push('/dashboard')}>Get Started</button>
+                        <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">Fees</a>
+                        <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">FAQ</a>
+                        <span onClick={() => router.push('/dashboard')} className="cursor-pointer font-medium text-gray-600 hover:text-black transition-colors">For Creators</span>
+                    </div>
+
+                    {/* Right Action */}
+                    <div className="hidden md:block">
+                        <WalletButton />
                     </div>
 
                     {/* Mobile Hamburger */}
@@ -64,10 +72,12 @@ export default function Home() {
             {mobileMenuOpen && (
                 <div className="fixed top-[72px] inset-x-0 bg-white border-b border-gray-100 p-6 z-40 animate-slide-down shadow-lg md:hidden">
                     <div className="flex flex-col gap-6 text-xl font-semibold">
-                        <div onClick={() => router.push('/explore')}>Find Creators</div>
+                        <div onClick={() => router.push('/explore')}>Explore</div>
                         <div onClick={() => { setMobileMenuOpen(false); document.getElementById('how-it-works')?.scrollIntoView(); }}>How it Works</div>
-                        <div className="pt-4 border-t border-gray-100">
-                            <button className="btn-primary w-full justify-center py-3" onClick={() => router.push('/dashboard')}>Get Started</button>
+                        <div onClick={() => { setMobileMenuOpen(false); document.getElementById('fees-and-features')?.scrollIntoView(); }}>Fees</div>
+                        <div onClick={() => { setMobileMenuOpen(false); document.getElementById('faq')?.scrollIntoView(); }}>FAQ</div>
+                        <div className="pt-4 border-t border-gray-100 flex justify-center">
+                            <WalletButton />
                         </div>
                     </div>
                 </div>
@@ -97,10 +107,22 @@ export default function Home() {
                                 Build a thriving community and earn directly from your fans. All on Mantle, with no middleman.
                             </p>
 
-                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
-                                <button className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all" onClick={() => router.push('/dashboard')}>
-                                    Create your page
-                                </button>
+                            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16 items-center lg:items-start justify-center lg:justify-start">
+                                {/* Conditional Primary CTA */}
+                                {!isConnected ? (
+                                    <WalletButton
+                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all"
+                                        size="lg"
+                                    />
+                                ) : (
+                                    <button
+                                        className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all"
+                                        onClick={() => router.push('/dashboard')}
+                                    >
+                                        Go to Studio
+                                    </button>
+                                )}
+
                                 <button className="btn-secondary px-8 py-4 text-lg w-full sm:w-auto justify-center bg-white border-gray-200 hover:border-gray-300" onClick={() => router.push('/explore')}>
                                     Discover creators
                                 </button>
@@ -223,7 +245,7 @@ export default function Home() {
 
 
                 {/* SECTION 4: FEES & FEATURES (Cosmic Dark) */}
-                <section className="py-32 bg-cosmic text-white relative">
+                <section id="fees-and-features" className="py-32 bg-cosmic text-white relative">
                     <div className="page-container relative z-10">
                         <Reveal>
                             <div className="text-center mb-20 max-w-3xl mx-auto">
@@ -309,7 +331,7 @@ export default function Home() {
 
 
                 {/* SECTION 5: COMPETITOR COMPARISON */}
-                <section className="py-24 bg-white">
+                <section id="compare" className="py-24 bg-white">
                     <div className="page-container">
                         <div className="max-w-4xl mx-auto">
                             <h2 className="text-3xl font-serif font-bold text-center mb-16">Backr vs. The Old Way</h2>
@@ -340,7 +362,7 @@ export default function Home() {
                 </section>
 
                 {/* SECTION 6: FAQ */}
-                <section className="py-24 bg-gray-50 border-t border-gray-200">
+                <section id="faq" className="py-24 bg-gray-50 border-t border-gray-200">
                     <div className="page-container max-w-3xl">
                         <h2 className="text-3xl font-serif font-bold text-center mb-12">Frequently Asked Questions</h2>
 
@@ -373,40 +395,44 @@ export default function Home() {
                 <footer className="bg-white border-t border-gray-100 pt-20 pb-12">
                     <div className="page-container">
 
-                        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 mb-20">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-20 text-sm">
 
-                            {/* Newsletter & Brand */}
-                            <div className="md:col-span-4">
-                                <div className="font-serif text-3xl font-bold mb-4">Backr</div>
-                                <p className="text-gray-500 mb-8 max-w-sm text-sm leading-relaxed">
+                            {/* Column 1: Brand */}
+                            <div className="md:col-span-1">
+                                <div className="font-serif text-2xl font-bold mb-4 flex items-center gap-2">
+                                    <div className="w-8 h-8 bg-indigo-600 rounded-lg"></div> Backr
+                                </div>
+                                <p className="text-gray-500 mb-6 leading-relaxed">
                                     The future of creator monetization. Built on Mantle. Owned by you.
                                 </p>
-
-                                <h4 className="font-bold text-gray-900 mb-2 text-sm">Join our newsletter</h4>
-                                <form onSubmit={(e) => { e.preventDefault(); }} className="flex gap-2 max-w-sm">
-                                    <input type="email" placeholder="Email address" className="flex-1 px-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20" />
-                                    <button className="bg-black text-white px-4 py-2 rounded-lg text-sm font-bold">Subscribe</button>
-                                </form>
                             </div>
 
-                            {/* Links */}
-                            <div className="md:col-span-8 flex flex-wrap gap-12 md:justify-end">
-                                <div className="flex flex-col gap-4">
-                                    <strong className="text-gray-900 text-sm uppercase tracking-wider">Platform</strong>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Features</a>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Pricing</a>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <strong className="text-gray-900 text-sm uppercase tracking-wider">Support</strong>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Help Center</a>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Community</a>
-                                </div>
-                                <div className="flex flex-col gap-4">
-                                    <strong className="text-gray-900 text-sm uppercase tracking-wider">Company</strong>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">About</a>
-                                    <a href="#" className="text-gray-500 hover:text-black transition-colors text-sm">Careers</a>
-                                </div>
+                            {/* Column 2: Platform */}
+                            <div className="flex flex-col gap-4">
+                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Platform</strong>
+                                <a href="/explore" onClick={(e) => { e.preventDefault(); router.push('/explore') }} className="text-gray-500 hover:text-indigo-600 transition-colors">Explore Creators</a>
+                                <a href="#how-it-works" onClick={(e) => { e.preventDefault(); document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">How it works</a>
+                                <a href="#fees-and-features" onClick={(e) => { e.preventDefault(); document.getElementById('fees-and-features')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">Fees & Features</a>
+                                <a href="#faq" onClick={(e) => { e.preventDefault(); document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' }); }} className="text-gray-500 hover:text-indigo-600 transition-colors">FAQ</a>
                             </div>
+
+                            {/* Column 3: Support */}
+                            <div className="flex flex-col gap-4">
+                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Support</strong>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Help Center</a>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Community</a>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Documentation</a>
+                            </div>
+
+                            {/* Column 4: Company */}
+                            <div className="flex flex-col gap-4">
+                                <strong className="text-gray-900 font-bold uppercase tracking-wider text-xs">Company</strong>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">About</a>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Careers</a>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Terms of Service</a>
+                                <a href="#" className="text-gray-500 hover:text-indigo-600 transition-colors">Privacy Policy</a>
+                            </div>
+
                         </div>
 
                         <div className="pt-8 border-t border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">

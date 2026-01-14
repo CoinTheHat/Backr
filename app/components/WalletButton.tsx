@@ -5,7 +5,7 @@ import { injected } from 'wagmi/connectors';
 import Button from './Button';
 import { useState, useEffect } from 'react';
 
-export default function WalletButton() {
+export default function WalletButton({ className = '', style = {}, size = 'md', variant = 'primary' }: { className?: string, style?: React.CSSProperties, size?: 'sm' | 'md' | 'lg', variant?: 'primary' | 'secondary' | 'outline' | 'ghost' }) {
     const { address, isConnected, chain } = useAccount();
     const { connect, connectors } = useConnect();
     const { disconnect } = useDisconnect();
@@ -37,7 +37,13 @@ export default function WalletButton() {
     if (!isConnected) {
         return (
             <>
-                <Button onClick={() => setShowConnectModal(true)} style={{ fontSize: '0.875rem', padding: '8px 16px' }} variant="primary">
+                <Button
+                    onClick={() => setShowConnectModal(true)}
+                    size={size}
+                    variant={variant}
+                    className={className}
+                    style={{ ...style }}
+                >
                     Connect Wallet
                 </Button>
 
