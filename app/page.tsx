@@ -152,7 +152,7 @@ export default function Home() {
                         <Reveal>
                             <div className="text-center mb-16">
                                 <h2 className="text-3xl font-bold mb-4 font-serif text-white">How Backr Works</h2>
-                                <p className="text-body text-brand-secondary/80 font-medium">Simple, transparent, and built for you.</p>
+                                <p className="text-body text-gray-300 font-medium">Simple, transparent, and built for you.</p>
                             </div>
                         </Reveal>
 
@@ -242,7 +242,7 @@ export default function Home() {
 
                             {/* Value Card B (Highlight) */}
                             <Reveal delay={200}>
-                                <div className="glass-card-dark bg-black/60 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-brand-secondary/50 flex flex-col backdrop-blur-xl">
+                                <div className="glass-card-dark bg-brand-secondary/10 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-brand-secondary/30 flex flex-col">
                                     <div className="absolute top-0 right-0 p-6">
                                         <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Simple</span>
                                     </div>
