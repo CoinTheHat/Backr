@@ -89,20 +89,20 @@ export default function Home() {
                             </div>
 
                             <h1 className="text-display mb-6 text-gray-900 leading-[1.05] tracking-tight">
-                                Unlock your <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 font-serif italic pr-2">creative potential</span>
+                                Empower <br />
+                                Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 font-serif italic pr-2">Creativity</span>
                             </h1>
 
                             <p className="text-xl text-gray-600 mb-10 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-                                The all-in-one platform to build community, share exclusive content, and earn directly from your biggest fans – without middlemen.
+                                Build a thriving community and earn directly from your fans. All on Mantle, with no middleman.
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto mb-16">
                                 <button className="btn-primary px-8 py-4 text-lg w-full sm:w-auto justify-center shadow-xl shadow-blue-500/20 hover:shadow-blue-500/30 hover:-translate-y-1 transition-all" onClick={() => router.push('/dashboard')}>
-                                    Create a Page
+                                    Create your page
                                 </button>
                                 <button className="btn-secondary px-8 py-4 text-lg w-full sm:w-auto justify-center bg-white border-gray-200 hover:border-gray-300" onClick={() => router.push('/explore')}>
-                                    Find Creators
+                                    Discover creators
                                 </button>
                             </div>
 
@@ -148,13 +148,13 @@ export default function Home() {
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {[
-                                { icon: <Palette size={28} className="text-indigo-600" />, title: 'Create your page', desc: 'Set up your profile and define your brand in minutes.' },
-                                { icon: <Lock size={28} className="text-pink-600" />, title: 'Share exclusive content', desc: 'Post behind-the-scenes updates for your members.' },
-                                { icon: <Wallet size={28} className="text-emerald-600" />, title: 'Get paid instantly', desc: 'Receive crypto payouts directly to your wallet.' }
+                                { icon: <Palette size={28} className="text-indigo-600" />, title: 'Create your page', desc: 'Customize your creator page, set your tier prices, and start creating.' },
+                                { icon: <Lock size={28} className="text-pink-600" />, title: 'Share exclusive content', desc: 'Your members only content and connect with your biggest fans.' },
+                                { icon: <Wallet size={28} className="text-emerald-600" />, title: 'Get paid instantly', desc: 'Earn crypto payouts in seconds & settle, directly on Mantle.' }
                             ].map((step, i) => (
                                 <Reveal key={i} delay={(i + 1) * 100}>
-                                    <div className="flex flex-col items-start p-8 rounded-2xl bg-gray-50/50 border border-gray-100 hover:border-gray-200 hover:bg-white hover:shadow-lg transition-all duration-300">
-                                        <div className="mb-4 bg-white p-3 rounded-xl shadow-sm border border-gray-100">{step.icon}</div>
+                                    <div className="flex flex-col items-start p-8 rounded-2xl glass-card hover:bg-white hover:shadow-lg transition-all duration-300">
+                                        <div className="mb-4 bg-indigo-50 p-3 rounded-full shadow-sm">{step.icon}</div>
                                         <h3 className="text-lg font-bold mb-2 text-gray-900">{step.title}</h3>
                                         <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
                                     </div>
@@ -195,10 +195,10 @@ export default function Home() {
                             <Reveal delay={100}>
                                 <h2 className="text-4xl md:text-5xl font-serif font-medium mb-6 text-gray-900 leading-tight">
                                     Complete creative control. <br />
-                                    <span className="text-indigo-600">We take a simple fee.</span>
+                                    <span className="text-indigo-600">Own your content, your list, and your revenue.</span>
                                 </h2>
                                 <p className="text-xl text-gray-600 mb-10 leading-relaxed">
-                                    You own your content, your list, and your payments. No algorithms dictating between you and your biggest fans.
+                                    No algorithms dictating between you and your biggest fans.
                                 </p>
 
                                 <ul className="space-y-6">
@@ -208,7 +208,7 @@ export default function Home() {
                                         "Consistent, sustainable payments"
                                     ].map((item, i) => (
                                         <li key={i} className="flex items-center gap-4">
-                                            <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 flex-shrink-0">
+                                            <div className="w-6 h-6 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 flex-shrink-0">
                                                 <CheckCircle size={14} strokeWidth={3} />
                                             </div>
                                             <span className="text-lg text-gray-700 font-medium">{item}</span>
@@ -227,9 +227,9 @@ export default function Home() {
                     <div className="page-container relative z-10">
                         <Reveal>
                             <div className="text-center mb-20 max-w-3xl mx-auto">
-                                <h2 className="text-4xl md:text-5xl font-serif mb-6">Fair pricing for everyone.</h2>
+                                <h2 className="text-4xl md:text-5xl font-serif mb-6">Creators set the price. <br /> We take a simple fee.</h2>
                                 <p className="text-xl text-gray-300 leading-relaxed">
-                                    No monthly subscriptions. No hidden costs. We only earn when you do.
+                                    You choose your tier prices. Backr charges a transparent fee.
                                 </p>
                             </div>
                         </Reveal>
@@ -238,29 +238,28 @@ export default function Home() {
 
                             {/* Value Card A */}
                             <Reveal delay={100}>
-                                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
+                                <div className="glass-card-dark rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
                                     <div className="mb-6 bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center">
                                         <DollarSign className="text-amber-300" size={28} />
                                     </div>
-                                    <h3 className="text-2xl font-bold mb-4">You Set The Price</h3>
-                                    <p className="text-gray-400 mb-8 flex-1">Create membership tiers that work for your audience. Bronze, Silver, Gold—it's up to you.</p>
+                                    <h3 className="text-2xl font-bold mb-4">You set your prices</h3>
+                                    <p className="text-gray-400 mb-8 flex-1">Set any price, anytime. Create membership tiers that work for your audience.</p>
                                     <div className="flex gap-2 opacity-80">
-                                        <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">Tier 1</span>
-                                        <span className="px-3 py-1 rounded-full bg-gray-500/20 text-gray-300 text-xs font-bold border border-gray-500/30">Tier 2</span>
-                                        <span className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-300 text-xs font-bold border border-yellow-500/30">VIP</span>
+                                        <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">Bronze 0.05 MNT</span>
+                                        <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30">Silver 0.1 MNT</span>
                                     </div>
                                 </div>
                             </Reveal>
 
                             {/* Value Card B (Highlight) */}
                             <Reveal delay={200}>
-                                <div className="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-white/20 flex flex-col">
+                                <div className="bg-gradient-to-b from-indigo-500 to-indigo-700 rounded-3xl p-10 h-full transform lg:-translate-y-4 shadow-2xl relative border border-white/20 flex flex-col">
                                     <div className="absolute top-0 right-0 p-6">
-                                        <span className="bg-white text-indigo-600 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Simple</span>
+                                        <span className="bg-white/20 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">Simple</span>
                                     </div>
                                     <h3 className="text-2xl font-bold mb-2">Platform Fee</h3>
                                     <div className="text-7xl font-bold mb-4 tracking-tighter">5%</div>
-                                    <p className="text-indigo-100 mb-8 flex-1 text-lg">taken only on successful payments.</p>
+                                    <p className="text-indigo-100 mb-8 flex-1 text-lg">Only on successful payments.</p>
 
                                     <div className="border-t border-white/20 pt-6 space-y-3">
                                         <div className="flex items-center gap-3 text-sm font-medium">
@@ -275,15 +274,22 @@ export default function Home() {
 
                             {/* Value Card C */}
                             <Reveal delay={300}>
-                                <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
+                                <div className="glass-card-dark rounded-3xl p-10 h-full hover:bg-white/10 transition-colors flex flex-col">
                                     <div className="mb-6 bg-white/10 w-14 h-14 rounded-2xl flex items-center justify-center">
                                         <Zap className="text-emerald-400" size={28} />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-4">Instant Payouts</h3>
-                                    <p className="text-gray-400 mb-8 flex-1">Funds are settled directly to your wallet on the Mantle Network. Low friction, high speed.</p>
-                                    <div className="mt-auto">
-                                        <div className="text-emerald-400 text-sm font-bold flex items-center gap-2">
-                                            View Documentation <ArrowRight size={14} />
+                                    <p className="text-gray-400 mb-8 flex-1">Funds are settled directly to your wallet on the Mantle Network.</p>
+
+                                    <div className="space-y-3">
+                                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                                            <CheckCircle size={14} className="text-emerald-500" /> Creator wallet payouts
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                                            <CheckCircle size={14} className="text-emerald-500" /> Earn friendly crypto payments
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                                            <CheckCircle size={14} className="text-emerald-500" /> Predictable fees
                                         </div>
                                     </div>
                                 </div>
@@ -299,6 +305,7 @@ export default function Home() {
 
                     </div>
                 </section>
+
 
 
                 {/* SECTION 5: COMPETITOR COMPARISON */}
