@@ -157,6 +157,10 @@ export const db = {
             const res = await pool.query('SELECT * FROM tips WHERE receiver = $1 ORDER BY timestamp DESC', [address]);
             return res.rows;
         },
+        getBySender: async (address: string) => {
+            const res = await pool.query('SELECT * FROM tips WHERE sender = $1 ORDER BY timestamp DESC', [address]);
+            return res.rows;
+        },
         create: async (tip: any) => {
             const query = `
                 INSERT INTO tips (sender, receiver, amount, currency, message, timestamp)

@@ -10,7 +10,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const newTip = db.tips.create({
+        const newTip = await db.tips.create({
             sender,
             receiver,
             amount,
@@ -29,14 +29,18 @@ export async function GET(request: Request) {
     const receiver = searchParams.get('receiver');
     const sender = searchParams.get('sender');
 
-    let tips = [];
-    if (receiver) {
-        tips = db.tips.getByReceiver(receiver);
-    } else if (sender) {
-        tips = db.tips.getBySender(sender);
-    } else {
-        tips = db.tips.getAll();
-    }
+    try {
+        let tips;
+        if (receiver) {
+            tips = await db.tips.getByReceiver(receiver);
+        } else if (sender) {
+            tips = await db.tips.getBySender(sender);
+        } else {
+            tips = await db.tips.getAll();
+        }
 
-    return NextResponse.json(tips);
+        return NextResponse.json(tips);
+    } catch (error) {
+        return NextResponse.json({ error: 'Failed to fetch tips' }, { status: 500 });
+    }
 }
