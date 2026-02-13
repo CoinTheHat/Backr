@@ -6,9 +6,10 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     helperText?: string;
     icon?: React.ReactNode;
     containerStyle?: React.CSSProperties;
+    textarea?: boolean;
 }
 
-export default function Input({ label, error, helperText, style, containerStyle, icon, ...props }: InputProps) {
+export default function Input({ label, error, helperText, style, containerStyle, icon, textarea, ...props }: InputProps) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginBottom: '16px', ...containerStyle }}>
             {label && (
@@ -26,6 +27,8 @@ export default function Input({ label, error, helperText, style, containerStyle,
                     <div style={{
                         position: 'absolute',
                         left: '12px',
+                        top: textarea ? '12px' : '50%',
+                        transform: textarea ? 'none' : 'translateY(-50%)',
                         color: 'var(--color-text-secondary)',
                         display: 'flex',
                         alignItems: 'center',
@@ -36,22 +39,44 @@ export default function Input({ label, error, helperText, style, containerStyle,
                         {icon}
                     </div>
                 )}
-                <input
-                    className="focus-ring"
-                    style={{
-                        width: '100%',
-                        padding: '10px 14px',
-                        paddingLeft: icon ? '40px' : '14px', // Adjust padding if icon exists
-                        borderRadius: 'var(--radius-md)',
-                        border: error ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
-                        background: 'var(--color-bg-surface)',
-                        color: 'var(--color-text-primary)',
-                        fontSize: '0.925rem',
-                        transition: 'all 0.2s ease',
-                        ...style
-                    }}
-                    {...props}
-                />
+                {textarea ? (
+                    <textarea
+                        className="focus-ring"
+                        style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            paddingLeft: icon ? '40px' : '14px',
+                            borderRadius: 'var(--radius-md)',
+                            border: error ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
+                            background: 'var(--color-bg-surface)',
+                            color: 'var(--color-text-primary)',
+                            fontSize: '0.925rem',
+                            minHeight: '100px',
+                            fontFamily: 'inherit',
+                            resize: 'vertical',
+                            transition: 'all 0.2s ease',
+                            ...style
+                        }}
+                        {...(props as any)}
+                    />
+                ) : (
+                    <input
+                        className="focus-ring"
+                        style={{
+                            width: '100%',
+                            padding: '10px 14px',
+                            paddingLeft: icon ? '40px' : '14px',
+                            borderRadius: 'var(--radius-md)',
+                            border: error ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
+                            background: 'var(--color-bg-surface)',
+                            color: 'var(--color-text-primary)',
+                            fontSize: '0.925rem',
+                            transition: 'all 0.2s ease',
+                            ...style
+                        }}
+                        {...props}
+                    />
+                )}
             </div>
 
             {helperText && !error && (

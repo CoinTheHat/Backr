@@ -5,13 +5,14 @@ import { useCommunity } from '../../../context/CommunityContext';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Image as ImageIcon, X, Globe, Lock, ChevronDown, Bold, Italic, Type, Quote, List, Upload } from 'lucide-react';
 import Button from '../../../components/Button';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function EditPostPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const { tiers, refreshData } = useCommunity();
     const router = useRouter();
-    const { address } = useAccount();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');

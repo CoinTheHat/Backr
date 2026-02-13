@@ -19,8 +19,8 @@ const playfair = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  title: "Backr",
-  description: "Next Gen Membership Platform on Mantle",
+  title: "Backr - Creator Tipping on Tempo",
+  description: "Next Gen Creator Tipping Platform on Tempo",
 };
 
 export default function RootLayout({
@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/logo/backr-logo-galaxy.png" type="image/png" />
+        <link rel="icon" href="/logo/rocket-favicon.svg" type="image/svg+xml" />
         <link rel="preload" as="image" href="/backgrounds/hero-bg-simple.png" />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable}`}>

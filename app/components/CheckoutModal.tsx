@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Button from './Button';
 import { createPortal } from 'react-dom';
-import { useAccount, useConnect } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 type CheckoutStatus = 'idle' | 'pending' | 'success' | 'error';
 
@@ -22,8 +22,8 @@ interface CheckoutModalProps {
 
 export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status, txHash }: CheckoutModalProps) {
     const [mounted, setMounted] = useState(false);
-    const { isConnected } = useAccount();
-    const { connect, connectors } = useConnect();
+    const { authenticated, login } = usePrivy();
+    const isConnected = authenticated;
 
     useEffect(() => {
         setMounted(true);
@@ -120,7 +120,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                     {tier.name}
                                 </h2>
                                 <div style={{ fontSize: '1.25rem', color: 'var(--color-text-secondary)' }}>
-                                    <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>{tier.price} MNT</span> / month
+                                    <span style={{ fontWeight: 700, color: 'var(--color-text-primary)' }}>${tier.price}</span> / month
                                 </div>
                             </div>
 
@@ -145,16 +145,16 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                             <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '20px', marginBottom: '24px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.9rem' }}>
                                     <span style={{ color: 'var(--color-text-secondary)' }}>Subtotal</span>
-                                    <span style={{ fontWeight: 600 }}>{tier.price} MNT</span>
+                                    <span style={{ fontWeight: 600 }}>{tier.price} USD</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '0.9rem' }}>
                                     <span style={{ color: 'var(--color-text-secondary)' }}>Est. Network Fee</span>
-                                    <span style={{ color: 'var(--color-text-tertiary)' }}>~ 0.0004 MNT</span>
+                                    <span style={{ color: 'var(--color-text-tertiary)' }}>~ 0.00 USDC</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px dashed var(--color-border)' }}>
                                     <span style={{ fontWeight: 700 }}>Total Due</span>
                                     <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-primary)' }}>{tier.price} MNT</div>
+                                        <div style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-primary)' }}>${tier.price}</div>
                                     </div>
                                 </div>
                             </div>
@@ -166,20 +166,16 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                         Choose Wallet to Connect
                                     </p>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                        {connectors.slice(0, 4).map((connector) => (
-                                            <Button
-                                                key={connector.uid}
-                                                variant="outline"
-                                                onClick={() => connect({ connector })}
-                                                style={{ width: '100%', padding: '12px', justifyContent: 'space-between' }}
-                                            >
-                                                Connect {connector.name}
-                                                <span style={{ fontSize: '1.2rem' }}>→</span>
-                                            </Button>
-                                        ))}
+                                        <Button
+                                            variant="primary"
+                                            onClick={login}
+                                            style={{ width: '100%', padding: '12px' }}
+                                        >
+                                            Log in with Privy
+                                        </Button>
                                     </div>
                                     <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'var(--color-text-secondary)', marginTop: '8px' }}>
-                                        Mantle Network
+                                        Tempo Network
                                     </p>
                                 </div>
                             ) : (
@@ -188,7 +184,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                         Confirm Payment
                                     </Button>
                                     <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>
-                                        This transaction will be processed on the Mantle Network.
+                                        This transaction will be processed on the Tempo Network.
                                     </p>
                                 </div>
                             )}
@@ -238,7 +234,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                 </Button>
                                 {txHash && (
                                     <a
-                                        href={`https://explorer.mantle.xyz/tx/${txHash}`}
+                                        href={`https://explore.tempo.xyz/tx/${txHash}`}
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         style={{ color: 'var(--color-text-tertiary)', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}

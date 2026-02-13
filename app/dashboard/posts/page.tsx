@@ -6,11 +6,12 @@ import Card from '../../components/Card';
 import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
 import Dropdown from '../../components/Dropdown';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 
 export default function PostsPage() {
-    const { address } = useAccount();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
     const router = useRouter();
 
     // VIEW STATE: 'list' | 'editor'
@@ -192,7 +193,7 @@ export default function PostsPage() {
                                         </div>
                                         {creatorTiers.map((t, i) => (
                                             <div key={i} onClick={() => setMinTier(i + 1)} style={{ padding: '16px', borderRadius: 'var(--radius-md)', border: minTier === i + 1 ? '2px solid var(--color-primary)' : '1px solid var(--color-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                <input type="radio" checked={minTier === i + 1} readOnly /><div><div style={{ fontWeight: 600 }}>{t.name} +</div><div className="text-caption">{t.price} MNT</div></div>
+                                                <input type="radio" checked={minTier === i + 1} readOnly /><div><div style={{ fontWeight: 600 }}>{t.name} +</div><div className="text-caption">{t.price} USD</div></div>
                                             </div>
                                         ))}
                                     </div>

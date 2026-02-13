@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 // Types
 export interface Post {
@@ -32,22 +32,26 @@ interface CommunityContextType {
     tiers: Tier[];
     stats: Stats;
     isDeployed: boolean;
-    contractAddress: string | null; // Added
+    contractAddress: string | null;
     isLoading: boolean;
     refreshData: () => void;
     addPost: (content: string, tier: string) => void;
     addTier: (tier: Omit<Tier, 'id'>) => void;
     deleteTier: (id: string) => void;
+    address: string | undefined; // Exposed for convenience
+    user: any; // Exposed Privy user
 }
 
 const CommunityContext = createContext<CommunityContextType | undefined>(undefined);
 
 export function CommunityProvider({ children }: { children: ReactNode }) {
-    const { address } = useAccount();
+    const { user, authenticated } = usePrivy();
+    const address = user?.wallet?.address;
+
     const [posts, setPosts] = useState<Post[]>([]);
     const [tiers, setTiers] = useState<Tier[]>([]);
     const [isDeployed, setIsDeployed] = useState(false);
-    const [contractAddress, setContractAddress] = useState<string | null>(null); // Added
+    const [contractAddress, setContractAddress] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const [stats, setStats] = useState<Stats>({
@@ -119,14 +123,22 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
     };
 
     useEffect(() => {
-        refreshData();
-    }, [address]);
+        if (authenticated && address) {
+            refreshData();
+        } else {
+            // Reset data if logged out
+            setPosts([]);
+            setTiers([]);
+            setIsDeployed(false);
+            setIsLoading(false);
+        }
+    }, [authenticated, address]);
 
     const addPost = (content: string, tier: string) => {
-        // ...
+        // Optimistic update - ideally should call API
         const newPost: Post = {
             id: Date.now().toString(),
-            author: 'You', // The logged in user
+            author: 'You',
             content,
             timestamp: 'Just now',
             likes: 0,
@@ -137,6 +149,7 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
     };
 
     const addTier = (tierData: Omit<Tier, 'id'>) => {
+        // Optimistic update
         const newTier: Tier = {
             ...tierData,
             id: Date.now().toString()
@@ -149,7 +162,20 @@ export function CommunityProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <CommunityContext.Provider value={{ posts, tiers, stats, isDeployed, contractAddress, isLoading, addPost, addTier, deleteTier, refreshData }}>
+        <CommunityContext.Provider value={{
+            posts,
+            tiers,
+            stats,
+            isDeployed,
+            contractAddress,
+            isLoading,
+            addPost,
+            addTier,
+            deleteTier,
+            refreshData,
+            address,
+            user
+        }}>
             {children}
         </CommunityContext.Provider>
     );

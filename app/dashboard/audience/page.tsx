@@ -6,10 +6,11 @@ import Card from '../../components/Card';
 import Input from '../../components/Input';
 import Dropdown from '../../components/Dropdown';
 import SectionHeader from '../../components/SectionHeader';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function AudiencePage() {
-    const { address } = useAccount();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
     const [members, setMembers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
@@ -203,7 +204,7 @@ export default function AudiencePage() {
                                                             {m.subscriberAddress.slice(0, 6)}...{m.subscriberAddress.slice(-4)}
                                                         </span>
                                                         <button onClick={() => copyAddress(m.subscriberAddress)} title="Copy" style={{ border: 'none', background: 'none', cursor: 'pointer', opacity: 0.5, fontSize: '0.9rem' }}>📋</button>
-                                                        <a href={`https://explorer.mantle.xyz/address/${m.subscriberAddress}`} target="_blank" title="View on Explorer" style={{ textDecoration: 'none', opacity: 0.5, fontSize: '0.9rem' }}>🔗</a>
+                                                        <a href={`https://explore.tempo.xyz/address/${m.subscriberAddress}`} target="_blank" title="View on Explorer" style={{ textDecoration: 'none', opacity: 0.5, fontSize: '0.9rem' }}>🔗</a>
                                                     </div>
                                                 </div>
                                             </div>

@@ -4,17 +4,17 @@
 
 :root {
   /* Brand Colors */
-  /* Brand Colors */
-  --color-primary: #FF6EB5;
-  /* Galaxy Pink */
-  --color-primary-hover: #E85DA0;
-  --color-primary-light: #FFD4EA;
+  /* Brand Colors - Tempo Theme */
+  --color-primary: #6366f1;
+  /* Indigo 500 */
+  --color-primary-hover: #4f46e5;
+  --color-primary-light: #e0e7ff;
 
-  --color-brand-blue: #6B8BFF;
-  /* Nebula Blue (Secondary) */
-  --color-accent: #88E9CE;
-  /* Starlight Cyan */
-  --color-accent-light: #E0FAF5;
+  --color-brand-blue: #3b82f6;
+  /* Blue 500 */
+  --color-accent: #14b8a6;
+  /* Teal 500 */
+  --color-accent-light: #ccfbf1;
 
   /* Neutral Scale */
   --color-bg-page: #F2F2FA;
@@ -142,7 +142,6 @@ svg,
 iframe {
   display: block;
   max-width: 100%;
-  height: auto;
 }
 
 /* Hardening: Flex/Grid Layout Safety */
@@ -701,15 +700,14 @@ textarea {
 -------------------------------------------------------------------------- */
 .home-page-bg {
   background-image:
-    radial-gradient(circle at top, rgba(0, 0, 0, 0.25) 0, transparent 45%),
-    linear-gradient(to bottom, rgba(0, 0, 0, 0.15), rgba(0, 0, 0, 0.45)),
-    url('/backgrounds/galaxy-purple.png');
+    radial-gradient(circle at top, rgba(99, 102, 241, 0.15) 0, transparent 45%),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.6)),
+    linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: top center;
   background-attachment: fixed;
-  background-color: #05010f;
-  /* dark purple fallback, NOT grey */
+  background-color: #0f172a;
 }
 
 /* Fallback for mobile if fixed background causing issues */

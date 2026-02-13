@@ -1,8 +1,9 @@
 'use client';
 
-import { WagmiProvider } from 'wagmi';
+import { PrivyProvider } from '@privy-io/react-auth';
+import { WagmiProvider } from '@privy-io/wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { config } from '../utils/wagmi';
+import { config, tempoTestnet } from '../utils/tempo-config';
 import { useState } from 'react';
 import { CommunityProvider } from './context/CommunityContext';
 
@@ -10,12 +11,30 @@ export function Providers({ children }) {
     const [queryClient] = useState(() => new QueryClient());
 
     return (
-        <WagmiProvider config={config}>
+        <PrivyProvider
+            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
+            onSuccess={(user) => console.log('Privy login success!', user)}
+            config={{
+                defaultChain: tempoTestnet,
+                supportedChains: [tempoTestnet],
+                embeddedWallets: {
+                    ethereum: {
+                        createOnLogin: 'users-without-wallets',
+                    },
+                },
+                appearance: {
+                    theme: 'dark',
+                    accentColor: '#6366f1',
+                },
+            }}
+        >
             <QueryClientProvider client={queryClient}>
-                <CommunityProvider>
-                    {children}
-                </CommunityProvider>
+                <WagmiProvider config={config}>
+                    <CommunityProvider>
+                        {children}
+                    </CommunityProvider>
+                </WagmiProvider>
             </QueryClientProvider>
-        </WagmiProvider>
+        </PrivyProvider>
     );
 }

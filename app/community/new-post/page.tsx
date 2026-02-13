@@ -3,33 +3,29 @@
 import { useState, useRef } from 'react';
 import { useCommunity } from '../../context/CommunityContext';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown, Bold, Italic, Type, Quote, List, Upload } from 'lucide-react';
-import Button from '../../components/Button';
-import { useAccount } from 'wagmi';
+import { ArrowLeft, Image as ImageIcon, Youtube, Globe, Lock, X, ChevronDown, Bold, Italic, Type, Quote, List, Upload, Send, Sparkles } from 'lucide-react';
+import { usePrivy } from '@privy-io/react-auth';
+import { useToast } from '../../components/Toast';
 
 export default function NewPostPage() {
-    const { tiers, isDeployed, isLoading, refreshData } = useCommunity();
+    const { tiers, isLoading, refreshData } = useCommunity();
     const router = useRouter();
-    const { address } = useAccount();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
+    const { showToast, ToastComponent } = useToast();
 
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [imageUrl, setImageUrl] = useState('');
     const [videoUrl, setVideoUrl] = useState('');
-
-    // minTier: 0 means Public. 1 means Tier 1 (index 0). 2 means Tier 2 (index 1).
-    // "All Members" usually means the lowest tier (Tier 1) and above.
     const [minTier, setMinTier] = useState<number>(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Toggle for media inputs
     const [showImageInput, setShowImageInput] = useState(false);
     const [showVideoInput, setShowVideoInput] = useState(false);
 
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Auto-resize textarea
     const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setContent(e.target.value);
         if (textareaRef.current) {
@@ -38,51 +34,29 @@ export default function NewPostPage() {
         }
     };
 
-    if (isLoading) return <div className="min-h-screen bg-brand-light flex items-center justify-center text-brand-muted">Loading studio...</div>;
-
-    if (!isDeployed) {
-        return (
-            <div className="min-h-screen bg-brand-light flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-studio p-8 shadow-studio text-center border border-gray-100">
-                    <div className="text-5xl mb-6">🔒</div>
-                    <h2 className="text-2xl font-serif font-bold text-brand-dark mb-3">Deployment Required</h2>
-                    <p className="text-brand-muted mb-8 leading-relaxed">
-                        You need a deployed contract to publish exclusive content to your members.
-                    </p>
-                    <Button
-                        onClick={() => router.push('/dashboard/settings')}
-                        variant="primary"
-                        className="w-full justify-center py-3 shadow-lg shadow-brand-primary/20"
-                    >
-                        Deploy Contract
-                    </Button>
-                    <button onClick={() => router.back()} className="mt-4 text-sm text-brand-muted hover:text-brand-dark underline decoration-gray-300 underline-offset-4">
-                        Go Back
-                    </button>
-                </div>
+    if (isLoading) return (
+        <div className="min-h-screen bg-mist flex items-center justify-center">
+            <div className="flex gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce"></div>
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '100ms' }}></div>
+                <div className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '200ms' }}></div>
             </div>
-        );
-    }
+        </div>
+    );
 
-    // Helper to insert markdown at cursor
     const insertMarkdown = (prefix: string, suffix: string) => {
         if (!textareaRef.current) return;
-
         const start = textareaRef.current.selectionStart;
         const end = textareaRef.current.selectionEnd;
         const text = content;
         const before = text.substring(0, start);
         const selection = text.substring(start, end);
         const after = text.substring(end);
-
         const newText = before + prefix + selection + suffix + after;
         setContent(newText);
-
-        // Restore focus and position cursor inside the tags
         setTimeout(() => {
             if (textareaRef.current) {
                 textareaRef.current.focus();
-                // Move cursor to end of inserted content (or middle if it was a wrapper)
                 const newCursorPos = end + prefix.length;
                 textareaRef.current.setSelectionRange(newCursorPos, newCursorPos);
             }
@@ -90,11 +64,10 @@ export default function NewPostPage() {
     };
 
     const handlePost = async () => {
-        if (!title.trim() || !content.trim()) return alert('Please add a title and some content.');
-        if (!address) return alert('Wallet not connected.');
+        if (!title.trim() || !content.trim()) return showToast('Please add a title and content.', 'error');
+        if (!address) return showToast('Wallet not connected.', 'error');
 
         setIsSubmitting(true);
-
         try {
             const res = await fetch('/api/posts', {
                 method: 'POST',
@@ -113,6 +86,7 @@ export default function NewPostPage() {
             });
 
             if (res.ok) {
+                showToast('Post published!', 'success');
                 await refreshData();
                 router.push('/community');
             } else {
@@ -120,243 +94,225 @@ export default function NewPostPage() {
             }
         } catch (e) {
             console.error(e);
-            alert('Failed to publish post. Please try again.');
+            showToast('Failed to publish. Please try again.', 'error');
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    // Shared file reader with compression
     const processFile = (file: File) => {
         if (!file.type.startsWith('image/')) return;
-
         const reader = new FileReader();
         reader.onload = (event) => {
             const img = new Image();
             img.onload = () => {
                 const canvas = document.createElement('canvas');
-                const MAX_WIDTH = 1000;
-                const MAX_HEIGHT = 1000;
-                let width = img.width;
-                let height = img.height;
-
-                // Calculate new dimensions
-                if (width > height) {
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-                } else {
-                    if (height > MAX_HEIGHT) {
-                        width *= MAX_HEIGHT / height;
-                        height = MAX_HEIGHT;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
+                const MAX = 1000;
+                let w = img.width, h = img.height;
+                if (w > h) { if (w > MAX) { h *= MAX / w; w = MAX; } }
+                else { if (h > MAX) { w *= MAX / h; h = MAX; } }
+                canvas.width = w;
+                canvas.height = h;
                 const ctx = canvas.getContext('2d');
                 if (ctx) {
-                    ctx.drawImage(img, 0, 0, width, height);
-                    // Compress to JPEG with 0.7 quality
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    setImageUrl(dataUrl);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    setImageUrl(canvas.toDataURL('image/jpeg', 0.7));
                     setShowImageInput(true);
                 }
             };
-            if (event.target?.result) {
-                img.src = event.target.result as string;
-            }
+            if (event.target?.result) img.src = event.target.result as string;
         };
         reader.readAsDataURL(file);
     };
 
-    // Handle file select
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            processFile(e.target.files[0]);
-        }
+        if (e.target.files?.[0]) processFile(e.target.files[0]);
     };
 
-    // Handle paste events for images
     const handlePaste = (e: React.ClipboardEvent) => {
         const items = e.clipboardData.items;
         for (let i = 0; i < items.length; i++) {
             if (items[i].type.indexOf('image') !== -1) {
                 const file = items[i].getAsFile();
-                if (file) {
-                    processFile(file);
-                    e.preventDefault();
-                    return;
-                }
+                if (file) { processFile(file); e.preventDefault(); return; }
             }
         }
     };
 
+    const toolbarBtns = [
+        { icon: <Bold size={16} />, action: () => insertMarkdown('**', '**'), tip: 'Bold' },
+        { icon: <Italic size={16} />, action: () => insertMarkdown('*', '*'), tip: 'Italic' },
+        null, // separator
+        { icon: <Type size={16} />, action: () => insertMarkdown('## ', ''), tip: 'Heading' },
+        { icon: <Quote size={16} />, action: () => insertMarkdown('> ', ''), tip: 'Quote' },
+        { icon: <List size={16} />, action: () => insertMarkdown('- ', ''), tip: 'List' },
+    ];
+
     return (
-        <div className="min-h-screen bg-brand-light font-sans flex flex-col">
+        <div className="min-h-screen bg-mist font-sans flex flex-col">
+            {ToastComponent}
 
             {/* Top Navigation */}
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 h-16 flex items-center justify-between px-4 md:px-8 shadow-sm">
+            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-100 h-16 flex items-center justify-between px-4 md:px-8">
                 <button
                     onClick={() => router.back()}
-                    className="text-gray-500 hover:text-brand-dark flex items-center gap-2 font-medium transition-colors px-2 py-1 rounded-lg hover:bg-gray-100"
+                    className="text-slate-500 hover:text-slate-900 flex items-center gap-2 font-semibold transition-colors px-3 py-2 rounded-xl hover:bg-slate-50"
                 >
                     <ArrowLeft size={18} />
-                    <span className="hidden md:inline">Back</span>
+                    <span className="hidden sm:inline">Back</span>
                 </button>
 
-                <div className="text-sm font-bold text-brand-muted uppercase tracking-widest hidden md:block">
-                    Creator Studio
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-[.2em] hidden md:block">
+                    New Post
                 </div>
 
-                <div className="flex gap-3">
-                    <Button
-                        onClick={handlePost}
-                        disabled={isSubmitting || !title || !content}
-                        variant="primary"
-                        className="rounded-full px-6 py-2 text-sm shadow-glow hover:shadow-lg transition-all transform hover:-translate-y-0.5"
-                    >
-                        {isSubmitting ? 'Publishing...' : 'Publish'}
-                    </Button>
-                </div>
+                <button
+                    onClick={handlePost}
+                    disabled={isSubmitting || !title || !content}
+                    className="bg-slate-900 text-white px-6 py-2.5 rounded-full text-sm font-bold flex items-center gap-2 hover:-translate-y-0.5 hover:shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 active:scale-95"
+                >
+                    <Send size={14} />
+                    {isSubmitting ? 'Publishing...' : 'Publish'}
+                </button>
             </nav>
 
             {/* Main Editor */}
-            <main className="flex-1 max-w-3xl w-full mx-auto py-12 px-6">
+            <main className="flex-1 max-w-3xl w-full mx-auto py-10 md:py-16 px-6">
 
-                <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-                    {/* Title Input */}
-                    <input
-                        type="text"
-                        placeholder="Title"
-                        value={title}
-                        onChange={(e) => setTitle(e.target.value)}
-                        className="w-full text-5xl font-serif font-bold text-brand-dark placeholder-gray-300 border-none focus:ring-0 bg-transparent p-0 mb-8 leading-tight selection:bg-brand-primary/20"
-                        autoFocus
-                    />
+                {/* Editor Card */}
+                <div className="bg-white rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden">
+
+                    {/* Title */}
+                    <div className="px-8 md:px-12 pt-10">
+                        <input
+                            type="text"
+                            placeholder="Give your post a title..."
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                            className="w-full text-3xl md:text-4xl font-bold text-slate-900 placeholder-slate-300 border-none focus:ring-0 focus:outline-none bg-transparent p-0 leading-tight"
+                            style={{ fontFamily: 'var(--font-serif), Georgia, serif' }}
+                            autoFocus
+                        />
+                    </div>
+
+                    {/* Divider */}
+                    <div className="mx-8 md:mx-12 my-6 h-px bg-slate-100"></div>
 
                     {/* Formatting Toolbar */}
-                    <div className="flex items-center gap-1 mb-6 p-1.5 bg-white shadow-sm border border-gray-100 rounded-xl w-fit sticky top-20 z-10">
-                        <button
-                            onClick={() => insertMarkdown('**', '**')}
-                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
-                            title="Bold">
-                            <Bold size={18} />
-                        </button>
-                        <button
-                            onClick={() => insertMarkdown('*', '*')}
-                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
-                            title="Italic">
-                            <Italic size={18} />
-                        </button>
-                        <div className="w-px h-4 bg-gray-200 mx-1"></div>
-                        <button
-                            onClick={() => insertMarkdown('## ', '')}
-                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
-                            title="Heading">
-                            <Type size={18} />
-                        </button>
-                        <button
-                            onClick={() => insertMarkdown('> ', '')}
-                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
-                            title="Quote">
-                            <Quote size={18} />
-                        </button>
-                        <button
-                            onClick={() => insertMarkdown('- ', '')}
-                            className="p-2 text-gray-400 hover:text-brand-dark hover:bg-gray-50 rounded-lg transition-colors"
-                            title="List">
-                            <List size={18} />
-                        </button>
+                    <div className="px-8 md:px-12 mb-4">
+                        <div className="flex items-center gap-0.5 p-1 bg-slate-50 rounded-xl w-fit">
+                            {toolbarBtns.map((btn, i) =>
+                                btn === null ? (
+                                    <div key={i} className="w-px h-5 bg-slate-200 mx-1"></div>
+                                ) : (
+                                    <button
+                                        key={i}
+                                        onClick={btn.action}
+                                        className="p-2.5 text-slate-400 hover:text-slate-900 hover:bg-white rounded-lg transition-all"
+                                        title={btn.tip}
+                                    >
+                                        {btn.icon}
+                                    </button>
+                                )
+                            )}
+                        </div>
                     </div>
 
                     {/* Content Input */}
-                    <textarea
-                        ref={textareaRef}
-                        value={content}
-                        onChange={handleContentChange}
-                        onPaste={handlePaste}
-                        className="w-full min-h-[30vh] text-xl text-gray-700 leading-relaxed placeholder-gray-300 border-none focus:ring-0 bg-transparent p-0 resize-none overflow-hidden mb-12"
-                        placeholder="Tell your story... (Paste images directly!)"
-                    />
+                    <div className="px-8 md:px-12 pb-6">
+                        <textarea
+                            ref={textareaRef}
+                            value={content}
+                            onChange={handleContentChange}
+                            onPaste={handlePaste}
+                            className="w-full min-h-[35vh] text-[17px] text-slate-600 leading-[1.8] placeholder-slate-300 border-none focus:ring-0 focus:outline-none bg-transparent p-0 resize-none overflow-hidden"
+                            placeholder="Write something amazing..."
+                        />
+                    </div>
 
-                    {/* Media Previews */}
-                    {(imageUrl || videoUrl) && (
-                        <div className="grid gap-4 mb-8">
-                            {imageUrl && (
-                                <div className="relative group rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-                                    <img src={imageUrl} alt="Preview" className="w-full max-h-[400px] object-cover" />
-                                    <button
-                                        onClick={() => { setImageUrl(''); setShowImageInput(false); }}
-                                        className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
-                                    >
-                                        <X size={16} />
-                                    </button>
-                                </div>
-                            )}
+                    {/* Image Preview */}
+                    {imageUrl && (
+                        <div className="px-8 md:px-12 pb-6">
+                            <div className="relative group rounded-2xl overflow-hidden border border-slate-100">
+                                <img src={imageUrl} alt="Preview" className="w-full max-h-[400px] object-cover" />
+                                <button
+                                    onClick={() => { setImageUrl(''); setShowImageInput(false); }}
+                                    className="absolute top-3 right-3 bg-black/40 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm transition-all opacity-0 group-hover:opacity-100"
+                                >
+                                    <X size={14} />
+                                </button>
+                            </div>
                         </div>
                     )}
 
-                    {/* Floating Toolbar (Media & Access) */}
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 py-6 border-t border-gray-100">
+                    {/* Bottom Toolbar */}
+                    <div className="px-8 md:px-12 py-5 bg-slate-50/50 border-t border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 
                         {/* Media Buttons */}
                         <div className="flex gap-2">
-                            <div className="relative group">
+                            {/* Image Upload */}
+                            <div className="relative">
                                 <button
                                     onClick={() => setShowImageInput(!showImageInput)}
-                                    className={`p-3 rounded-xl transition-all flex items-center gap-2 ${showImageInput ? 'bg-brand-dark text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-brand-primary hover:text-brand-primary shadow-sm'}`}
+                                    className={`p-2.5 rounded-xl transition-all text-sm font-medium flex items-center gap-2 ${showImageInput
+                                        ? 'bg-slate-900 text-white shadow-lg'
+                                        : 'bg-white border border-slate-200 text-slate-500 hover:border-primary hover:text-primary shadow-sm'}`}
                                 >
-                                    <ImageIcon size={20} />
+                                    <ImageIcon size={18} />
                                 </button>
-                                {/* Popover Input for Image */}
                                 {showImageInput && (
-                                    <div className="absolute bottom-full mb-3 left-0 w-[320px] bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-20 animate-in fade-in zoom-in-95">
+                                    <div className="absolute bottom-full mb-3 left-0 w-[300px] bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 p-4 z-20">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Add Image</p>
                                         <div className="flex gap-2 items-center">
                                             <button
                                                 onClick={() => fileInputRef.current?.click()}
-                                                className="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-gray-600 transition-colors"
-                                                title="Upload Image"
+                                                className="p-2.5 bg-slate-50 hover:bg-slate-100 rounded-xl text-slate-600 transition-colors"
+                                                title="Upload"
                                             >
-                                                <Upload size={18} />
+                                                <Upload size={16} />
                                             </button>
-                                            <div className="w-px h-6 bg-gray-200 mx-1"></div>
                                             <input
                                                 type="text"
                                                 value={imageUrl}
                                                 onChange={(e) => setImageUrl(e.target.value)}
-                                                placeholder="Paste URL..."
-                                                className="flex-1 text-sm border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary min-w-0"
+                                                placeholder="or paste a URL..."
+                                                className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary min-w-0 bg-slate-50"
                                                 autoFocus
                                             />
-                                            <button onClick={() => setShowImageInput(false)} className="text-gray-400 hover:text-red-500"><X size={18} /></button>
+                                            <button onClick={() => setShowImageInput(false)} className="text-slate-400 hover:text-rose-500 p-1">
+                                                <X size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                 )}
                                 <input type="file" ref={fileInputRef} onChange={handleFileSelect} className="hidden" accept="image/*" />
                             </div>
 
-                            <div className="relative group">
+                            {/* Video */}
+                            <div className="relative">
                                 <button
                                     onClick={() => setShowVideoInput(!showVideoInput)}
-                                    className={`p-3 rounded-xl transition-all flex items-center gap-2 ${showVideoInput ? 'bg-brand-dark text-white' : 'bg-white border border-gray-200 text-gray-500 hover:border-brand-primary hover:text-brand-primary shadow-sm'}`}
+                                    className={`p-2.5 rounded-xl transition-all text-sm font-medium flex items-center gap-2 ${showVideoInput
+                                        ? 'bg-slate-900 text-white shadow-lg'
+                                        : 'bg-white border border-slate-200 text-slate-500 hover:border-primary hover:text-primary shadow-sm'}`}
                                 >
-                                    <Youtube size={20} />
+                                    <Youtube size={18} />
                                 </button>
-                                {/* Popover Input for Video */}
                                 {showVideoInput && (
-                                    <div className="absolute bottom-full mb-3 left-0 w-[300px] bg-white rounded-xl shadow-xl border border-gray-100 p-3 z-20 animate-in fade-in zoom-in-95">
+                                    <div className="absolute bottom-full mb-3 left-0 w-[300px] bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 p-4 z-20">
+                                        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Add Video</p>
                                         <div className="flex gap-2">
                                             <input
                                                 type="text"
                                                 value={videoUrl}
                                                 onChange={(e) => setVideoUrl(e.target.value)}
-                                                placeholder="Paste video/embed link..."
-                                                className="flex-1 text-sm border-gray-200 rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
+                                                placeholder="Paste video URL..."
+                                                className="flex-1 text-sm border border-slate-200 rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-primary/20 focus:border-primary bg-slate-50"
                                                 autoFocus
                                             />
-                                            <button onClick={() => setShowVideoInput(false)} className="text-gray-400 hover:text-red-500"><X size={18} /></button>
+                                            <button onClick={() => setShowVideoInput(false)} className="text-slate-400 hover:text-rose-500 p-1">
+                                                <X size={16} />
+                                            </button>
                                         </div>
                                     </div>
                                 )}
@@ -364,29 +320,36 @@ export default function NewPostPage() {
                         </div>
 
                         {/* Visibility Dropdown */}
-                        <div className="relative group min-w-[240px]">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-brand-primary pointer-events-none">
-                                {minTier === 0 ? <Globe size={18} /> : <Lock size={18} />}
+                        <div className="relative min-w-[200px]">
+                            <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
+                                {minTier === 0
+                                    ? <Globe size={16} className="text-emerald-500" />
+                                    : <Lock size={16} className="text-amber-500" />}
                             </div>
                             <select
                                 value={minTier}
                                 onChange={(e) => setMinTier(Number(e.target.value))}
-                                className="w-full appearance-none bg-white border border-gray-200 hover:border-brand-primary/50 text-gray-700 font-medium rounded-xl pl-11 pr-10 py-3 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-primary/20 transition-all "
+                                className="w-full appearance-none bg-white border border-slate-200 text-slate-700 font-medium rounded-xl pl-10 pr-9 py-2.5 cursor-pointer shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
                             >
                                 <option value={0}>Public (Everyone)</option>
                                 {tiers.map((tier, index) => (
                                     <option key={tier.id} value={index + 1}>
-                                        {tier.name} ($ {tier.price}) & Higher
+                                        {tier.name} (${tier.price}) & Above
                                     </option>
                                 ))}
                             </select>
-                            <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                                <ChevronDown size={16} />
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+                                <ChevronDown size={14} />
                             </div>
                         </div>
-
                     </div>
                 </div>
+
+                {/* Tip */}
+                <p className="text-center text-xs text-slate-400 mt-6 flex items-center justify-center gap-1.5">
+                    <Sparkles size={12} />
+                    Tip: You can paste images directly into the editor
+                </p>
             </main>
         </div>
     );

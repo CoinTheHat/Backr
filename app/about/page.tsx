@@ -11,7 +11,7 @@ export default function AboutPage() {
                     <h2 className="text-2xl font-bold text-white">Our Mission</h2>
                     <p className="text-gray-300 leading-relaxed text-lg">
                         Backr is built on the belief that creators should have complete ownership of their content and their community.
-                        By leveraging the Mantle Network, we provide a decentralized platform where revenue flows directly to you,
+                        By leveraging the Tempo Network, we provide a decentralized platform where revenue flows directly to you,
                         without intermediaries taking a massive cut.
                     </p>
                 </div>

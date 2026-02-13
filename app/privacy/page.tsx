@@ -10,7 +10,7 @@ export default function PrivacyPage() {
                     </section>
                     <section>
                         <h2 className="text-xl font-bold text-white mb-2">2. Wallet Information</h2>
-                        <p>When you connect your wallet, we see your public address. We do not have access to your private keys.</p>
+                        <p>When you sign in, we see your public address. We do not have access to your private keys.</p>
                     </section>
                     <section>
                         <h2 className="text-xl font-bold text-white mb-2">3. Cookies</h2>

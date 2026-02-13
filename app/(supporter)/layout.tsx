@@ -5,12 +5,12 @@ import { useRouter, usePathname } from 'next/navigation';
 import Button from '../components/Button';
 import BrandLogo from '../components/BrandLogo';
 import WalletButton from '../components/WalletButton';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 
 export default function SupporterLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { isConnected } = useAccount();
+    const { authenticated: isConnected } = usePrivy();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchFocused, setSearchFocused] = useState(false);
 

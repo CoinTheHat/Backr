@@ -13,9 +13,9 @@ module.exports = {
         }
     },
     networks: {
-        mantle: {
-            url: "https://rpc.mantle.xyz",
-            chainId: 5000,
+        tempo: {
+            url: "https://rpc.moderato.tempo.xyz",
+            chainId: 42431,
             accounts: process.env.PRIVATE_KEY ? [process.env.PRIVATE_KEY] : [],
         },
         mantleSepolia: {

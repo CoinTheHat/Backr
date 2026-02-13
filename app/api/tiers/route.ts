@@ -1,55 +1,101 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db'; // Assuming db is exported from utils/db
+
+// Helper to get all tiers directly if needed, or just use db.tiers.getByCreator
+// But db.tiers.getByCreator returns filtered list.
+// To save properly, we need to know how db handles persistence.
+// db.tiers.saveAll(address, tiers) REPLACES all tiers for that address.
+// So we can just:
+// 1. Get existing tiers for creator
+// 2. Modify array
+// 3. Call saveAll
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
-    const address = searchParams.get('address');
+    const creator = searchParams.get('creator');
 
-    if (!address) {
+    if (!creator) {
         return NextResponse.json([]);
     }
 
-    const { data: tiers, error } = await supabase
-        .from('tiers')
-        .select('*')
-        .eq('creatorAddress', address);
-
-    if (error) {
-        console.error('Error fetching tiers:', error);
-        return NextResponse.json([]);
-    }
-
-    return NextResponse.json(tiers || []);
+    const tiers = db.tiers.getByCreator(creator);
+    return NextResponse.json(tiers);
 }
 
 export async function POST(request: Request) {
-    const body = await request.json();
-    const { address, tiers } = body;
+    try {
+        const body = await request.json();
+        const { creator, name, price, perks } = body;
 
-    if (!address || !tiers) {
-        return NextResponse.json({ error: 'Missing data' }, { status: 400 });
+        if (!creator || !name || !price) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        const currentTiers = db.tiers.getByCreator(creator);
+
+        const newTier = {
+            id: Math.random().toString(36).substr(2, 9),
+            creatorAddress: creator,
+            name,
+            price: Number(price),
+            benefits: perks || [], // perks from frontend = benefits in db
+            active: true,
+            createdAt: new Date().toISOString()
+        };
+
+        db.tiers.saveAll(creator, [...currentTiers, newTier]);
+
+        return NextResponse.json(newTier);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+export async function PUT(request: Request) {
+    try {
+        const body = await request.json();
+        const { id, creator, name, price, perks } = body;
+
+        if (!id || !creator) {
+            return NextResponse.json({ error: 'Missing ID or Creator' }, { status: 400 });
+        }
+
+        const currentTiers = db.tiers.getByCreator(creator);
+        const tierIndex = currentTiers.findIndex((t: any) => t.id === id);
+
+        if (tierIndex === -1) {
+            return NextResponse.json({ error: "Tier not found" }, { status: 404 });
+        }
+
+        const updatedTier = {
+            ...currentTiers[tierIndex],
+            name,
+            price: Number(price),
+            benefits: perks || []
+        };
+
+        currentTiers[tierIndex] = updatedTier;
+        db.tiers.saveAll(creator, currentTiers);
+
+        return NextResponse.json(updatedTier);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+    const creator = searchParams.get('creator');
+
+    if (!id || !creator) {
+        return NextResponse.json({ error: 'Missing ID or Creator' }, { status: 400 });
     }
 
-    // Delete all existing tiers for this creator
-    await supabase.from('tiers').delete().eq('creatorAddress', address);
+    const currentTiers = db.tiers.getByCreator(creator);
+    const filteredTiers = currentTiers.filter((t: any) => t.id !== id);
 
-    // Insert new tiers
-    const tiersToInsert = tiers.map((tier: any) => ({
-        creatorAddress: address,
-        name: tier.name,
-        price: tier.price,
-        duration: tier.duration || '30',
-        benefits: tier.benefits || [],
-        recommended: tier.recommended || false,
-        active: tier.active !== false
-    }));
+    db.tiers.saveAll(creator, filteredTiers);
 
-    const { data, error } = await supabase.from('tiers').insert(tiersToInsert).select();
-
-    if (error) {
-        console.error('Error saving tiers:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
-    return NextResponse.json({ success: true, data });
+    return NextResponse.json({ success: true });
 }

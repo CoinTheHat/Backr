@@ -7,29 +7,47 @@ module.exports = {
     ],
     theme: {
         extend: {
-            fontFamily: {
-                sans: ["var(--font-geist-sans)", "sans-serif"],
-                mono: ["var(--font-geist-mono)", "monospace"],
-                serif: ["var(--font-playfair)", "serif"],
-            },
             colors: {
-                background: "var(--background)",
-                foreground: "var(--foreground)",
-                brand: {
-                    primary: "#FF6EB5", // Galaxy Pink
-                    secondary: "#6B8BFF", // Nebula Blue
-                    accent: "#88E9CE", // Starlight Cyan
-                    dark: "#0D0B1D", // Cosmic Ink
-                    light: "#F2F2FA", // Nebula Pastel
-                    muted: "#94A3B8", // Slate 400
-                },
+                "primary": "#8c2bee",
+                "primary-light": "#a74bfb",
+                "primary-dark": "#711ec3",
+                "secondary": "#0EA5E9",
+                "accent": "#F59E0B",
+                "mist": "#F8F9FC",
+                "fuchsia-accent": "#e879f9",
+                "brand-dark": "#0D0B1D",
+                "brand-primary": "#6B8BFF",
+                "brand-secondary": "#FF6EB5",
+                "brand-accent": "#88E9CE",
+                "brand-light": "#F2F2FA",
             },
-            boxShadow: {
-                'studio': '0 4px 24px rgba(0,0,0,0.12)',
-                'glow': '0 0 20px rgba(255, 110, 181, 0.5)',
+            fontFamily: {
+                "sans": ["var(--font-inter)", "sans-serif"],
+                "serif": ["var(--font-playfair)", "serif"],
+                "display": ["var(--font-playfair)", "serif"],
             },
             borderRadius: {
-                'studio': '16px',
+                "2xl": "1rem",
+                "3xl": "1.5rem",
+                "4xl": "2rem",
+            },
+            boxShadow: {
+                "glow": "0 0 20px rgba(140, 43, 238, 0.3)",
+                "glass": "0 8px 32px 0 rgba(31, 38, 135, 0.07)",
+            },
+            animation: {
+                "float": "float 6s ease-in-out infinite",
+                "fade-in-up": "fadeInUp 0.8s ease-out forwards",
+            },
+            keyframes: {
+                float: {
+                    "0%, 100%": { transform: "translateY(0)" },
+                    "50%": { transform: "translateY(-20px)" },
+                },
+                fadeInUp: {
+                    "0%": { opacity: "0", transform: "translateY(20px)" },
+                    "100%": { opacity: "1", transform: "translateY(0)" },
+                }
             }
         },
     },

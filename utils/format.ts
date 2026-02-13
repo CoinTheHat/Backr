@@ -1,4 +1,4 @@
-export function formatPrice(amount: string | number, currency: string = 'MNT'): string {
+export function formatPrice(amount: string | number, currency: string = 'USD'): string {
     const num = typeof amount === 'string' ? parseFloat(amount) : amount;
     if (isNaN(num)) return `0.00 ${currency}`;
 

@@ -1,19 +1,18 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCommunity } from '../../context/CommunityContext';
 import { useRouter } from 'next/navigation';
 import { Trash2, Plus, ArrowLeft } from 'lucide-react';
 import Button from '../../components/Button';
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
-import { parseEther } from 'viem';
-import { SUBSCRIPTION_ABI } from '@/utils/abis';
+import { usePrivy } from '@privy-io/react-auth';
 import { useToast } from '../../components/Toast';
 
 export default function ManageTiersPage() {
-    const { tiers, addTier, deleteTier, isDeployed, isLoading: isContextLoading, contractAddress } = useCommunity();
+    const { tiers, addTier, deleteTier, isLoading: isContextLoading } = useCommunity();
     const router = useRouter();
-    const { address } = useAccount();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
     const { showToast, ToastComponent } = useToast();
 
     // Form State
@@ -22,97 +21,43 @@ export default function ManageTiersPage() {
     const [perkInput, setPerkInput] = useState('');
     const [perks, setPerks] = useState<string[]>([]);
 
-    // Contract Writes
-    const { data: hash, writeContract, isPending: isWritePending, error: writeError } = useWriteContract();
-    const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
-
-    // Handle Success
-    useEffect(() => {
-        if (isConfirmed) {
-            showToast('Tier created on-chain successfully!', 'success');
-
-            const newTierData = { name, price: `${price} MNT`, perks };
-            addTier(newTierData);
-
-            // Sync with Backend
-            if (address) {
-                const updatedTiers = [...tiers, { ...newTierData, id: 'temp' }];
-                const payload = {
-                    address,
-                    tiers: updatedTiers.map(t => ({
-                        name: t.name,
-                        price: t.price,
-                        benefits: t.perks,
-                        duration: 30
-                    }))
-                };
-
-                fetch('/api/tiers', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                }).catch(console.error);
-            }
-
-            // Reset Form
-            setName('');
-            setPrice('');
-            setPerks([]);
-        }
-    }, [isConfirmed]);
-
-    useEffect(() => {
-        if (writeError) {
-            showToast(`Error: ${writeError.message}`, 'error');
-        }
-    }, [writeError]);
+    // Simplified State
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     if (isContextLoading) return <div className="min-h-screen bg-brand-light flex items-center justify-center text-brand-muted">Loading studio...</div>;
 
-    if (!isDeployed) {
-        return (
-            <div className="min-h-screen bg-brand-light flex items-center justify-center p-4">
-                <div className="max-w-md w-full bg-white rounded-studio p-8 shadow-studio text-center border border-gray-100">
-                    <div className="text-5xl mb-6">🔒</div>
-                    <h2 className="text-2xl font-serif font-bold text-brand-dark mb-3">Deployment Required</h2>
-                    <p className="text-brand-muted mb-8 leading-relaxed">
-                        To create membership tiers and start earning, you must first deploy your smart contract on the blockchain.
-                    </p>
-                    <Button
-                        onClick={() => router.push('/dashboard/settings')}
-                        variant="primary"
-                        className="w-full justify-center py-3 shadow-lg shadow-brand-primary/20"
-                    >
-                        Deploy Contract
-                    </Button>
-                    <button onClick={() => router.back()} className="mt-4 text-sm text-brand-muted hover:text-brand-dark underline decoration-gray-300 underline-offset-4">
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    // Removed deployment check
 
-    const handleCreateTier = () => {
+    const handleCreateTier = async () => {
         if (!name || !price) {
             showToast('Please fill in name and price', 'info');
             return;
         }
-        if (!contractAddress) {
-            showToast('Contract address not found. Please refresh.', 'error');
-            return;
-        }
 
+        setIsSubmitting(true);
         try {
-            writeContract({
-                address: contractAddress as `0x${string}`,
-                abi: SUBSCRIPTION_ABI,
-                functionName: 'createTier',
-                args: [name, parseEther(price), BigInt(30 * 24 * 60 * 60)] // Default 30 Days duration
+            // API Call (Off-chain for now)
+            const payload = {
+                address,
+                tiers: [...tiers, { name, price: `${price}`, benefits: perks, duration: 30 }]
+            };
+
+            await fetch('/api/tiers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
+
+            addTier({ name, price: `${price}`, perks });
+            showToast('Tier created successfully', 'success');
+            setName('');
+            setPrice('');
+            setPerks([]);
         } catch (e) {
             console.error(e);
-            showToast('Failed to initiate transaction', 'error');
+            showToast('Failed to create tier', 'error');
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -122,7 +67,7 @@ export default function ManageTiersPage() {
         setPerkInput('');
     };
 
-    const isProcessing = isWritePending || isConfirming;
+    const isProcessing = isSubmitting;
 
     return (
         <div className="min-h-screen bg-brand-light pt-8 pb-12 px-4 md:px-8">
@@ -147,7 +92,7 @@ export default function ManageTiersPage() {
                                     <h3 className="text-xl font-bold mb-1 text-brand-dark">{tier.name}</h3>
                                     <p className="text-brand-primary font-bold">{tier.price}</p>
                                     <ul className="mt-2 space-y-1">
-                                        {tier.perks.map((p, i) => <li key={i} className="text-sm text-gray-500">• {p}</li>)}
+                                        {tier.perks.map((p: string, i: number) => <li key={i} className="text-sm text-gray-500">• {p}</li>)}
                                     </ul>
                                 </div>
                                 <button
@@ -176,14 +121,14 @@ export default function ManageTiersPage() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-brand-muted mb-1">Price (MNT)</label>
+                                <label className="block text-sm font-medium text-brand-muted mb-1">Price (USD)</label>
                                 <input
                                     type="text"
                                     value={price}
                                     onChange={e => setPrice(e.target.value)}
                                     disabled={isProcessing}
                                     className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-brand-dark focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all disabled:opacity-50"
-                                    placeholder="0.00"
+                                    placeholder="5.00"
                                 />
                             </div>
                             <div>
@@ -215,7 +160,7 @@ export default function ManageTiersPage() {
                                 variant="primary"
                                 disabled={isProcessing || !name || !price}
                             >
-                                {isWritePending ? 'Confirming Wallet...' : isConfirming ? 'Creating Tier on Blockchain...' : 'Create On-Chain Tier'}
+                                {isSubmitting ? 'Creating...' : 'Create Tier'}
                             </Button>
                         </div>
                     </div>

@@ -55,5 +55,46 @@ export const db = {
             saveTable('posts', all);
             return newPost;
         }
+    },
+    tips: {
+        getAll: () => getTable('tips'),
+        getByReceiver: (address: string) => getTable('tips').filter((t: any) => t.receiver === address),
+        getBySender: (address: string) => getTable('tips').filter((t: any) => t.sender === address),
+        create: (tip: any) => {
+            const all = getTable('tips');
+            const newTip = {
+                ...tip,
+                id: Math.random().toString(36).substr(2, 9),
+                timestamp: new Date().toISOString()
+            };
+            all.push(newTip);
+            saveTable('tips', all);
+            return newTip;
+        }
+    },
+    memberships: {
+        getAll: () => getTable('memberships'),
+        getByUser: (address: string) => getTable('memberships').filter((m: any) => m.userAddress === address),
+        getByCreator: (address: string) => getTable('memberships').filter((m: any) => m.creatorAddress === address),
+        create: (membership: any) => {
+            const all = getTable('memberships');
+            // Check if exists
+            const existingIndex = all.findIndex((m: any) => m.userAddress === membership.userAddress && m.creatorAddress === membership.creatorAddress);
+
+            const newMembership = {
+                ...membership,
+                updatedAt: new Date().toISOString()
+            };
+
+            if (existingIndex >= 0) {
+                all[existingIndex] = { ...all[existingIndex], ...newMembership };
+            } else {
+                newMembership.id = Math.random().toString(36).substr(2, 9);
+                newMembership.createdAt = new Date().toISOString();
+                all.push(newMembership);
+            }
+            saveTable('memberships', all);
+            return newMembership;
+        }
     }
 };

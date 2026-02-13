@@ -3,19 +3,22 @@
 import { useState, useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { useAccount, useDisconnect } from 'wagmi';
-import Button from '../components/Button';
+import { usePrivy } from '@privy-io/react-auth';
+import { useToast } from '../components/Toast';
 import WalletButton from '../components/WalletButton';
 import {
     LayoutDashboard,
-    PenTool,
     Users,
+    FileText,
     DollarSign,
     Settings,
     LogOut,
     Menu,
-    X,
-    ExternalLink
+    Bell,
+    Plus,
+    ChevronRight,
+    Rocket,
+    Crown
 } from 'lucide-react';
 import { supabase } from '@/utils/supabase';
 import { useCommunity } from '../context/CommunityContext';
@@ -23,13 +26,12 @@ import { useCommunity } from '../context/CommunityContext';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { address, isConnected } = useAccount();
-    const { disconnect } = useDisconnect();
-    const { isDeployed } = useCommunity(); // Use shared state
+    const { user, authenticated, logout, createWallet } = usePrivy();
+    const { showToast, ToastComponent } = useToast();
+    const address = user?.wallet?.address;
     const [mounted, setMounted] = useState(false);
     const [profile, setProfile] = useState<any>(null);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
 
     useEffect(() => {
         setMounted(true);
@@ -40,140 +42,140 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         setIsSidebarOpen(false);
     }, [pathname]);
 
-    // Fetch Profile for Sidebar (Name/Avatar)
+    // Fetch Profile & Handle Onboarding Redirect
     useEffect(() => {
         const fetchProfile = async () => {
             if (!address) return;
-            const { data } = await supabase.from('creators').select('*').eq('address', address).single();
-            if (data) setProfile(data);
+
+            // Check if profile exists in Supabase
+            const { data, error } = await supabase.from('creators').select('*').eq('address', address).single();
+
+            if (data) {
+                setProfile(data);
+            } else if (!error || error.code === 'PGRST116') {
+                // Profile not found (PGRST116 is "The result contains 0 rows")
+                // Redirect to onboarding
+                router.push('/onboarding');
+            }
         };
         fetchProfile();
-    }, [address]);
+    }, [address, router]);
 
+    // Auto-create wallet if authenticated but no wallet
+    useEffect(() => {
+        if (authenticated && !user?.wallet && createWallet) {
+            createWallet().then(() => router.refresh()).catch(console.error);
+        }
+    }, [authenticated, user?.wallet, createWallet, router]);
 
     if (!mounted) return null;
 
-    const displayName = profile?.name || 'Creator';
-
-    const menuItems = [
-        { label: 'Overview', path: '/dashboard', icon: '📊' },
-        ...(isDeployed ? [
-            { label: 'My Page', path: `/${address}`, icon: '🎨', external: true },
-            { label: 'Community', path: '/community', icon: '📝' },
-            { label: 'Audience', path: '/dashboard/audience', icon: '👥' },
-            { label: 'Membership', path: '/community/manage-tiers', icon: '💎' },
-            { label: 'Payouts', path: '/dashboard/earnings', icon: '💰' },
-        ] : []),
-        { label: 'Settings', path: '/dashboard/settings', icon: '⚙️' },
-    ];
-
-    // Access Control: Enforce Wallet Connection
-    if (!address) {
+    // Access Control
+    if (!authenticated) {
         return (
-            <div style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                height: '100vh', background: 'var(--color-bg-page)', color: 'var(--color-text-primary)', textAlign: 'center'
-            }}>
-                <div className="card-surface" style={{ padding: '32px', maxWidth: '400px', margin: '16px' }}>
-                    <h1 className="text-h1" style={{ marginBottom: '16px' }}>Dashboard Access</h1>
-                    <p className="text-body" style={{ color: 'var(--color-text-secondary)', marginBottom: '32px' }}>Connect your wallet to manage your creator page.</p>
-                    <WalletButton />
-                    <Button variant="outline" style={{ marginTop: '24px', width: '100%', justifyContent: 'center' }} onClick={() => router.push('/')}>
+            <div className="min-h-screen flex flex-col items-center justify-center bg-mist text-slate-900 p-4">
+                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-slate-100">
+                    <h1 className="text-2xl font-bold mb-4 font-serif">Dashboard Access</h1>
+                    <p className="text-slate-500 mb-8">Sign in to manage your creator page.</p>
+                    <div className="flex justify-center"><WalletButton /></div>
+                    <button className="mt-6 text-sm text-slate-400 hover:text-primary transition-colors" onClick={() => router.push('/')}>
                         Return Home
-                    </Button>
+                    </button>
                 </div>
             </div>
         );
     }
 
-    const currentTitle = menuItems.find(i => i.path === pathname)?.label || 'Dashboard';
+    if (!address) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center bg-mist text-slate-900 p-4">
+                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-slate-100">
+                    <h1 className="text-2xl font-bold mb-4 font-serif">Setting up wallet...</h1>
+                    <div className="flex justify-center gap-2 mb-6">
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce delay-100"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary animate-bounce delay-200"></div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
-    // Handle logout
-    const handleLogout = () => {
-        disconnect();
+    const menuItems = [
+        { label: 'Overview', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
+        { label: 'Membership', path: '/dashboard/membership', icon: <Crown size={20} /> },
+        { label: 'Members', path: '/dashboard/audience', icon: <Users size={20} /> },
+        { label: 'Posts', path: '/community', icon: <FileText size={20} /> },
+        { label: 'Earnings', path: '/dashboard/earnings', icon: <DollarSign size={20} /> },
+        { label: 'Settings', path: '/dashboard/settings', icon: <Settings size={20} /> },
+    ];
+
+    const currentTitle = menuItems.find(i => i.path === pathname)?.label || 'Overview';
+
+    const handleLogout = async () => {
+        await logout();
         router.push('/');
     };
 
-    // Mobile Overlay
-    const MobileOverlay = () => (
-        <div
-            className={`fixed inset-0 bg-black/50 backdrop-blur-sm z-30 lg:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-                }`}
-            onClick={() => setIsSidebarOpen(false)}
-        />
-    );
-
     return (
-        <div className="min-h-screen bg-bg-page text-text-primary font-sans flex">
+        <div className="min-h-screen bg-mist text-slate-900 font-sans flex overflow-hidden">
+            {ToastComponent}
 
-            {/* Mobile Header (Hamburger) */}
-            <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-gray-200 z-20 flex items-center px-4 justify-between">
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setIsSidebarOpen(true)}
-                        className="p-2 -ml-2 text-gray-600 hover:text-gray-900 focus:outline-none"
-                    >
-                        <Menu size={24} />
-                    </button>
-                    <span className="font-bold text-lg">Studio</span>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-gray-100 border border-gray-200 overflow-hidden">
-                    {/* Tiny avatar placeholder */}
-                </div>
-            </div>
+            {/* Mobile Overlay */}
+            <div
+                className={`fixed inset-0 bg-black/20 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+                onClick={() => setIsSidebarOpen(false)}
+            />
 
-            <MobileOverlay />
+            {/* SIDEBAR */}
+            <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-100 transform transition-transform duration-300 lg:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <div className="flex flex-col h-full p-6">
+                    {/* Brand */}
+                    {/* Brand */}
+                    <Link href="/" className="flex items-center gap-3 mb-10 pl-2 hover:opacity-80 transition-opacity">
+                        <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-white shadow-lg shadow-slate-800/20">
+                            <Rocket size={16} />
+                        </div>
+                        <span className="text-xl font-bold tracking-tight text-slate-900 font-display">Backr</span>
+                    </Link>
 
-            {/* Sidebar */}
-            <aside
-                className={`fixed top-0 bottom-0 left-0 z-40 w-[280px] bg-white border-r border-gray-200 shadow-xl lg:shadow-none transition-transform duration-300 transform lg:translate-x-0 overflow-y-auto ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
-            >
-                <div className="p-6 flex flex-col h-full">
-                    {/* Header */}
-                    <div className="mb-10 pl-2 pt-2">
-                        <Link href="/" className="text-2xl font-bold font-serif hover:opacity-80 transition-opacity">
-                            Backr<span className="text-brand-primary">.</span>
-                        </Link>
-                    </div>
-
-                    {/* Nav Items */}
-                    <nav className="flex-1 flex flex-col gap-2">
+                    {/* Navigation */}
+                    <nav className="flex-1 space-y-1">
                         {menuItems.map((item) => {
                             const isActive = pathname === item.path;
                             return (
                                 <Link
                                     key={item.path}
                                     href={item.path}
-                                    onClick={() => setIsSidebarOpen(false)} // close on mobile click
-                                    className={`flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all font-medium text-sm ${isActive
-                                        ? 'bg-gray-900 text-white shadow-md'
-                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
-                                        }`}
+                                    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-medium text-sm ${isActive
+                                        ? 'bg-primary/10 text-primary'
+                                        : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
                                 >
-                                    <span className={isActive ? 'text-brand-accent' : ''}>{item.icon}</span>
+                                    {item.icon}
                                     {item.label}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    {/* Footer / User */}
-                    <div className="mt-8 pt-6 border-t border-gray-100">
-                        <div className="flex items-center gap-3 px-2 mb-6">
-                            <div className="w-10 h-10 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center text-lg">
-                                👤
+                    {/* User Profile */}
+                    <div className="mt-auto pt-6 border-t border-slate-50">
+                        <div className="flex items-center gap-3 mb-4 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => router.push(`/${address}`)}>
+                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
+                                {profile?.avatar_url ? (
+                                    <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-slate-400">
+                                        <Users size={16} />
+                                    </div>
+                                )}
                             </div>
-                            <div className="flex-1 min-w-0">
-                                <div className="text-sm font-bold truncate text-gray-900">My Creator Page</div>
-                                <div className="text-xs text-brand-primary truncate hover:underline cursor-pointer" onClick={() => router.push('/' + (address || ''))}>View Public Page ↗</div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-sm font-semibold truncate text-slate-900">{profile?.name || 'Creator'}</p>
+                                <p className="text-xs text-slate-400 truncate">View Public Page</p>
                             </div>
                         </div>
-
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm font-medium"
-                        >
+                        <button onClick={handleLogout} className="flex items-center gap-3 w-full px-4 py-2 text-rose-500 hover:bg-rose-50 rounded-lg text-sm font-medium transition-colors">
                             <LogOut size={18} />
                             Log Out
                         </button>
@@ -181,62 +183,46 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 </div>
             </aside>
 
-            {/* Backdrop */}
-            {isSidebarOpen && (
-                <div
-                    onClick={() => setIsSidebarOpen(false)}
-                    style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 45 }}
-                ></div>
-            )}
+            {/* MAIN CONTENT */}
+            <main className="flex-1 flex flex-col h-screen overflow-hidden lg:ml-64 relative">
 
-            {/* Content Area */}
-            <main className="main-content">
-                {/* Topbar */}
-                <header style={{
-                    padding: '16px 40px',
-                    borderBottom: '1px solid var(--color-border)',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    background: 'var(--color-bg-surface)',
-                    height: 'var(--header-height)',
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 30
-                }}>
-                    {/* Left: Breadcrumb / Context */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--color-text-secondary)', fontSize: '0.9rem' }}>
-                        <span style={{ cursor: 'pointer' }} onClick={() => router.push('/dashboard')}>Studio</span>
-                        <span style={{ color: 'var(--color-text-tertiary)' }}>/</span>
-                        <span style={{ color: 'var(--color-text-primary)', fontWeight: 600 }}>{currentTitle}</span>
+                {/* Header */}
+                <header className="sticky top-0 z-30 bg-mist/80 backdrop-blur-md px-6 py-4 flex items-center justify-between border-b border-white/50">
+                    <div className="flex items-center gap-4">
+                        <button className="lg:hidden p-2 -ml-2 text-slate-500" onClick={() => setIsSidebarOpen(true)}>
+                            <Menu size={24} />
+                        </button>
+                        <div className="flex items-center text-xs text-slate-400 gap-1">
+                            <span>Studio</span>
+                            <ChevronRight size={12} />
+                            <span className="text-primary font-medium">{currentTitle}</span>
+                        </div>
                     </div>
 
-                    {/* Right: Network Status + Profile/Wallet */}
-                    <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
-                        <WalletButton />
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => showToast('No new notifications', 'info')}
+                            className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-primary transition-colors relative">
+                            <Bell size={20} />
+                            <span className="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full border-2 border-mist"></span>
+                        </button>
+                        <button
+                            onClick={() => router.push('/community/new-post')}
+                            className="bg-gradient-to-r from-primary to-fuchsia-accent text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-primary/20 flex items-center gap-2 hover:shadow-primary/30 transition-all active:scale-95"
+                        >
+                            <Plus size={16} />
+                            <span className="hidden sm:inline">Create Post</span>
+                        </button>
                     </div>
                 </header>
 
-                {/* Page Content */}
-                <div className="page-container" style={{ paddingBottom: '80px', paddingTop: '32px' }}>
-                    {children}
+                {/* Scrollable Page Content */}
+                <div className="flex-1 overflow-y-auto px-6 py-8">
+                    <div className="max-w-5xl mx-auto">
+                        {children}
+                    </div>
                 </div>
 
-                {/* Mobile FAB: Create Post */}
-                <div
-                    className="mobile-fab"
-                    onClick={() => router.push('/dashboard/posts')}
-                    style={{
-                        position: 'fixed', bottom: '24px', right: '24px', zIndex: 60,
-                        width: '56px', height: '56px', borderRadius: '50%',
-                        background: 'var(--color-primary)', boxShadow: 'var(--shadow-xl)',
-                        display: 'none', alignItems: 'center', justifyContent: 'center',
-                        color: '#fff', fontSize: '1.5rem', cursor: 'pointer'
-                    }}
-                >
-                    +
-                </div>
-                <style dangerouslySetInnerHTML={{ __html: `@media(max-width: 1024px) { .mobile-fab { display: flex !important; margin-left: auto; } }` }} />
             </main>
         </div>
     );

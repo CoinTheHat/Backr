@@ -1,117 +1,44 @@
-export const FACTORY_ABI = [
+export const TIP20_ABI = [
     {
-        "inputs": [
-            { "internalType": "address", "name": "_implementation", "type": "address" }
+        inputs: [
+            { internalType: "address", name: "to", type: "address" },
+            { internalType: "uint256", name: "amount", type: "uint256" }
         ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
+        name: "transfer",
+        outputs: [{ internalType: "bool", name: "", type: "bool" }],
+        stateMutability: "nonpayable",
+        type: "function"
     },
     {
-        "anonymous": false,
-        "inputs": [
-            { "indexed": true, "internalType": "address", "name": "creator", "type": "address" },
-            { "indexed": false, "internalType": "address", "name": "profileContract", "type": "address" }
+        inputs: [
+            { internalType: "address", name: "to", type: "address" },
+            { internalType: "uint256", name: "amount", type: "uint256" },
+            { internalType: "bytes32", name: "memo", type: "bytes32" }
         ],
-        "name": "ProfileCreated",
-        "type": "event"
+        name: "transferWithMemo",
+        outputs: [],
+        stateMutability: "nonpayable",
+        type: "function"
     },
     {
-        "inputs": [
-            { "internalType": "address", "name": "_paymentToken", "type": "address" }
-        ],
-        "name": "createProfile",
-        "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "function"
+        inputs: [{ internalType: "address", name: "account", type: "address" }],
+        name: "balanceOf",
+        outputs: [{ internalType: "uint256", name: "", type: "uint256" }],
+        stateMutability: "view",
+        type: "function"
     },
     {
-        "inputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-        ],
-        "name": "getProfile",
-        "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
+        inputs: [],
+        name: "decimals",
+        outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
+        stateMutability: "view",
+        type: "function"
+    },
+    {
+        inputs: [],
+        name: "symbol",
+        outputs: [{ internalType: "string", name: "", type: "string" }],
+        stateMutability: "view",
+        type: "function"
     }
-];
-
-export const SUBSCRIPTION_ABI = [
-    {
-        "inputs": [],
-        "name": "initialize",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            { "internalType": "string", "name": "_name", "type": "string" },
-            { "internalType": "uint256", "name": "_price", "type": "uint256" },
-            { "internalType": "uint256", "name": "_duration", "type": "uint256" }
-        ],
-        "name": "createTier",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            { "internalType": "uint256", "name": "_tierId", "type": "uint256" }
-        ],
-        "name": "subscribe",
-        "outputs": [],
-        "stateMutability": "payable", // Important for MNT
-        "type": "function"
-    },
-    {
-        "inputs": [
-            { "internalType": "address", "name": "_user", "type": "address" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
-        "name": "memberships",
-        "outputs": [
-            { "internalType": "uint256", "name": "expiry", "type": "uint256" },
-            { "internalType": "uint256", "name": "tierId", "type": "uint256" }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "getTiers",
-        "outputs": [
-            {
-                "components": [
-                    { "internalType": "string", "name": "name", "type": "string" },
-                    { "internalType": "uint256", "name": "price", "type": "uint256" },
-                    { "internalType": "uint256", "name": "duration", "type": "uint256" },
-                    { "internalType": "bool", "name": "isActive", "type": "bool" }
-                ],
-                "internalType": "struct SubscriptionContract.Tier[]",
-                "name": "",
-                "type": "tuple[]"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "withdraw",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    }
-];
-
-// Provide a default address or load from env
-export const FACTORY_ADDRESS = process.env.NEXT_PUBLIC_FACTORY_ADDRESS || "0x48c87643EE7A20B5741F7d78B09ba23CF246D59F"; // New Mantle Mainnet Factory (Platform Fee Enabled - Custom Treasury)
-
+] as const;

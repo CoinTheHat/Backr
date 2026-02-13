@@ -1,316 +1,241 @@
 'use client';
 
 import { use, useState, useEffect } from 'react';
-import Button from '../components/Button';
-import Card from '../components/Card';
-import WalletButton from '../components/WalletButton';
 import { useRouter } from 'next/navigation';
-import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
-import { SUBSCRIPTION_ABI } from '@/utils/abis';
-import { Address } from 'viem';
+import { usePrivy } from '@privy-io/react-auth';
 import { useToast } from '../components/Toast';
 import confetti from 'canvas-confetti';
-import { formatPrice, formatPlural } from '@/utils/format';
+import { formatPrice } from '@/utils/format';
 import CheckoutModal from '../components/CheckoutModal';
+import TipButton from '../components/TipButton';
+import TipJar from '../components/TipJar';
+import SupporterLeaderboard from '../components/SupporterLeaderboard';
+import WalletButton from '../components/WalletButton';
+import { useSend } from '../hooks/useSend';
+import {
+    ChevronLeft,
+    Share,
+    MoreHorizontal,
+    Check,
+    Lock,
+    Heart,
+    MessageCircle,
+    Zap,
+    Shield
+} from 'lucide-react';
 
 export default function CreatorPage({ params }: { params: Promise<{ creator: string }> }) {
     const { creator } = use(params);
     const creatorId = creator;
 
-    const { isConnected, address } = useAccount();
+    const { user, authenticated } = usePrivy();
+    const address = user?.wallet?.address;
     const router = useRouter();
     const { showToast, ToastComponent } = useToast();
 
     // Tab State
-    const [activeTab, setActiveTab] = useState<'posts' | 'about' | 'membership'>('posts');
+    const [activeTab, setActiveTab] = useState<'posts' | 'membership' | 'about'>('posts');
 
     const [loading, setLoading] = useState(false);
     const [posts, setPosts] = useState<any[]>([]);
     const [creatorTiers, setCreatorTiers] = useState<any[]>([]);
     const [creatorProfile, setCreatorProfile] = useState<any>(null);
-    const [creatorContractAddress, setCreatorContractAddress] = useState<string>('');
     const [realMemberCount, setRealMemberCount] = useState(0);
     const [expandedPosts, setExpandedPosts] = useState<Record<number, boolean>>({});
 
-    // Fetch Data
-    useEffect(() => {
-        if (!creatorId) return;
-
-        // Profile & Contract
-        fetch('/api/creators')
-            .then(res => res.json())
-            .then(creators => {
-                const found = creators.find((c: any) => c.address === creatorId);
-                if (found) {
-                    setCreatorProfile(found);
-                    setCreatorContractAddress(found.contractAddress || '');
-                }
-            });
-
-        // Tiers
-        fetch(`/api/tiers?address=${creatorId}`)
-            .then(res => res.json())
-            .then(data => {
-                if (Array.isArray(data)) setCreatorTiers(data);
-            });
-
-        // Posts
-        fetch(`/api/posts?address=${creatorId}`)
-            .then(res => res.json())
-            .then(data => setPosts(data));
-
-        // Stats (Real Member Count)
-        fetch(`/api/stats?address=${creatorId}`)
-            .then(res => res.json())
-            .then(data => setRealMemberCount(data.activeMembers || 0));
-    }, [creatorId]);
-
-    // Membership Check
-    const { data: memberData } = useReadContract({
-        address: creatorContractAddress as Address,
-        abi: SUBSCRIPTION_ABI,
-        functionName: 'memberships',
-        args: [address],
-        query: { enabled: !!creatorContractAddress && !!address }
-    });
-
-    // Fix Type Error: Force boolean cast
-    const isSubscribed = memberData ? Number((memberData as any)[0]) > Math.floor(Date.now() / 1000) : false;
-    const memberTierId = memberData ? Number((memberData as any)[1]) : -1;
+    // Payment Hook
+    const { send, txHash: paymentTxHash } = useSend();
 
     // Checkout State
     const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
     const [selectedTierIndex, setSelectedTierIndex] = useState<number | null>(null);
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
-    // Subscription Transaction
-    const { data: hash, writeContract, error: writeError } = useWriteContract();
-    const { isSuccess: isSubscribedOnChain, isLoading: isTxLoading } = useWaitForTransactionReceipt({ hash });
-
-    // Self-healing: Check if contract says subscribed but we might have missed the sync
+    // Fetch Data
     useEffect(() => {
-        if (isSubscribed && address && creatorId) {
-            // Check if we already have it in local state knowledge (optimization)
-            // But safely, let's just trigger a sync just in case. 
-            // The API is an upsert, so it's safe.
-            const expiry = Number((memberData as any)[0]); // Contract returns timestamp
-            const tierId = Number((memberData as any)[1]);
+        if (!creatorId) return;
 
-            // Only sync if valid expiry
-            if (expiry > Math.floor(Date.now() / 1000)) {
-                fetch('/api/subscriptions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subscriberAddress: address,
-                        creatorAddress: creatorId,
-                        tierId: tierId,
-                        expiry: expiry,
-                        txHash: 'SYNC_RECOVERY'
-                    })
-                }).then(() => {
-                    // Update local member count if needed? 
-                    // We'll leave that to the stats fetch.
-                }).catch(err => console.error('Auto-sync failed:', err));
-            }
-        }
-    }, [isSubscribed, address, creatorId, memberData]);
+        // Profile
+        fetch('/api/creators')
+            .then(res => res.json())
+            .then(creators => {
+                const found = creators.find((c: any) => c.address === creatorId);
+                if (found) setCreatorProfile(found);
+            });
+
+        // Tiers
+        fetch(`/api/tiers?address=${creatorId}`)
+            .then(res => res.json())
+            .then(data => { if (Array.isArray(data)) setCreatorTiers(data); });
+
+        // Posts
+        fetch(`/api/posts?address=${creatorId}`)
+            .then(res => res.json())
+            .then(data => setPosts(data));
+
+        // Stats
+        fetch(`/api/stats?address=${creatorId}`)
+            .then(res => res.json())
+            .then(data => setRealMemberCount(data.activeMembers || 0));
+    }, [creatorId]);
+
+    // Membership Check
+    const isSubscribed = false; // This was mock.
+    const [activeSubscription, setActiveSubscription] = useState<any>(null);
 
     useEffect(() => {
-        if (isTxLoading) {
-            setCheckoutStatus('pending');
-        } else if (isSubscribedOnChain) {
-            setCheckoutStatus('success');
-            setLoading(false);
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-
-            // Sync to Database
-            if (selectedTierIndex !== null) {
-                const duration = 30 * 24 * 60 * 60; // 30 Days default
-                const expiry = Math.floor(Date.now() / 1000) + duration;
-
-                fetch('/api/subscriptions', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        subscriberAddress: address,
-                        creatorAddress: creatorId,
-                        tierId: selectedTierIndex,
-                        expiry: expiry,
-                        txHash: hash
-                    })
-                }).catch(err => console.error('Failed to sync subscription:', err));
-            }
-
-        } else if (writeError) {
-            setCheckoutStatus('error');
-            setLoading(false);
+        if (address && creatorId) {
+            fetch(`/api/subscriptions?subscriber=${address}&creator=${creatorId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0) {
+                        // Find active one
+                        const active = data.find((s: any) => new Date(s.expiresAt) > new Date());
+                        if (active) setActiveSubscription(active);
+                    }
+                });
         }
-    }, [isSubscribedOnChain, isTxLoading, writeError]);
+    }, [address, creatorId, checkoutStatus]);
 
-    const handleSubscribeClick = (tierId: number) => {
-        // Removed auth check to let Modal handle it
-        if (!creatorContractAddress) return showToast('Creator contract not found.', 'error');
-
-        setSelectedTierIndex(tierId);
+    const handleSubscribeClick = (tierIndex: number) => {
+        setSelectedTierIndex(tierIndex);
         setCheckoutStatus('idle');
         setCheckoutModalOpen(true);
     };
 
-    const handleConfirmSubscribe = () => {
+    const handleConfirmSubscribe = async () => {
         if (selectedTierIndex === null) return;
         const tier = creatorTiers[selectedTierIndex];
-        if (!tier) return;
 
         setCheckoutStatus('pending');
+
         try {
-            writeContract({
-                address: creatorContractAddress as `0x${string}`,
-                abi: SUBSCRIPTION_ABI,
-                functionName: 'subscribe',
-                args: [BigInt(selectedTierIndex)],
-                value: BigInt(parseFloat(tier.price) * 1e18)
+            // 1. Payment
+            const txHash = await send(creatorId, tier.price.toString(), `Subscribe to ${tier.name}`);
+
+            // 2. Save Subscription
+            await fetch('/api/subscriptions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subscriberAddress: address,
+                    creatorAddress: creatorId,
+                    tierId: selectedTierIndex, // or tier.id
+                    expiry: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+                    txHash
+                })
             });
-        } catch (e) {
-            console.error(e);
+
+            // Success
+            setCheckoutStatus('success');
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        } catch (err) {
+            console.error(err);
             setCheckoutStatus('error');
         }
     };
 
     const canViewPost = (post: any) => {
         if (post.isPublic) return true;
-
-        // Check if viewer is creator
         const viewer = address?.toLowerCase();
         const currentCreator = creatorId?.toLowerCase();
-        const profileAddress = creatorProfile?.address?.toLowerCase();
+        // Creator themselves
+        if (viewer === currentCreator) return true;
 
-        if (viewer && (viewer === currentCreator || viewer === profileAddress)) return true;
+        // Subscription Check
+        if (activeSubscription) return true;
 
-        if (!isSubscribed) return false;
-
-        const minTier = post.minTier || 0;
-        if (minTier === 0) return true;
-        return memberTierId >= (minTier - 1);
+        return false;
     };
 
     const toggleExpand = (index: number) => {
-        setExpandedPosts(prev => ({
-            ...prev,
-            [index]: !prev[index]
-        }));
+        setExpandedPosts(prev => ({ ...prev, [index]: !prev[index] }));
     };
 
-    // Derived Display Data
     const displayName = creatorProfile?.name || `Creator ${creatorId.substring(0, 4)}...`;
     const avatar = creatorProfile?.avatarUrl;
     const cover = creatorProfile?.coverUrl;
-    const memberCount = realMemberCount;
-
-    // Loading Skeleton
-    if (!creatorProfile && loading) {
-        return (
-            <div className="min-h-screen bg-bg-page">
-                {/* Hero Skeleton */}
-                <div className="h-[180px] w-full bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse"></div>
-                <div className="page-container relative -mt-[60px] flex items-end gap-6 pb-8">
-                    <div className="w-[120px] h-[120px] rounded-full border-4 border-bg-surface bg-gray-200 animate-pulse" />
-                    <div className="flex-1 pb-4">
-                        <div className="h-8 w-[200px] bg-gray-200 rounded mb-2 animate-pulse" />
-                        <div className="h-4 w-[150px] bg-gray-200 rounded animate-pulse" />
-                    </div>
-                </div>
-
-                <div className="page-container grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-10 pt-10">
-                    <div>
-                        <div className="h-[200px] w-full bg-gray-200 rounded-lg mb-6 animate-pulse" />
-                        <div className="h-[200px] w-full bg-gray-200 rounded-lg animate-pulse" />
-                    </div>
-                    <div className="hidden lg:block">
-                        <div className="h-[400px] w-full bg-gray-200 rounded-lg animate-pulse" />
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
-        <div className="min-h-screen bg-bg-page text-text-primary font-sans pb-[100px] lg:pb-12">
+        <div className="min-h-screen bg-mist text-slate-900 font-sans pb-24 selection:bg-fuchsia-200">
             {ToastComponent}
 
-            {/* Nav */}
-            <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-black/5 py-4">
-                <div className="page-container flex justify-between items-center">
-                    <div className="flex items-center gap-3">
-                        <Button variant="ghost" onClick={() => router.push('/')} className="text-gray-500 p-2 rounded-full">←</Button>
-                        <div className="font-bold text-base tracking-tight">{displayName}</div>
-                    </div>
-                    <WalletButton />
-                </div>
-            </nav>
-
-            {/* Hero & Profile Header */}
-            <div className="bg-white pb-8 mb-10 border-b border-gray-200">
-                {/* Cover - Modern Gradient */}
-                <div
-                    className="h-[240px] w-full relative overflow-hidden bg-cover bg-center"
-                    style={{
-                        backgroundImage: cover ? `url(${cover})` : 'linear-gradient(120deg, #FDFBFB 0%, #EBEDEE 100%)'
-                    }}
-                >
-                    {!cover && (
-                        <div className="absolute inset-0 bg-gradient-to-br from-[#667eea] to-[#764ba2] opacity-10"></div>
+            {/* HEADER */}
+            <header className="relative h-[320px] md:h-[380px]">
+                <div className="absolute inset-0">
+                    {cover ? (
+                        <img src={cover} alt="Cover" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-blue-100 to-fuchsia-100"></div>
                     )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-mist via-transparent to-transparent"></div>
                 </div>
 
-                <div className="page-container relative -mt-20 flex flex-col md:flex-row items-center md:items-end gap-6 md:gap-8">
-                    {/* Avatar - Premium Border */}
-                    <div
-                        className="w-[160px] h-[160px] rounded-full border-[6px] border-white shadow-2xl flex-shrink-0 z-10 bg-cover bg-center bg-white"
-                        style={{
-                            backgroundImage: avatar ? `url(${avatar})` : undefined
-                        }}
-                    ></div>
-
-                    {/* Info */}
-                    <div className="flex-1 pb-3 z-10 text-center md:text-left">
-                        <h1 className="text-h1 mb-2 text-text-primary">{displayName}</h1>
-                        <div className="flex justify-center md:justify-start gap-6 text-gray-600 text-base flex-wrap">
-                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{posts.length}</strong> <span>Posts</span></div>
-                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{creatorTiers.length}</strong> <span>Tiers</span></div>
-                            <div className="flex items-center gap-1.5"><strong className="text-text-primary">{memberCount}</strong> <span>Following</span></div>
-                        </div>
-                    </div>
-
-                    {/* Socials / Actions */}
-                    <div className="flex gap-3 pb-3">
-                        {creatorProfile?.socials?.twitter && (
-                            <Button variant="outline" size="sm" onClick={() => window.open(`https://x.com/${creatorProfile.socials.twitter}`, '_blank')} className="rounded-full">
-                                🐦 <span className="ml-1">Follow</span>
-                            </Button>
-                        )}
-                        <Button variant="ghost" size="sm" className="rounded-full" onClick={() => {
+                {/* Top Controls */}
+                <div className="absolute top-6 inset-x-0 px-6 flex justify-between items-center z-10">
+                    <button onClick={() => router.push('/')} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-900 hover:bg-white/40 transition-colors">
+                        <ChevronLeft size={20} />
+                    </button>
+                    <div className="flex gap-2">
+                        <div className="hidden sm:block"><WalletButton /></div>
+                        <button onClick={() => {
                             navigator.clipboard.writeText(window.location.href);
-                            showToast('Link copied to clipboard!', 'success');
-                        }}>↗ Share</Button>
+                            showToast('Link copied!', 'success');
+                        }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-900 hover:bg-white/40 transition-colors">
+                            <Share size={18} />
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            {/* PROFILE INFO */}
+            <div className="relative px-6 -mt-20 text-center z-20 max-w-2xl mx-auto">
+                <div className="relative inline-block">
+                    <div className="w-36 h-36 rounded-full border-[6px] border-white shadow-xl overflow-hidden bg-white">
+                        {avatar ? (
+                            <img src={avatar} alt="Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
+                                <span className="text-4xl">?</span>
+                            </div>
+                        )}
+                    </div>
+                    <div className="absolute bottom-2 right-2 bg-primary text-white p-1.5 rounded-full border-4 border-white shadow-sm">
+                        <Check size={14} strokeWidth={4} />
+                    </div>
+                </div>
+
+                <h1 className="font-serif text-4xl mt-4 font-bold text-slate-900 tracking-tight">{displayName}</h1>
+                <p className="text-slate-500 font-medium mt-2 text-lg">{creatorProfile?.description || "Digital Creator"}</p>
+
+                {/* Stats Row */}
+                <div className="flex items-center justify-center gap-12 mt-8 pb-8 border-b border-slate-200">
+                    <div className="text-center">
+                        <span className="block text-2xl font-bold text-slate-900">{realMemberCount}</span>
+                        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Followers</span>
+                    </div>
+                    <div className="w-px h-10 bg-slate-200"></div>
+                    <div className="text-center">
+                        <span className="block text-2xl font-bold text-slate-900">{posts.length}</span>
+                        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Posts</span>
                     </div>
                 </div>
             </div>
 
-            {/* Main Content Grid */}
-            <div className="page-container grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12 lg:gap-16">
+            {/* MAIN CONTENT AREA */}
+            <main className="max-w-6xl mx-auto px-6 mt-8 grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-12">
 
-                {/* Left: Feed & Tabs */}
+                {/* Left Column */}
                 <div>
-                    {/* Modern Tabs */}
-                    <div className="flex border-b border-gray-200 mb-10 gap-8 overflow-x-auto scrollbar-hide">
-                        {['posts', 'about', 'membership'].map((tab) => (
+                    {/* TABS */}
+                    <div className="flex justify-center lg:justify-start gap-2 mb-8 bg-white/50 p-1.5 rounded-full inline-flex backdrop-blur-sm border border-white/50">
+                        {['posts', 'membership', 'about'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`py-4 px-1 border-b-2 bg-transparent capitalize text-base font-medium transition-colors whitespace-nowrap ${activeTab === tab
-                                    ? 'border-text-primary text-text-primary font-semibold'
-                                    : 'border-transparent text-gray-500 hover:text-text-primary'
+                                className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize transition-all ${activeTab === tab
+                                    ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50'
+                                    : 'text-slate-500 hover:bg-white/50 hover:text-slate-700'
                                     }`}
                             >
                                 {tab}
@@ -318,274 +243,166 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                         ))}
                     </div>
 
+                    {/* POSTS TAB */}
                     {activeTab === 'posts' && (
-                        <div className="flex flex-col gap-8">
+                        <div className="space-y-8">
+                            <div className="flex items-center justify-between">
+                                <h2 className="font-serif text-2xl font-bold text-slate-900">Recent Posts</h2>
+                                <button className="text-primary font-bold text-sm hover:underline">View all</button>
+                            </div>
+
                             {posts.length === 0 ? (
-                                <div className="py-20 px-10 text-center bg-white rounded-3xl border border-gray-100 shadow-sm">
-                                    <div className="text-5xl mb-6 opacity-50">✨</div>
-                                    <h3 className="text-h3 mb-3">No posts published yet</h3>
-                                    <p className="text-sm text-gray-500 max-w-sm mx-auto">This creator is preparing exclusive content. Join the membership to be the first to know when they post.</p>
+                                <div className="text-center py-20 bg-white rounded-3xl border border-slate-100 shadow-sm">
+                                    <p className="text-slate-400">No posts yet.</p>
                                 </div>
                             ) : (
                                 posts.map((post, i) => {
                                     const locked = !canViewPost(post);
-                                    const minTierName = creatorTiers[post.minTier || 0]?.name || 'Members Only';
-                                    const isExpanded = expandedPosts[i];
 
                                     return (
-                                        <div key={i} className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-                                            <div className="p-8">
-                                                <div className="flex justify-between items-center mb-4">
-                                                    <span className="text-xs text-gray-400 font-medium">
-                                                        {new Date(post.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
-                                                    </span>
-                                                    {locked ? (
-                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
-                                                            🔒 {minTierName}
-                                                        </div>
-                                                    ) : (
-                                                        <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1.5 rounded-full uppercase tracking-wider">
-                                                            Free
-                                                        </div>
-                                                    )}
-                                                </div>
-
-                                                <h2 className={`text-2xl font-bold mb-4 leading-tight ${locked ? 'text-gray-700' : 'text-gray-900'}`}>{post.title}</h2>
-
-                                                {/* Content Teaser */}
-                                                <div className={`text-base mb-6 leading-relaxed ${locked ? 'text-gray-400' : 'text-gray-600'}`}>
-                                                    {locked ? (
-                                                        <div className="italic bg-gray-50 p-5 rounded-xl text-sm">
-                                                            This post is exclusive to <strong>{minTierName}</strong> members.
-                                                            <br />Join the community to unlock this story and support the creator.
-                                                        </div>
-                                                    ) : (
-                                                        isExpanded || (post.content && post.content.length <= 250)
-                                                            ? post.content
-                                                            : (post.content?.substring(0, 250) + '...')
-                                                    )}
-                                                </div>
-
-                                                {/* Image Preview (if present) */}
-                                                {post.image && (
-                                                    <div className="h-[300px] w-full rounded-xl overflow-hidden mb-6 relative bg-gray-100">
-                                                        <img
-                                                            src={post.image}
-                                                            alt=""
-                                                            className={`w-full h-full object-cover ${locked ? 'blur-md opacity-80' : ''}`}
-                                                        />
-                                                        {locked && (
-                                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                                <div className="bg-white/90 text-gray-900 px-8 py-4 rounded-full backdrop-blur-md font-semibold flex items-center gap-2 shadow-xl">
-                                                                    <span>🔒</span> Subscribers Only
-                                                                </div>
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                )}
-
-                                                <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-                                                    <div className="flex gap-5">
-                                                        {locked ? (
-                                                            <Button size="sm" onClick={() => {
-                                                                const el = document.getElementById('tiers-section');
-                                                                if (el && window.innerWidth >= 1024) {
-                                                                    el.scrollIntoView({ behavior: 'smooth' });
-                                                                } else {
-                                                                    setActiveTab('membership');
-                                                                    window.scrollTo({ top: 300, behavior: 'smooth' });
-                                                                }
-                                                            }}>Unlock Post</Button>
-                                                        ) : (
-                                                            <>
-                                                                <button
-                                                                    onClick={() => showToast('Likes coming soon!', 'info')}
-                                                                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                                                                    <span>❤️</span> Like
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => showToast('Comments coming soon!', 'info')}
-                                                                    className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-700 transition-colors">
-                                                                    <span>💬</span> Comment
-                                                                </button>
-                                                                {/* Edit/Delete for owner */}
-                                                                {address && post.creatorAddress === address && (
-                                                                    <>
-                                                                        <button
-                                                                            onClick={() => router.push(`/community/edit-post/${post.id}`)}
-                                                                            className="flex items-center gap-2 text-sm font-medium text-blue-500 hover:text-blue-700 transition-colors">
-                                                                            <span>✏️</span> Edit
-                                                                        </button>
-                                                                        <button
-                                                                            onClick={async () => {
-                                                                                if (!confirm('Are you sure you want to delete this post?')) return;
-                                                                                try {
-                                                                                    const res = await fetch(`/api/posts/${post.id}`, {
-                                                                                        method: 'DELETE',
-                                                                                        headers: { 'Content-Type': 'application/json' },
-                                                                                        body: JSON.stringify({ creatorAddress: address })
-                                                                                    });
-                                                                                    if (res.ok) {
-                                                                                        showToast('Post deleted successfully', 'success');
-                                                                                        setPosts(posts.filter(p => p.id !== post.id));
-                                                                                    } else {
-                                                                                        throw new Error('Failed to delete');
-                                                                                    }
-                                                                                } catch (e) {
-                                                                                    showToast('Failed to delete post', 'error');
-                                                                                }
-                                                                            }}
-                                                                            className="flex items-center gap-2 text-sm font-medium text-red-500 hover:text-red-700 transition-colors">
-                                                                            <span>🗑️</span> Delete
-                                                                        </button>
-                                                                    </>
-                                                                )}
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                    {!locked && post.content?.length > 250 && (
-                                                        <Button variant="ghost" size="sm" onClick={() => toggleExpand(i)} className="text-primary">
-                                                            {isExpanded ? 'Read Less ↑' : 'Read More →'}
-                                                        </Button>
-                                                    )}
+                                        <article key={i} className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
+                                            {/* Header */}
+                                            <div className="p-6 flex items-center gap-4">
+                                                <img src={avatar || "https://via.placeholder.com/40"} alt="" className="w-10 h-10 rounded-full object-cover" />
+                                                <div>
+                                                    <p className="text-sm font-bold text-slate-900">{displayName}</p>
+                                                    <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">
+                                                        {new Date(post.createdAt).toLocaleDateString()} {locked && "• Members Only"}
+                                                    </p>
                                                 </div>
                                             </div>
-                                        </div>
+
+                                            {/* Media / Content */}
+                                            {post.image ? (
+                                                <div className="aspect-square sm:aspect-video w-full relative bg-slate-100">
+                                                    <img src={post.image} alt="Post" className={`w-full h-full object-cover ${locked ? 'blur-xl opacity-50' : ''}`} />
+                                                    {locked && (
+                                                        <div className="absolute inset-0 flex items-center justify-center p-8">
+                                                            <div className="bg-white/80 backdrop-blur-md border border-white/50 w-full max-w-sm rounded-3xl p-8 text-center shadow-2xl">
+                                                                <div className="w-16 h-16 bg-primary text-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
+                                                                    <Lock size={28} />
+                                                                </div>
+                                                                <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Locked Content</h3>
+                                                                <p className="text-sm text-slate-500 mb-6">Join the membership to unlock this post.</p>
+                                                                <button onClick={() => setActiveTab('membership')} className="bg-slate-900 text-white px-6 py-3 rounded-full font-bold text-sm w-full hover:scale-105 transition-transform">
+                                                                    View Plans
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ) : null}
+
+                                            {/* Text Content */}
+                                            <div className="p-6">
+                                                <h3 className="font-bold text-xl text-slate-900 mb-2">{post.title}</h3>
+                                                <p className={`text-slate-600 leading-relaxed ${locked ? 'blur-sm select-none' : ''}`}>
+                                                    {locked
+                                                        ? "This is a preview of the content suitable only for members. Join now to read the full story and access exclusive updates."
+                                                        : (expandedPosts[i] || !post.content || post.content.length < 200 ? post.content : post.content.substring(0, 200) + '...')}
+                                                </p>
+                                                {!locked && post.content && post.content.length >= 200 && (
+                                                    <button onClick={() => toggleExpand(i)} className="text-primary text-sm font-bold mt-2">
+                                                        {expandedPosts[i] ? 'Read Less' : 'Read More'}
+                                                    </button>
+                                                )}
+
+                                                {/* Actions */}
+                                                <div className="mt-6 flex items-center gap-6 pt-6 border-t border-slate-50">
+                                                    <button className="flex items-center gap-2 text-slate-400 hover:text-rose-500 transition-colors group">
+                                                        <Heart size={20} className="group-hover:fill-current" />
+                                                        <span className="text-xs font-bold">1.2k</span>
+                                                    </button>
+                                                    <button className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors">
+                                                        <MessageCircle size={20} />
+                                                        <span className="text-xs font-bold">45</span>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </article>
                                     );
                                 })
                             )}
                         </div>
                     )}
 
-                    {activeTab === 'about' && (
-                        <div className="p-10 bg-white rounded-3xl border border-gray-200">
-                            <h3 className="text-h3 mb-6">About {displayName}</h3>
-                            <p className="whitespace-pre-line text-lg leading-relaxed text-gray-600">
-                                {creatorProfile?.description || "This creator hasn't written a bio yet."}
-                            </p>
-                        </div>
-                    )}
-
+                    {/* MEMBERSHIP TAB */}
                     {activeTab === 'membership' && (
-                        <div className="flex flex-col gap-8">
-                            <div className="text-center">
-                                <h2 className="text-h2 mb-2">Choose your plan</h2>
-                                <p className="text-gray-500">Unlock exclusive access and support {displayName}</p>
+                        <div className="space-y-8">
+                            <div className="text-center max-w-lg mx-auto mb-10">
+                                <h2 className="font-serif text-3xl font-bold text-slate-900 mb-3">Support {displayName}</h2>
+                                <p className="text-slate-500">Choose a membership level to unlock exclusive content and join the community.</p>
                             </div>
 
-                            {creatorTiers.map((tier, i) => {
-                                const isCurrentTier = i === memberTierId;
-                                const isUpgrade = i > memberTierId && memberTierId !== -1;
-                                const isDowngrade = i < memberTierId && memberTierId !== -1;
-                                let buttonText = "Join " + tier.name;
-                                let buttonVariant = tier.recommended ? 'primary' : 'outline';
-                                let disabled = false;
-
-                                if (isCurrentTier) {
-                                    if (isSubscribed) { buttonText = "Current Plan"; buttonVariant = "outline"; disabled = true; }
-                                    else { buttonText = "Renew Plan"; buttonVariant = "primary"; }
-                                } else if (isUpgrade) {
-                                    buttonText = "Upgrade for " + formatPrice(tier.price); buttonVariant = "primary";
-                                } else if (isDowngrade) {
-                                    buttonText = "Downgrade"; buttonVariant = "outline";
-                                }
-
-                                return (
-                                    <div key={i} className={`p-8 flex flex-col gap-6 rounded-3xl bg-white border shadow-sm hover:shadow-lg transition-all ${tier.recommended ? 'border-gray-900 ring-4 ring-black/5' : 'border-gray-200'}`}>
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="text-2xl font-bold text-gray-900">{tier.name}</h3>
-                                                <div className="text-3xl font-bold mt-2 text-gray-900">{formatPrice(tier.price)} <span className="text-base text-gray-500 font-medium">/ month</span></div>
-                                            </div>
-                                            {tier.recommended && <span className="bg-gray-900 text-white px-3 py-1.5 rounded-full text-xs font-bold tracking-wider">RECOMMENDED</span>}
-                                        </div>
-                                        <div className="h-px bg-gray-100"></div>
-                                        <div>
-                                            <p className="text-sm font-bold text-gray-700 uppercase tracking-wider mb-4">What's included:</p>
-                                            <ul className="flex flex-col gap-3">
-                                                <li className="flex gap-3 text-base text-gray-600 items-center">
-                                                    <span className="bg-emerald-50 text-emerald-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</span>
-                                                    Direct support to {displayName}
-                                                </li>
-                                                {tier.benefits?.map((b: string, idx: number) => (
-                                                    <li key={idx} className="flex gap-3 text-base text-gray-600 items-center">
-                                                        <span className="bg-emerald-50 text-emerald-500 rounded-full w-5 h-5 flex items-center justify-center text-xs">✓</span>
-                                                        {b}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                        <Button
-                                            onClick={() => !disabled && handleSubscribeClick(i)}
-                                            variant={buttonVariant as any}
-                                            disabled={disabled}
-                                            size="lg"
-                                            className="w-full justify-center py-4 text-lg"
-                                        >
-                                            {buttonText}
-                                        </Button>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-                {/* Right: Sidebar (Sticky - Desktop Only) */}
-                <aside className="hidden lg:block relative">
-                    <div id="tiers-section" className="sticky top-[100px]">
-                        <div className="p-8 bg-white border border-gray-200 rounded-3xl shadow-xl shadow-gray-200/50">
-                            <h3 className="text-xl font-bold mb-6">Membership</h3>
-
-                            <div className="flex flex-col gap-4">
+                            <div className="grid grid-cols-1 gap-6">
                                 {creatorTiers.map((tier, i) => (
-                                    <div key={i} className={`p-5 rounded-2xl cursor-pointer transition-all border ${tier.recommended ? 'bg-gray-50 border-gray-900' : 'bg-white border-gray-100 hover:border-gray-300'}`}
-                                        onClick={() => handleSubscribeClick(i)}
-                                    >
-                                        <div className="flex justify-between items-center mb-1">
-                                            <h4 className="font-bold text-lg text-gray-900">{tier.name}</h4>
-                                            {tier.recommended && <span className="bg-gray-900 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">BEST</span>}
+                                    <div key={i} className="bg-white rounded-[2rem] p-8 shadow-xl shadow-primary/5 border border-primary/10 relative overflow-hidden group hover:border-primary/30 transition-all">
+                                        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+
+                                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6 relative">
+                                            <div>
+                                                <h3 className="font-serif text-2xl font-bold text-slate-900">{tier.name}</h3>
+                                                <p className="text-slate-500 font-medium mt-1">Monthly Support</p>
+                                            </div>
+                                            <div className="bg-mist border border-slate-100 px-4 py-2 rounded-xl text-primary font-bold text-xl">
+                                                {formatPrice(tier.price)}<span className="text-sm text-slate-400 font-normal">/mo</span>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between items-end">
-                                            <span className="font-bold text-xl text-gray-900">{formatPrice(tier.price)}</span>
-                                            <span className="text-sm text-gray-500">/ month</span>
-                                        </div>
+
+                                        <ul className="space-y-4 mb-8 relative">
+                                            <li className="flex items-center gap-3 text-slate-700 font-medium">
+                                                <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><Check size={12} strokeWidth={4} /></div>
+                                                <span>Directly support {displayName}</span>
+                                            </li>
+                                            {tier.benefits?.map((b: string, idx: number) => (
+                                                <li key={idx} className="flex items-center gap-3 text-slate-700 font-medium">
+                                                    <div className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0"><Check size={12} strokeWidth={4} /></div>
+                                                    <span>{b}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+
+                                        <button
+                                            onClick={() => handleSubscribeClick(i)}
+                                            className="w-full py-4 rounded-full bg-gradient-to-r from-primary to-fuchsia-accent text-white font-bold text-lg shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                                        >
+                                            Join {tier.name}
+                                        </button>
                                     </div>
                                 ))}
-
                                 {creatorTiers.length === 0 && (
-                                    <div className="text-center p-4 bg-gray-50 rounded-xl text-gray-500 text-sm">No public tiers available.</div>
+                                    <div className="text-center p-8 bg-slate-50 rounded-3xl text-slate-400">No public tiers available yet.</div>
                                 )}
                             </div>
+                        </div>
+                    )}
 
-                            {/* Trust Microcopy */}
-                            <div className="mt-6 pt-5 border-t border-gray-100 text-sm text-gray-500 flex flex-col gap-3">
-                                <div className="flex items-center gap-2.5">
-                                    <span className="bg-amber-100 text-amber-600 rounded-full w-6 h-6 flex items-center justify-center">⚡</span>
-                                    <span>Instant access unlocked</span>
-                                </div>
-                                <div className="flex items-center gap-2.5">
-                                    <span className="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center">🛡️</span>
-                                    <span>Secure payments on Mantle</span>
-                                </div>
+                    {/* ABOUT TAB */}
+                    {activeTab === 'about' && (
+                        <div className="bg-white rounded-[2rem] p-10 border border-slate-100">
+                            <h3 className="font-serif text-2xl font-bold text-slate-900 mb-6">About {displayName}</h3>
+                            <div className="prose prose-slate lg:prose-lg">
+                                <p className="leading-relaxed text-slate-600">
+                                    {creatorProfile?.description || "This creator hasn't added a bio yet."}
+                                </p>
                             </div>
                         </div>
+                    )}
+                </div>
+
+                {/* Right Column: Sticky Sidebar */}
+                <aside className="hidden lg:block space-y-8">
+                    {/* Tip Jar */}
+                    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm sticky top-24">
+                        <TipJar receiverAddress={creatorId} />
+                    </div>
+
+                    {/* Leaderboard */}
+                    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                        <SupporterLeaderboard creatorAddress={creatorId} />
                     </div>
                 </aside>
-
-            </div>
-
-            {/* Mobile Sticky Bottom Bar */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md p-4 border-t border-gray-200 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-40 flex justify-between items-center lg:hidden">
-                <div>
-                    <div className="text-xs text-gray-500 uppercase font-bold tracking-wide">Membership</div>
-                    <div className="font-bold text-gray-900 text-lg">From {creatorTiers[0] ? formatPrice(creatorTiers[0].price) : 'Free'}</div>
-                </div>
-                <Button size="lg" onClick={() => {
-                    setActiveTab('membership');
-                    window.scrollTo({ top: 300, behavior: 'smooth' });
-                }}>View Plans</Button>
-            </div>
+            </main>
 
             <CheckoutModal
                 isOpen={checkoutModalOpen}
@@ -593,8 +410,8 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 onConfirm={handleConfirmSubscribe}
                 tier={selectedTierIndex !== null ? creatorTiers[selectedTierIndex] : null}
                 status={checkoutStatus}
+                txHash={paymentTxHash || undefined}
             />
         </div>
     );
-
 }

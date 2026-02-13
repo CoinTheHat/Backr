@@ -4,19 +4,19 @@ import { useState, useEffect } from 'react';
 import Button from '../../components/Button';
 import LoadingSkeleton from '../../components/LoadingSkeleton';
 import EmptyState from '../../components/EmptyState';
-import { useAccount } from 'wagmi';
+import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 
 export default function FeedPage() {
     const router = useRouter();
-    const { isConnected } = useAccount();
+    const { authenticated: isConnected } = usePrivy();
     const [posts, setPosts] = useState<any[]>([]);
     const [filteredPosts, setFilteredPosts] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<'all' | 'unlocked' | 'locked'>('all');
 
     useEffect(() => {
-        // Simulating API call
+        // Fetch posts
         setTimeout(() => {
             fetch('/api/posts')
                 .then(res => res.json())
@@ -48,7 +48,7 @@ export default function FeedPage() {
             <div style={{ minHeight: '100vh', background: 'var(--color-bg-page)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
                 <EmptyState
                     title="Your personal feed"
-                    description="Connect your wallet to see updates from your favorite creators."
+                    description="Sign in to see updates from your favorite creators."
                     actionLabel="Explore Creators"
                     onAction={() => router.push('/explore')}
                 />

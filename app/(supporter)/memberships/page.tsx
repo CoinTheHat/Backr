@@ -6,18 +6,23 @@ import LoadingSkeleton from '../../components/LoadingSkeleton';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { formatPrice } from '@/utils/format';
+import { usePrivy } from '@privy-io/react-auth';
+import WalletButton from '../../components/WalletButton';
 
 export default function MyMembershipsPage() {
     const router = useRouter();
-    const { address } = useAccount();
+    const { user, authenticated } = usePrivy();
+    const address = user?.wallet?.address;
     const [memberships, setMemberships] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [recommended, setRecommended] = useState<any[]>([]);
 
     useEffect(() => {
-        if (!address) return;
+        if (!authenticated) return;
+        if (!address) {
+            setLoading(false);
+            return;
+        }
         setLoading(true);
 
         // Parallel fetch
@@ -32,7 +37,7 @@ export default function MyMembershipsPage() {
             console.error(err);
             setLoading(false);
         });
-    }, [address]);
+    }, [address, authenticated]);
 
     const categories = ['Art', 'Music', 'Podcast', 'Writing', 'Gaming', 'Education'];
 
@@ -41,40 +46,68 @@ export default function MyMembershipsPage() {
             <style dangerouslySetInnerHTML={{
                 __html: `
                 .membership-grid {
-                    display: grid; grid-template-columns: 1fr; gap: 24px;
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                    gap: 24px;
                 }
-                @media (min-width: 768px) {
-                    .membership-grid { grid-template-columns: repeat(2, 1fr); }
+                .badge {
+                    display: inline-flex;
+                    align-items: center;
+                    padding: 4px 12px;
+                    border-radius: 999px;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.05em;
+                }
+                .badge-success {
+                    background: rgba(16, 185, 129, 0.1);
+                    color: #10B981;
+                    border: 1px solid rgba(16, 185, 129, 0.2);
                 }
                 .discovery-chip {
-                    padding: 8px 16px; border-radius: 99px; background: #fff; border: 1px solid var(--color-border);
-                    font-size: 0.9rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+                    padding: 8px 16px;
+                    border-radius: 999px;
+                    background: var(--color-bg-surface);
+                    border: 1px solid var(--color-border);
+                    font-size: 0.9rem;
+                    font-weight: 500;
+                    color: var(--color-text-secondary);
+                    cursor: pointer;
+                    transition: all 0.2s;
                 }
-                .discovery-chip:hover { border-color: var(--color-primary); color: var(--color-primary); transform: translateY(-2px); }
+                .discovery-chip:hover {
+                    background: var(--color-brand-blue);
+                    color: white;
+                    border-color: var(--color-brand-blue);
+                    transform: translateY(-1px);
+                }
             `}} />
 
-            {/* Hero */}
+            {/* Hero Section */}
             <div style={{
-                background: 'linear-gradient(135deg, #a8c0f7 0%, #7FA1F7 100%)',
-                padding: '80px 0 100px',
-                marginBottom: '-40px'
+                background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+                color: 'white',
+                padding: '64px 0 120px',
+                marginBottom: '-60px',
+                textAlign: 'center'
             }}>
-                <div className="page-container" style={{ maxWidth: '900px', margin: '0 auto' }}>
-                    <h1 className="headline-serif" style={{ fontSize: 'clamp(2.5rem, 6vw, 4rem)', marginBottom: '16px', lineHeight: 1.1 }}>
-                        Your memberships
+                <div className="page-container">
+                    <h1 style={{ fontSize: '3.5rem', fontWeight: 800, marginBottom: '16px', letterSpacing: '-0.02em' }}>
+                        My Memberships
                     </h1>
-                    <p style={{ fontSize: '1.2rem', color: '#111', opacity: 0.9 }}>
-                        Manage your support and exclusive access.
+                    <p style={{ fontSize: '1.1rem', opacity: 0.9, maxWidth: '600px', margin: '0 auto' }}>
+                        Manage your active subscriptions and discover new creators to back.
                     </p>
                 </div>
             </div>
 
             <div className="page-container" style={{ maxWidth: '900px', margin: '0 auto', paddingBottom: '80px' }}>
-                {!address ? (
+                {!authenticated ? (
                     <div style={{ padding: '64px', textAlign: 'center', background: '#fff', borderRadius: '16px', border: '1px dashed var(--color-border)' }}>
-                        <h3 className="text-h3" style={{ marginBottom: '16px' }}>Connect your wallet</h3>
+                        <h3 className="text-h3" style={{ marginBottom: '16px' }}>Sign in</h3>
                         <p className="text-body" style={{ marginBottom: '24px' }}>Sign in to view and manage your active memberships.</p>
-                        <Button variant="primary" onClick={() => { /* Connect logic */ }}>Connect Wallet</Button>
+                        <WalletButton size="lg" />
                     </div>
                 ) : loading ? (
                     <div className="membership-grid">
@@ -243,7 +276,7 @@ export default function MyMembershipsPage() {
                                                         <div style={{ fontWeight: 600 }}>Membership Renewal</div>
                                                         <div className="text-caption">{m.creators?.name || 'Creator'}</div>
                                                     </td>
-                                                    <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 MNT</td>
+                                                    <td style={{ padding: '16px 24px', textAlign: 'right', fontWeight: 600 }}>5.00 USD</td>
                                                 </tr>
                                             ))}
                                         </tbody>
