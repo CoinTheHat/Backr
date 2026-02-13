@@ -12,6 +12,7 @@ import TipJar from '../components/TipJar';
 import SupporterLeaderboard from '../components/SupporterLeaderboard';
 import WalletButton from '../components/WalletButton';
 import { useSend } from '../hooks/useSend';
+import { useSubscribe } from '../hooks/useSubscribe';
 import {
     ChevronLeft,
     Share,
@@ -43,13 +44,15 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const [realMemberCount, setRealMemberCount] = useState(0);
     const [expandedPosts, setExpandedPosts] = useState<Record<number, boolean>>({});
 
-    // Payment Hook
+    // Payment Hooks
     const { send, txHash: paymentTxHash } = useSend();
+    const { subscribe, txHash: subscribeTxHash, isSubscribing } = useSubscribe();
 
     // Checkout State
     const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
     const [selectedTierIndex, setSelectedTierIndex] = useState<number | null>(null);
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
+    const [contractAddress, setContractAddress] = useState<string | null>(null);
 
     // Fetch Data
     useEffect(() => {
@@ -110,17 +113,33 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         setCheckoutStatus('pending');
 
         try {
-            // 1. Payment
-            const txHash = await send(creatorId, tier.price.toString(), `Subscribe to ${tier.name}`);
+            // Check if creator has a subscription contract
+            let contractAddr = contractAddress;
+            if (!contractAddr) {
+                // Try to get from database (creatorProfile.contractAddress)
+                if (creatorProfile?.contractAddress) {
+                    contractAddr = creatorProfile.contractAddress;
+                } else {
+                    throw new Error("Creator does not have a subscription contract deployed. Please contact the creator.");
+                }
+            }
 
-            // 2. Save Subscription
+            // Use smart contract subscription
+            const txHash = await subscribe({
+                contractAddress: contractAddr || "",
+                tierId: selectedTierIndex,
+                amount: tier.price.toString(),
+                memo: `Subscribe to ${tier.name}`
+            });
+
+            // Save subscription to database for frontend sync
             await fetch('/api/subscriptions', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     subscriberAddress: address,
                     creatorAddress: creatorId,
-                    tierId: selectedTierIndex, // or tier.id
+                    tierId: selectedTierIndex,
                     expiry: Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
                     txHash
                 })
