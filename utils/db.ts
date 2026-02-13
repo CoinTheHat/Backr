@@ -68,6 +68,28 @@ const initDb = async () => {
                 "createdAt" TIMESTAMP DEFAULT NOW(),
                 "updatedAt" TIMESTAMP DEFAULT NOW()
             );
+
+            CREATE TABLE IF NOT EXISTS categories (
+                id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+                name TEXT NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                icon TEXT,
+                "sortOrder" INTEGER DEFAULT 0,
+                "isActive" BOOLEAN DEFAULT TRUE,
+                "createdAt" TIMESTAMP DEFAULT NOW(),
+                "updatedAt" TIMESTAMP DEFAULT NOW()
+            );
+
+            CREATE TABLE IF NOT EXISTS hashtags (
+                id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+                name TEXT NOT NULL, 
+                slug TEXT UNIQUE NOT NULL, 
+                "sortOrder" INTEGER DEFAULT 0,
+                "isActive" BOOLEAN DEFAULT TRUE,
+                "isTrending" BOOLEAN DEFAULT FALSE,
+                "createdAt" TIMESTAMP DEFAULT NOW(),
+                "updatedAt" TIMESTAMP DEFAULT NOW()
+            );
         `);
     } catch (err) {
         console.error('Error initializing DB:', err);
@@ -146,6 +168,10 @@ export const db = {
             const res = await pool.query('SELECT * FROM posts WHERE "creatorAddress" = $1 ORDER BY "createdAt" DESC', [address]);
             return res.rows;
         },
+        getById: async (id: string) => {
+            const res = await pool.query('SELECT * FROM posts WHERE id = $1', [id]);
+            return res.rows[0];
+        },
         create: async (post: any) => {
             const query = `
                 INSERT INTO posts ("creatorAddress", title, content, image, "videoUrl", "minTier", "isPublic", "createdAt")
@@ -156,6 +182,105 @@ export const db = {
                 post.creatorAddress, post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
             ]);
             return res.rows[0];
+        },
+        update: async (id: string, post: any) => {
+            const query = `
+                UPDATE posts 
+                SET title = $2, content = $3, image = $4, "videoUrl" = $5, "minTier" = $6, "isPublic" = $7
+                WHERE id = $1
+                RETURNING *;
+            `;
+            const res = await pool.query(query, [
+                id, post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
+            ]);
+            return res.rows[0];
+        },
+        delete: async (id: string) => {
+            const res = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING *', [id]);
+            return res.rows[0];
+        }
+    },
+    taxonomy: {
+        categories: {
+            getAll: async () => {
+                const res = await pool.query('SELECT * FROM categories ORDER BY "sortOrder" ASC');
+                return res.rows;
+            },
+            create: async (name: string, slug: string) => {
+                const res = await pool.query('INSERT INTO categories (name, slug) VALUES ($1, $2) RETURNING *', [name, slug]);
+                return res.rows[0];
+            },
+            delete: async (id: string) => {
+                await pool.query('DELETE FROM categories WHERE id = $1', [id]);
+            },
+            toggleActive: async (id: string, isActive: boolean) => {
+                const res = await pool.query('UPDATE categories SET "isActive" = $2 WHERE id = $1 RETURNING *', [id, isActive]);
+                return res.rows[0];
+            },
+            update: async (id: string, updates: any) => {
+                const { name, icon, sortOrder, isActive } = updates;
+                const query = `
+                    UPDATE categories 
+                    SET 
+                        name = COALESCE($2, name),
+                        icon = COALESCE($3, icon), 
+                        "sortOrder" = COALESCE($4, "sortOrder"),
+                        "isActive" = COALESCE($5, "isActive"),
+                        "updatedAt" = NOW()
+                    WHERE id = $1
+                    RETURNING *;
+                `;
+                const res = await pool.query(query, [id, name, icon, sortOrder, isActive]);
+                return res.rows[0];
+            }
+        },
+        hashtags: {
+            getAll: async () => {
+                const res = await pool.query('SELECT * FROM hashtags ORDER BY "sortOrder" ASC');
+                return res.rows;
+            },
+            create: async (name: string, slug: string) => {
+                const res = await pool.query('INSERT INTO hashtags (name, slug) VALUES ($1, $2) RETURNING *', [name, slug]);
+                return res.rows[0];
+            },
+            delete: async (id: string) => {
+                await pool.query('DELETE FROM hashtags WHERE id = $1', [id]);
+            },
+            toggleTrending: async (id: string, isTrending: boolean) => {
+                const res = await pool.query('UPDATE hashtags SET "isTrending" = $2 WHERE id = $1 RETURNING *', [id, isTrending]);
+                return res.rows[0];
+            },
+            update: async (id: string, updates: any) => {
+                const { label, sortOrder, isActive, isTrending } = updates;
+                // Note: label maps to name in DB
+                const query = `
+                    UPDATE hashtags 
+                    SET 
+                        name = COALESCE($2, name),
+                        "sortOrder" = COALESCE($3, "sortOrder"),
+                        "isActive" = COALESCE($4, "isActive"),
+                        "isTrending" = COALESCE($5, "isTrending"),
+                         "updatedAt" = NOW()
+                    WHERE id = $1
+                    RETURNING *;
+                `;
+                const res = await pool.query(query, [id, label, sortOrder, isActive, isTrending]);
+                return res.rows[0];
+            }
+        }
+    },
+    stats: {
+        getCounts: async () => {
+            const creators = await pool.query('SELECT COUNT(*) FROM creators');
+            const posts = await pool.query('SELECT COUNT(*) FROM posts');
+            const tips = await pool.query('SELECT COUNT(*) FROM tips');
+            const volume = await pool.query('SELECT SUM(amount) FROM tips');
+            return {
+                creators: parseInt(creators.rows[0].count),
+                posts: parseInt(posts.rows[0].count),
+                tips: parseInt(tips.rows[0].count),
+                volume: parseFloat(volume.rows[0].sum || '0')
+            };
         }
     },
     tips: {
@@ -201,8 +326,7 @@ export const db = {
                 ON CONFLICT DO NOTHING
                 RETURNING *; 
             `;
-            // Note: simple schema above doesn't have unique constraint, so ON CONFLICT might need a Unique Index.
-            // For now just insert. 
+            // Simple insert as fallback
             const insertQuery = `
                 INSERT INTO memberships ("userAddress", "creatorAddress", "tierId", "expiresAt", "createdAt", "updatedAt")
                 VALUES ($1, $2, $3, $4, NOW(), NOW())

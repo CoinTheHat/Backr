@@ -20,7 +20,7 @@ import {
     Rocket,
     Crown
 } from 'lucide-react';
-import { supabase } from '@/utils/supabase';
+
 import { useCommunity } from '../context/CommunityContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -48,14 +48,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             if (!address) return;
 
             // Check if profile exists in Supabase
-            const { data, error } = await supabase.from('creators').select('*').eq('address', address).single();
+            // Check if profile exists via API
+            try {
+                const res = await fetch(`/api/creators?address=${address}`);
+                const data = await res.json();
 
-            if (data) {
-                setProfile(data);
-            } else if (!error || error.code === 'PGRST116') {
-                // Profile not found (PGRST116 is "The result contains 0 rows")
-                // Redirect to onboarding
-                router.push('/onboarding');
+                if (data && data.address) {
+                    setProfile(data);
+                } else {
+                    // Profile not found
+                    router.push('/onboarding');
+                }
+            } catch (error) {
+                console.error("Error fetching profile:", error);
             }
         };
         fetchProfile();

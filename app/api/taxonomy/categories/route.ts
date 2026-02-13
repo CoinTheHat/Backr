@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db';
 
 const DEFAULT_CATEGORIES = [
     { id: 'art', name: 'Art', icon: '🎨', isActive: true, sortOrder: 1 },
@@ -10,17 +10,17 @@ const DEFAULT_CATEGORIES = [
 ];
 
 export async function GET() {
-    const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('sortOrder', { ascending: true });
+    try {
+        const data = await db.taxonomy.categories.getAll();
 
-    if (error) {
-        // Table likely doesn't exist, return defaults
+        if (!data || data.length === 0) {
+            return NextResponse.json(DEFAULT_CATEGORIES);
+        }
+
+        return NextResponse.json(data);
+    } catch (e: any) {
         return NextResponse.json(DEFAULT_CATEGORIES);
     }
-
-    return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {
@@ -29,25 +29,28 @@ export async function POST(request: Request) {
         const { name, icon, sortOrder, isActive } = body;
 
         // Auto-generate slug from name if not provided
-        const id = body.id || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+        const slug = body.id || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-        const { data, error } = await supabase
-            .from('categories')
-            .insert([
-                { id, name, icon, sortOrder: sortOrder || 0, isActive: isActive ?? true }
-            ])
-            .select()
-            .single();
+        const newCat = await db.taxonomy.categories.create(name, slug);
 
-        if (error) throw error;
+        if (newCat) {
+            // Update additional fields
+            const updated = await db.taxonomy.categories.update(newCat.id, {
+                name,
+                icon,
+                sortOrder,
+                isActive
+            });
+            return NextResponse.json(updated);
+        }
 
-        return NextResponse.json(data);
+        return NextResponse.json({ error: "Failed to create" }, { status: 500 });
+
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-// PATCH update category
 export async function PATCH(request: Request) {
     try {
         const body = await request.json();
@@ -57,28 +60,23 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
         }
 
-        const updates: any = { updatedAt: new Date().toISOString() };
-        if (name !== undefined) updates.name = name;
-        if (icon !== undefined) updates.icon = icon;
-        if (sortOrder !== undefined) updates.sortOrder = sortOrder;
-        if (isActive !== undefined) updates.isActive = isActive;
+        const updated = await db.taxonomy.categories.update(id, {
+            name,
+            icon,
+            sortOrder,
+            isActive
+        });
 
-        const { data, error } = await supabase
-            .from('categories')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
+        if (!updated) {
+            return NextResponse.json({ error: 'Category not found' }, { status: 404 });
+        }
 
-        if (error) throw error;
-
-        return NextResponse.json(data);
+        return NextResponse.json(updated);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-// DELETE category
 export async function DELETE(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -88,12 +86,7 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Category ID is required' }, { status: 400 });
         }
 
-        const { error } = await supabase
-            .from('categories')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+        await db.taxonomy.categories.delete(id);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

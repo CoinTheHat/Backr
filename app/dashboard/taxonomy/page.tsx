@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/utils/supabase';
+
 import { useRouter } from 'next/navigation';
 import Card from '@/app/components/Card';
 import Button from '@/app/components/Button';
@@ -53,18 +53,26 @@ export default function TaxonomyPage() {
         // In a real app, confirm first
         if (!confirm('Are you sure?')) return;
 
-        const { error } = await supabase.from(type).delete().eq('id', id);
-        if (!error) fetchData();
+        const res = await fetch(`/api/taxonomy/${type}?id=${id}`, { method: 'DELETE' });
+        if (res.ok) fetchData();
     };
 
     const handleToggleActive = async (item: any, type: 'categories' | 'hashtags') => {
-        const { error } = await supabase.from(type).update({ isActive: !item.isActive }).eq('id', item.id);
-        if (!error) fetchData();
+        const res = await fetch(`/api/taxonomy/${type}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: item.id, isActive: !item.isActive })
+        });
+        if (res.ok) fetchData();
     }
 
     const handleToggleTrending = async (item: Hashtag) => {
-        const { error } = await supabase.from('hashtags').update({ isTrending: !item.isTrending }).eq('id', item.id);
-        if (!error) fetchData();
+        const res = await fetch('/api/taxonomy/hashtags', {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: item.id, isTrending: !item.isTrending })
+        });
+        if (res.ok) fetchData();
     }
 
     return (

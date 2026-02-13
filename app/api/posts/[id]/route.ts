@@ -1,77 +1,65 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db';
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const body = await request.json();
 
-    // Verify ownership
-    const { data: existingPost, error: fetchError } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', id)
-        .single();
+    try {
+        const body = await request.json();
 
-    if (fetchError || !existingPost) {
-        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
-    }
+        // Verify ownership
+        const existingPost = await db.posts.getById(id);
 
-    if (existingPost.creatorAddress !== body.creatorAddress) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+        if (!existingPost) {
+            return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+        }
 
-    // Update post
-    const payload = {
-        title: body.title,
-        content: body.content,
-        image: body.image || null,
-        videoUrl: body.videoUrl || null,
-        minTier: Number(body.minTier) || 0,
-        isPublic: !!body.isPublic
-    };
+        if (existingPost.creatorAddress !== body.creatorAddress) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
 
-    const { error } = await supabase
-        .from('posts')
-        .update(payload)
-        .eq('id', id);
+        // Update post
+        const payload = {
+            title: body.title,
+            content: body.content,
+            image: body.image || null,
+            videoUrl: body.videoUrl || null,
+            minTier: Number(body.minTier) || 0,
+            isPublic: !!body.isPublic
+        };
 
-    if (error) {
-        console.error("Supabase Update Error:", error.message, error.details);
+        await db.posts.update(id, payload);
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error("Post Update Error:", error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true });
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
-    const body = await request.json();
 
-    // Verify ownership
-    const { data: existingPost, error: fetchError } = await supabase
-        .from('posts')
-        .select('*')
-        .eq('id', id)
-        .single();
+    try {
+        const body = await request.json();
 
-    if (fetchError || !existingPost) {
-        return NextResponse.json({ error: 'Post not found' }, { status: 404 });
-    }
+        // Verify ownership
+        const existingPost = await db.posts.getById(id);
 
-    if (existingPost.creatorAddress !== body.creatorAddress) {
-        return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
-    }
+        if (!existingPost) {
+            return NextResponse.json({ error: 'Post not found' }, { status: 404 });
+        }
 
-    // Delete post
-    const { error } = await supabase
-        .from('posts')
-        .delete()
-        .eq('id', id);
+        if (existingPost.creatorAddress !== body.creatorAddress) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
+        }
 
-    if (error) {
-        console.error("Supabase Delete Error:", error.message);
+        // Delete post
+        await db.posts.delete(id);
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error("Post Delete Error:", error.message);
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true });
 }

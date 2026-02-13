@@ -8,7 +8,7 @@ import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
 import { useToast } from '../../components/Toast';
 import { useCommunity } from '../../context/CommunityContext';
-import { supabase } from '@/utils/supabase';
+
 import { Copy, ExternalLink, Save, RefreshCw, Trash2, Info, Wallet } from 'lucide-react';
 
 export default function SettingsPage() {

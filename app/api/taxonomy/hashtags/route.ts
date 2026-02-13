@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db';
 
 const DEFAULT_HASHTAGS = [
     { id: 'crypto', label: 'crypto', isActive: true, sortOrder: 1 },
@@ -9,16 +9,26 @@ const DEFAULT_HASHTAGS = [
 ];
 
 export async function GET() {
-    const { data, error } = await supabase
-        .from('hashtags')
-        .select('*')
-        .order('sortOrder', { ascending: true });
+    try {
+        const data = await db.taxonomy.hashtags.getAll();
 
-    if (error) {
+        // Map 'name' to 'label' for frontend compatibility
+        const mappedData = data.map((tag: any) => ({
+            ...tag,
+            label: tag.name
+        }));
+
+        if (!data || data.length === 0) {
+            // Optional: return defaults if DB empty? 
+            // Better to return empty array or defaults.
+            // Following original logic:
+            return NextResponse.json(mappedData.length ? mappedData : DEFAULT_HASHTAGS);
+        }
+
+        return NextResponse.json(mappedData);
+    } catch (e: any) {
         return NextResponse.json(DEFAULT_HASHTAGS);
     }
-
-    return NextResponse.json(data);
 }
 
 export async function POST(request: Request) {
@@ -27,44 +37,50 @@ export async function POST(request: Request) {
 
         // Check if bulk add (array)
         if (Array.isArray(body)) {
-            const hashtags = body.map((tag: any) => ({
-                id: tag.id || tag.label.toLowerCase().replace(/[^a-z0-9]+/g, ''),
-                label: tag.label,
-                sortOrder: tag.sortOrder || 0,
-                isActive: tag.isActive ?? true,
-                isTrending: tag.isTrending ?? false
-            }));
-
-            const { data, error } = await supabase
-                .from('hashtags')
-                .insert(hashtags)
-                .select();
-
-            if (error) throw error;
-            return NextResponse.json(data);
+            // PG specific bulk insert or loop
+            // db.taxonomy.hashtags.create takes name, slug
+            const results = [];
+            for (const tag of body) {
+                const slug = tag.id || tag.label.toLowerCase().replace(/[^a-z0-9]+/g, '');
+                const newTag = await db.taxonomy.hashtags.create(tag.label, slug);
+                // We might need to update other fields (sortOrder etc) immediately?
+                // The current db.create only sets name/slug.
+                // For MVP, just creating is fine, or we call update.
+                if (newTag) {
+                    await db.taxonomy.hashtags.update(newTag.id, {
+                        sortOrder: tag.sortOrder,
+                        isActive: tag.isActive,
+                        isTrending: tag.isTrending
+                    });
+                    results.push(newTag);
+                }
+            }
+            return NextResponse.json(results);
         }
 
         // Single add
         const { label, sortOrder, isActive, isTrending } = body;
-        const id = body.id || label.toLowerCase().replace(/[^a-z0-9]+/g, '');
+        const slug = body.id || label.toLowerCase().replace(/[^a-z0-9]+/g, '');
 
-        const { data, error } = await supabase
-            .from('hashtags')
-            .insert([
-                { id, label, sortOrder: sortOrder || 0, isActive: isActive ?? true, isTrending: isTrending ?? false }
-            ])
-            .select()
-            .single();
+        const newTag = await db.taxonomy.hashtags.create(label, slug);
+        if (newTag) {
+            await db.taxonomy.hashtags.update(newTag.id, {
+                sortOrder,
+                isActive,
+                isTrending
+            });
+            // Fetch updated
+            const updated = { ...newTag, sortOrder, isActive, isTrending, label }; // approximate return
+            return NextResponse.json(updated);
+        }
 
-        if (error) throw error;
+        return NextResponse.json({ error: "Failed to create" }, { status: 500 });
 
-        return NextResponse.json(data);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-// PATCH update hashtag
 export async function PATCH(request: Request) {
     try {
         const body = await request.json();
@@ -74,28 +90,24 @@ export async function PATCH(request: Request) {
             return NextResponse.json({ error: 'Hashtag ID is required' }, { status: 400 });
         }
 
-        const updates: any = { updatedAt: new Date().toISOString() };
-        if (label !== undefined) updates.label = label;
-        if (sortOrder !== undefined) updates.sortOrder = sortOrder;
-        if (isActive !== undefined) updates.isActive = isActive;
-        if (isTrending !== undefined) updates.isTrending = isTrending;
+        const updated = await db.taxonomy.hashtags.update(id, {
+            label, // maps to name in DB
+            sortOrder,
+            isActive,
+            isTrending
+        });
 
-        const { data, error } = await supabase
-            .from('hashtags')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
+        if (!updated) {
+            return NextResponse.json({ error: 'Hashtag not found' }, { status: 404 });
+        }
 
-        if (error) throw error;
+        return NextResponse.json({ ...updated, label: updated.name });
 
-        return NextResponse.json(data);
     } catch (error: any) {
         return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }
 
-// DELETE hashtag
 export async function DELETE(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
@@ -105,12 +117,7 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: 'Hashtag ID is required' }, { status: 400 });
         }
 
-        const { error } = await supabase
-            .from('hashtags')
-            .delete()
-            .eq('id', id);
-
-        if (error) throw error;
+        await db.taxonomy.hashtags.delete(id);
 
         return NextResponse.json({ success: true });
     } catch (error: any) {

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Card from '@/app/components/Card';
-import { supabase } from '@/utils/supabase';
+
 
 interface DiscoverySettingsProps {
     address: string;
