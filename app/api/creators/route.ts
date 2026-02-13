@@ -6,11 +6,11 @@ export async function GET(request: Request) {
     const address = searchParams.get('address');
 
     if (address) {
-        const creator = db.creators.find(address);
+        const creator = await db.creators.find(address);
         return NextResponse.json(creator || {});
     }
 
-    const creators = db.creators.getAll();
+    const creators = await db.creators.getAll();
     return NextResponse.json(creators);
 }
 
@@ -23,8 +23,8 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing address' }, { status: 400 });
         }
 
-        // Save to local DB
-        const updated = db.creators.create({
+        // Save to local DB (now Postgres)
+        const updated = await db.creators.create({
             ...body,
             updatedAt: new Date().toISOString()
         });

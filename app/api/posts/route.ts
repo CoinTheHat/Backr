@@ -1,56 +1,38 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db';
 
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
 
-    let query = supabase.from('posts').select('*').order('createdAt', { ascending: false });
-
     if (address) {
-        query = query.eq('creatorAddress', address);
+        const posts = await db.posts.getByCreator(address);
+        return NextResponse.json(posts);
     }
 
-    const { data: posts, error } = await query;
-
-    if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-
+    const posts = await db.posts.getAll();
     return NextResponse.json(posts);
 }
 
 export async function POST(request: Request) {
-    const body = await request.json();
+    try {
+        const body = await request.json();
 
-    // Field Mapping: Ensure these match the Supabase 'posts' table columns EXACTLY.
-    // Based on 'app/[creator]/page.tsx' usage of 'post.image', the column is 'image'.
-    // Based on GET route ordering by 'createdAt', the columns are camelCase.
-    const payload = {
-        creatorAddress: body.creatorAddress,
-        title: body.title,
-        content: body.content,
-        image: body.image || null, // Reverted to 'image'
-        videoUrl: body.videoUrl || null,
-        minTier: Number(body.minTier) || 0,
-        createdAt: body.createdAt,
-        likes: body.likes || 0,
-        isPublic: !!body.isPublic
-    };
+        const post = await db.posts.create({
+            creatorAddress: body.creatorAddress,
+            title: body.title,
+            content: body.content,
+            image: body.image || null,
+            videoUrl: body.videoUrl || null,
+            minTier: Number(body.minTier) || 0,
+            likes: body.likes || 0,
+            isPublic: !!body.isPublic,
+            createdAt: body.createdAt || new Date().toISOString()
+        });
 
-    const { error } = await supabase.from('posts').insert(payload);
-
-    if (error) {
-        console.error("Supabase Insert Error:", error.message, error.details, error.hint);
-        // Return detailed error for debugging
-        return NextResponse.json({
-            error: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint,
-            payload: payload // Show what we tried to insert
-        }, { status: 500 });
+        return NextResponse.json(post || { success: true });
+    } catch (e: any) {
+        console.error("Post Creation Error:", e);
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
-
-    return NextResponse.json({ success: true });
 }
