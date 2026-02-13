@@ -100,6 +100,16 @@ export const db = {
             `;
             const res = await pool.query(query, [address, name, bio, profileImage, coverImage, email]);
             return res.rows[0];
+        },
+        updateSocials: async (address: string, socials: any) => {
+            const query = `
+                UPDATE creators 
+                SET socials = $2, "updatedAt" = NOW()
+                WHERE address = $1
+                RETURNING *;
+            `;
+            const res = await pool.query(query, [address, socials]);
+            return res.rows[0];
         }
     },
     tiers: {

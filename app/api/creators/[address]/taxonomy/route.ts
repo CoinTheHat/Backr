@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/utils/supabase';
+import { db } from '@/utils/db'; // Use db instead of supabase
 
 export async function GET(request: Request, { params }: { params: Promise<{ address: string }> }) {
     const resolvedParams = await params;
     const { address } = resolvedParams;
 
-    // Use 'creators' table 'socials' column (JSONB) to store taxonomy
-    const { data, error } = await supabase
-        .from('creators')
-        .select('socials')
-        .eq('address', address)
-        .single();
+    try {
+        const creator = await db.creators.find(address);
 
-    if (error) {
-        // Return empty if creator not found or error
-        return NextResponse.json({ categoryIds: [], hashtagIds: [] });
+        if (!creator) {
+            return NextResponse.json({ categoryIds: [], hashtagIds: [] });
+        }
+
+        // socials is JSONB, so it comes back as an object
+        const taxonomy = creator.socials?.taxonomy || { categoryIds: [], hashtagIds: [] };
+        return NextResponse.json(taxonomy);
+    } catch (e: any) {
+        return NextResponse.json({ error: e.message }, { status: 500 });
     }
-
-    const taxonomy = data?.socials?.taxonomy || { categoryIds: [], hashtagIds: [] };
-    return NextResponse.json(taxonomy);
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ address: string }> }) {
@@ -29,31 +28,25 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ad
         const body = await request.json();
         const { categoryIds, hashtagIds } = body;
 
-        // 1. Get existing socials
-        const { data: creator, error: fetchError } = await supabase
-            .from('creators')
-            .select('socials')
-            .eq('address', address)
-            .single();
-
-        if (fetchError) throw fetchError;
+        // 1. Get existing creator
+        const creator = await db.creators.find(address);
+        if (!creator) {
+            return NextResponse.json({ error: "Creator not found" }, { status: 404 });
+        }
 
         // 2. Merge taxonomy into socials
-        const currentSocials = creator?.socials || {};
+        const currentSocials = creator.socials || {};
         const updatedSocials = {
             ...currentSocials,
             taxonomy: { categoryIds, hashtagIds }
         };
 
-        // 3. Update
-        const { data, error } = await supabase
-            .from('creators')
-            .update({ socials: updatedSocials })
-            .eq('address', address)
-            .select()
-            .single();
+        // 3. Update using db
+        const updatedCreator = await db.creators.updateSocials(address, updatedSocials);
 
-        if (error) throw error;
+        if (!updatedCreator) {
+            throw new Error("Failed to update socials");
+        }
 
         return NextResponse.json({ categoryIds, hashtagIds });
 
