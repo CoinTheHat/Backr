@@ -719,6 +719,36 @@ textarea {
   }
 }
 
+/* --------------------------------------------------------------------------
+   PRIVY MODAL FIX - Correct Stacking Context
+-------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+   PRIVY / RADIX MODAL FIX - Best Practice
+-------------------------------------------------------------------------- */
+/* Ensure overlay + content stack correctly using Radix primitives */
+/* Ensure overlay + content stack correctly using Radix primitives */
+[data-radix-portal],
+#privy-container,
+#privy-dialog {
+  position: relative;
+  z-index: 2147483646 !important;
+}
+
+[data-radix-dialog-overlay],
+[data-privy-backdrop] {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147483646 !important;
+}
+
+[data-radix-dialog-content],
+#privy-modal-content {
+  /* Relax position to let Privy/Radix handle centering */
+  z-index: 2147483647 !important;
+  /* Only ensure visibility if absolutely needed, but avoid display:block which kills flex layouts */
+  opacity: 1 !important;
+  visibility: visible !important;
+}
 
 
 /* --------------------------------------------------------------------------
