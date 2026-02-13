@@ -3,7 +3,7 @@
 import { PrivyProvider } from '@privy-io/react-auth';
 import { WagmiProvider } from '@privy-io/wagmi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { config, tempoModerato } from '../utils/tempo-config';
+import { config, tempoModerato, mainnet } from '../utils/tempo-config';
 import { useState } from 'react';
 import { CommunityProvider } from './context/CommunityContext';
 
@@ -16,7 +16,7 @@ export function Providers({ children }) {
             onSuccess={(user) => console.log('Privy login success!', user)}
             config={{
                 defaultChain: tempoModerato,
-                supportedChains: [tempoModerato],
+                supportedChains: [tempoModerato, mainnet],
                 embeddedWallets: {
                     ethereum: {
                         createOnLogin: 'users-without-wallets',

@@ -1,7 +1,7 @@
 import { createConfig, http } from '@wagmi/core';
-import { tempoModerato } from 'viem/chains';
+import { tempoModerato, mainnet } from 'viem/chains';
 
-export { tempoModerato };
+export { tempoModerato, mainnet };
 
 export const TOKENS = {
     alphaUsd: '0x20c0000000000000000000000000000000000000001' as const,
@@ -11,8 +11,9 @@ export const TOKENS = {
 };
 
 export const config = createConfig({
-    chains: [tempoModerato],
+    chains: [tempoModerato, mainnet],
     transports: {
         [tempoModerato.id]: http(),
+        [mainnet.id]: http(),
     },
 });
