@@ -166,6 +166,58 @@ export default function Home() {
                 </button>
             </nav>
 
+            {/* ═══ MOBILE MENU OVERLAY ═══ */}
+            {mobileMenuOpen && (
+                <div className="fixed inset-0 z-[60] bg-white animate-fade-in">
+                    <div className="flex flex-col h-full">
+                        <div className="px-6 py-4 flex items-center justify-between border-b border-slate-100">
+                            <div className="flex items-center gap-3">
+                                <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+                                    <Rocket size={18} />
+                                </div>
+                                <span className="text-xl font-bold tracking-tight text-slate-900">Backr</span>
+                            </div>
+                            <button onClick={() => setMobileMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-100 text-slate-900">
+                                <X size={24} />
+                            </button>
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-2">
+                            <button onClick={() => { router.push('/explore'); setMobileMenuOpen(false); }} className="p-4 text-lg font-bold text-left hover:bg-slate-50 rounded-2xl transition-colors">
+                                Explore Creators
+                            </button>
+                            <button onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false); }} className="p-4 text-lg font-bold text-left hover:bg-slate-50 rounded-2xl transition-colors">
+                                Creator Studio
+                            </button>
+                            <div className="h-px bg-slate-100 my-2" />
+                            {authenticated ? (
+                                <>
+                                    <div className="flex items-center gap-3 p-4">
+                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
+                                            <User size={20} />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-slate-900">{displayName}</p>
+                                            <p className="text-xs text-slate-500 font-medium">Logged in</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => { router.push('/dashboard/settings'); setMobileMenuOpen(false); }} className="p-4 text-lg font-medium text-left hover:bg-slate-50 rounded-2xl transition-colors text-slate-600">
+                                        Settings
+                                    </button>
+                                    <button onClick={() => { handleLogout(); setMobileMenuOpen(false); }} className="p-4 text-lg font-bold text-left hover:bg-rose-50 rounded-2xl transition-colors text-rose-500 flex items-center gap-2">
+                                        <LogOut size={20} />
+                                        Log Out
+                                    </button>
+                                </>
+                            ) : (
+                                <button onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false); }} className="mt-4 w-full py-4 rounded-xl bg-slate-900 text-white font-bold text-lg shadow-xl shadow-slate-200/50">
+                                    Get Started
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* ═══ HERO: FULL-VIEWPORT ROTATING SLIDES ═══ */}
             <section
                 ref={heroRef}
