@@ -1,7 +1,7 @@
 import { TOKENS } from "@/app/utils/constants";
 import { useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
-import { tempo } from "viem/chains";
+import { tempoModerato } from "viem/chains";
 import { tempoActions } from "viem/tempo";
 import {
     createWalletClient,
@@ -12,7 +12,7 @@ import {
     type Address,
 } from "viem";
 
-const PAYMENT_TOKEN = TOKENS.USDC;
+const alphaUsd = TOKENS.USDC;
 
 export function useSend() {
     const { wallets } = useWallets();
@@ -38,21 +38,22 @@ export function useSend() {
             const provider = await wallet.getEthereumProvider();
             const client = createWalletClient({
                 account: wallet.address as Address,
-                chain: { ...tempo, feeToken: PAYMENT_TOKEN } as any,
+                chain: tempoModerato,
                 transport: custom(provider),
             })
                 .extend(walletActions)
                 .extend(tempoActions());
 
-            // Should fetch metadata ideally, but hardcoding for demo speed
-            const decimals = 18;
+            const metadata = await client.token.getMetadata({
+                token: alphaUsd,
+            });
 
             // @ts-ignore
             const { receipt } = await client.token.transferSync({
                 to: to as Address,
-                amount: parseUnits(amount, decimals),
+                amount: parseUnits(amount, metadata.decimals),
                 memo: stringToHex(memo || ""),
-                token: PAYMENT_TOKEN as Address,
+                token: alphaUsd,
             });
 
             setTxHash(receipt.transactionHash);
