@@ -29,7 +29,7 @@ export default function TipButton({ receiverAddress, creatorName }: TipButtonPro
 }
 
 function TipModal({ receiverAddress, creatorName, onClose }: { receiverAddress: string, creatorName: string, onClose: () => void }) {
-    const { sendTip, loading } = useSend();
+    const { send, isSending } = useSend();
     const [amount, setAmount] = useState('');
     const [message, setMessage] = useState('');
     const [step, setStep] = useState<'amount' | 'confirm' | 'success'>('amount');
@@ -37,7 +37,7 @@ function TipModal({ receiverAddress, creatorName, onClose }: { receiverAddress: 
     const handleSend = async () => {
         if (!amount) return;
         try {
-            await sendTip(receiverAddress, amount, message);
+            await send(receiverAddress, amount, message);
             setStep('success');
         } catch (e) {
             // Error handled in hook
@@ -106,10 +106,10 @@ function TipModal({ receiverAddress, creatorName, onClose }: { receiverAddress: 
 
                 <Button
                     onClick={handleSend}
-                    disabled={!amount || loading}
+                    disabled={!amount || isSending}
                     className="w-full justify-center py-3 text-lg font-bold shadow-lg shadow-brand-primary/20"
                 >
-                    {loading ? 'Sending...' : `Send $${amount || '0'}`}
+                    {isSending ? 'Sending...' : `Send $${amount || '0'}`}
                 </Button>
             </div>
         </div>,

@@ -45,7 +45,7 @@ export function useSend() {
                 .extend(tempoActions());
 
             const metadata = await client.token.getMetadata({
-                token: alphaUsd,
+                token: alphaUsd as Address,
             });
 
             // @ts-ignore
@@ -53,7 +53,7 @@ export function useSend() {
                 to: to as Address,
                 amount: parseUnits(amount, metadata.decimals),
                 memo: stringToHex(memo || ""),
-                token: alphaUsd,
+                token: alphaUsd as Address,
             });
 
             setTxHash(receipt.transactionHash);

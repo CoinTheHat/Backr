@@ -23,7 +23,6 @@
     "react-dom": "19.2.3",
     "react-is": "^19.2.4",
     "recharts": "^3.6.0",
-    "tempo.ts": "latest",
     "viem": "^2.44.1",
     "wagmi": "^2.14.0"
   },

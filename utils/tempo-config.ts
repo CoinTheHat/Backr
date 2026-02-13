@@ -1,18 +1,7 @@
 import { createConfig, http } from '@wagmi/core';
-import { defineChain } from 'viem';
+import { tempoModerato } from 'viem/chains';
 
-export const tempoTestnet = defineChain({
-    id: 42431,
-    name: 'Tempo Testnet (Moderato)',
-    nativeCurrency: { name: 'USD', symbol: 'USD', decimals: 18 },
-    rpcUrls: {
-        default: { http: ['https://rpc.moderato.tempo.xyz'] },
-    },
-    blockExplorers: {
-        default: { name: 'Tempo Explorer', url: 'https://explore.tempo.xyz' },
-    },
-    testnet: true,
-});
+export { tempoModerato };
 
 export const TOKENS = {
     alphaUsd: '0x20c0000000000000000000000000000000000001' as const,
@@ -21,8 +10,8 @@ export const TOKENS = {
 };
 
 export const config = createConfig({
-    chains: [tempoTestnet],
+    chains: [tempoModerato],
     transports: {
-        [tempoTestnet.id]: http(),
+        [tempoModerato.id]: http(),
     },
 });

@@ -149,7 +149,7 @@ export default function CheckoutModal({ isOpen, onClose, onConfirm, tier, status
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '0.9rem' }}>
                                     <span style={{ color: 'var(--color-text-secondary)' }}>Est. Network Fee</span>
-                                    <span style={{ color: 'var(--color-text-tertiary)' }}>~ 0.00 USDC</span>
+                                    <span style={{ color: 'var(--color-text-tertiary)' }}>~ 0.00 USD</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '16px', borderTop: '1px dashed var(--color-border)' }}>
                                     <span style={{ fontWeight: 700 }}>Total Due</span>
