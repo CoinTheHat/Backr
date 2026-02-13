@@ -3,9 +3,9 @@
 import { usePrivy } from '@privy-io/react-auth';
 import Button from './Button';
 import { useEffect, useState } from 'react';
-import { Copy, LogOut } from 'lucide-react';
+import { Copy, LogOut, Wallet } from 'lucide-react';
 import { useToast } from './Toast';
-import LoginModal from './LoginModal';
+// import LoginModal from './LoginModal'; // Removed
 import { useRouter } from 'next/navigation';
 
 export default function WalletButton({
@@ -19,7 +19,7 @@ export default function WalletButton({
     size?: 'sm' | 'md' | 'lg',
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
 }) {
-    const { logout, authenticated, user, ready } = usePrivy();
+    const { login, logout, authenticated, user, ready } = usePrivy();
     const router = useRouter();
     const { addToast } = useToast();
     const [mounted, setMounted] = useState(false);
@@ -95,13 +95,13 @@ export default function WalletButton({
             <Button
                 variant={variant}
                 size={size}
-                onClick={() => setIsLoginModalOpen(true)}
-                className={className}
+                onClick={login}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
                 style={style}
             >
-                Login
+                <Wallet size={18} />
+                Connect Wallet
             </Button>
-            <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
         </>
     );
 }
