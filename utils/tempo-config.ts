@@ -12,7 +12,7 @@ export const tempoModerato = defineChain({
     },
     rpcUrls: {
         default: {
-            http: ['https://rpc.tempo.xyz'],
+            http: ['https://rpc.moderato.tempo.xyz'],
         },
     },
     blockExplorers: {
