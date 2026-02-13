@@ -742,10 +742,23 @@ textarea {
 }
 
 [data-radix-dialog-content],
+[data-radix-dialog-content],
 #privy-modal-content {
-  /* Relax position to let Privy/Radix handle centering */
+  /* Force fixed positioning and Z-Index */
+  position: fixed !important;
   z-index: 2147483647 !important;
-  /* Only ensure visibility if absolutely needed, but avoid display:block which kills flex layouts */
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+
+  /* MANUALLY CENTER THE MODAL */
+  /* This fixes the "yamuk" (misaligned) issue when flex is broken */
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+
+  /* Ensure visibility */
   opacity: 1 !important;
   visibility: visible !important;
 }

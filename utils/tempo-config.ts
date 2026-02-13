@@ -1,25 +1,8 @@
 import { createConfig, http } from '@wagmi/core';
-import { mainnet } from 'viem/chains';
-import { defineChain } from 'viem';
+import { mainnet, tempoModerato } from 'viem/chains';
 
-export const tempoModerato = defineChain({
-    id: 42431,
-    name: 'Tempo Moderato',
-    nativeCurrency: {
-        decimals: 18,
-        name: 'Tempo',
-        symbol: 'USD',
-    },
-    rpcUrls: {
-        default: {
-            http: ['https://rpc.moderato.tempo.xyz'],
-        },
-    },
-    blockExplorers: {
-        default: { name: 'Etherscan', url: 'https://scan.tempo.xyz' },
-    },
-    testnet: true,
-});
+// Export tempoModerato for use elsewhere if needed, though it's now direct from viem
+export { tempoModerato };
 
 export { mainnet };
 
@@ -32,6 +15,7 @@ export const TOKENS = {
 
 export const config = createConfig({
     chains: [tempoModerato, mainnet],
+    multiInjectedProviderDiscovery: false,
     transports: {
         [tempoModerato.id]: http(),
         [mainnet.id]: http(),

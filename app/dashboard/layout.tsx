@@ -26,7 +26,7 @@ import { useCommunity } from '../context/CommunityContext';
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
-    const { user, authenticated, logout, createWallet } = usePrivy();
+    const { user, ready, authenticated, logout, createWallet } = usePrivy();
     const { showToast, ToastComponent } = useToast();
     const address = user?.wallet?.address;
     const [mounted, setMounted] = useState(false);
@@ -36,6 +36,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Auth Protection: Redirect to /login if not authenticated
+    useEffect(() => {
+        if (ready && !authenticated) {
+            router.push('/login');
+        }
+    }, [ready, authenticated, router]);
 
     // Close sidebar on route change
     useEffect(() => {
@@ -63,8 +70,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 console.error("Error fetching profile:", error);
             }
         };
-        fetchProfile();
-    }, [address, router]);
+        if (ready && authenticated) {
+            fetchProfile();
+        }
+    }, [address, router, ready, authenticated]);
 
     // Auto-create wallet if authenticated but no wallet
     useEffect(() => {
@@ -73,22 +82,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     }, [authenticated, user?.wallet, createWallet, router]);
 
-    if (!mounted) return null;
+    if (!mounted || !ready) return null;
 
-    // Access Control
+    // Access Control - show loader while redirecting if not authenticated
     if (!authenticated) {
-        return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-mist text-slate-900 p-4">
-                <div className="bg-white p-8 rounded-3xl shadow-xl max-w-md w-full text-center border border-slate-100">
-                    <h1 className="text-2xl font-bold mb-4 font-serif">Dashboard Access</h1>
-                    <p className="text-slate-500 mb-8">Sign in to manage your creator page.</p>
-                    <div className="flex justify-center"><WalletButton /></div>
-                    <button className="mt-6 text-sm text-slate-400 hover:text-primary transition-colors" onClick={() => router.push('/')}>
-                        Return Home
-                    </button>
-                </div>
-            </div>
-        );
+        return null;
     }
 
     if (!address) {

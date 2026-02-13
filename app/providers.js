@@ -33,13 +33,16 @@ export function Providers({ children }) {
                         createOnLogin: 'users-without-wallets',
                     },
                 },
+                intl: {
+                    defaultCountry: 'US',
+                },
                 appearance: {
                     theme: 'dark',
                     accentColor: '#6366f1',
-                    loginMethods: ['email', 'sms'],
-                    showWalletLoginFirst: false,
-                    // externalWallets are disabled from loginMethods, but we can keep walletList empty or specific if needed later
-                    walletList: [],
+                    loginMethods: ['email', 'wallet', 'sms', 'passkey', 'google', 'twitter', 'discord', 'github'],
+                    // CRITICAL FIX: Only allowing WalletConnect to bypass fatal conflicts with 5+ installed extensions (MetaMask, Phantom, etc.)
+                    // This forces the modal to open safely with QR code instead of crashing on window.ethereum injection.
+                    walletList: ['wallet_connect'],
                 },
             }}
         >
