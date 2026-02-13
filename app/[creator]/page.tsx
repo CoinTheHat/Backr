@@ -43,6 +43,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const [creatorProfile, setCreatorProfile] = useState<any>(null);
     const [realMemberCount, setRealMemberCount] = useState(0);
     const [expandedPosts, setExpandedPosts] = useState<Record<number, boolean>>({});
+    const [showMobileMenu, setShowMobileMenu] = useState(false);
 
     // Payment Hooks
     const { send, txHash: paymentTxHash } = useSend();
@@ -203,8 +204,58 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                         }} className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-900 hover:bg-white/40 transition-colors">
                             <Share size={18} />
                         </button>
+                        <button
+                            onClick={() => setShowMobileMenu(!showMobileMenu)}
+                            className="sm:hidden w-10 h-10 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-slate-900 hover:bg-white/40 transition-colors"
+                        >
+                            <MoreHorizontal size={18} />
+                        </button>
                     </div>
                 </div>
+
+                {/* Mobile Menu Dropdown */}
+                {showMobileMenu && (
+                    <div className="absolute top-20 right-6 z-20 sm:hidden">
+                        <div className="bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 min-w-[200px]">
+                            <div className="space-y-3">
+                                <div className="sm:hidden">
+                                    <WalletButton />
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        navigator.clipboard.writeText(window.location.href);
+                                        showToast('Link copied!', 'success');
+                                        setShowMobileMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                                >
+                                    <Share size={18} />
+                                    <span className="font-medium text-sm">Share Profile</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        router.push('/explore');
+                                        setShowMobileMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                                >
+                                    <Zap size={18} />
+                                    <span className="font-medium text-sm">Explore Creators</span>
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        window.location.href = `mailto:${creatorProfile?.email || ''}`;
+                                        setShowMobileMenu(false);
+                                    }}
+                                    className="w-full flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-slate-50 transition-colors text-left"
+                                >
+                                    <MessageCircle size={18} />
+                                    <span className="font-medium text-sm">Contact</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </header>
 
             {/* PROFILE INFO */}
@@ -228,15 +279,15 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 <p className="text-slate-500 font-medium mt-2 text-lg">{creatorProfile?.description || "Digital Creator"}</p>
 
                 {/* Stats Row */}
-                <div className="flex items-center justify-center gap-12 mt-8 pb-8 border-b border-slate-200">
+                <div className="flex items-center justify-center gap-6 sm:gap-12 mt-8 pb-8 border-b border-slate-200">
                     <div className="text-center">
-                        <span className="block text-2xl font-bold text-slate-900">{realMemberCount}</span>
-                        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Followers</span>
+                        <span className="block text-xl sm:text-2xl font-bold text-slate-900">{realMemberCount}</span>
+                        <span className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400 font-bold">Followers</span>
                     </div>
-                    <div className="w-px h-10 bg-slate-200"></div>
+                    <div className="w-px h-8 sm:h-10 bg-slate-200"></div>
                     <div className="text-center">
-                        <span className="block text-2xl font-bold text-slate-900">{posts.length}</span>
-                        <span className="text-xs uppercase tracking-widest text-slate-400 font-bold">Posts</span>
+                        <span className="block text-xl sm:text-2xl font-bold text-slate-900">{posts.length}</span>
+                        <span className="text-[10px] sm:text-xs uppercase tracking-widest text-slate-400 font-bold">Posts</span>
                     </div>
                 </div>
             </div>
@@ -247,12 +298,12 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 {/* Left Column */}
                 <div>
                     {/* TABS */}
-                    <div className="flex justify-center lg:justify-start gap-2 mb-8 bg-white/50 p-1.5 rounded-full inline-flex backdrop-blur-sm border border-white/50">
+                    <div className="flex justify-center lg:justify-start gap-2 mb-8 bg-white/50 p-1.5 rounded-full inline-flex backdrop-blur-sm border border-white/50 w-full overflow-x-auto">
                         {['posts', 'membership', 'about'].map(tab => (
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab as any)}
-                                className={`px-6 py-2.5 rounded-full text-sm font-bold capitalize transition-all ${activeTab === tab
+                                className={`px-4 sm:px-6 py-2.5 rounded-full text-xs sm:text-sm font-bold capitalize transition-all whitespace-nowrap flex-shrink-0 ${activeTab === tab
                                     ? 'bg-white text-slate-900 shadow-md shadow-slate-200/50'
                                     : 'text-slate-500 hover:bg-white/50 hover:text-slate-700'
                                     }`}
@@ -409,7 +460,7 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                     )}
                 </div>
 
-                {/* Right Column: Sticky Sidebar */}
+                {/* Right Column: Sticky Sidebar (Desktop) */}
                 <aside className="hidden lg:block space-y-8">
                     {/* Tip Jar */}
                     <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm sticky top-24">
@@ -421,6 +472,11 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                         <SupporterLeaderboard creatorAddress={creatorId} />
                     </div>
                 </aside>
+
+                {/* Mobile: Bottom Tip Jar */}
+                <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 p-4 z-50 shadow-2xl">
+                    <TipJar receiverAddress={creatorId} />
+                </div>
             </main>
 
             <CheckoutModal
