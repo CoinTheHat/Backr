@@ -14,16 +14,24 @@ export function Providers({ children }) {
         <PrivyProvider
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
             onSuccess={(user) => {
-                console.log('[PrivyProvider] Login success!', user);
-                console.log('[PrivyProvider] Login success - user:', user);
+                console.log('✅ [Privy] onSuccess triggered');
+                console.log('👤 [Privy] User:', user);
+                console.log('👛 [Privy] Wallet:', user?.wallet);
             }}
             onError={(error) => {
-                console.error('[PrivyProvider] Error:', error);
-                console.error('[PrivyProvider] Error details:', error?.message, error?.code);
+                console.error('🔥 [Privy] onError triggered!');
+                console.error('❌ [Privy] Error Object:', error);
+                console.error('❌ [Privy] Error Message:', error?.message);
+                console.error('❌ [Privy] Error Code:', error?.code);
             }}
             onReady={() => {
-                console.log('[PrivyProvider] Ready!');
-                console.log('[PrivyProvider] App ID:', process.env.NEXT_PUBLIC_PRIVY_APP_ID);
+                console.log('🚀 [Privy] onReady triggered - SDK is initialized');
+                // Check if ethereum is defined in window
+                if (typeof window !== 'undefined') {
+                    console.log('🌐 [Window] window.ethereum:', window.ethereum);
+                    // @ts-ignore
+                    console.log('🌐 [Window] injected providers:', window.ethereum?.providers || 'No providers array');
+                }
             }}
             config={{
                 defaultChain: tempoModerato,
@@ -40,9 +48,8 @@ export function Providers({ children }) {
                     theme: 'dark',
                     accentColor: '#6366f1',
                     loginMethods: ['email', 'wallet', 'sms', 'passkey', 'google', 'twitter', 'discord', 'github'],
-                    // CRITICAL FIX: Only allowing WalletConnect to bypass fatal conflicts with 5+ installed extensions (MetaMask, Phantom, etc.)
-                    // This forces the modal to open safely with QR code instead of crashing on window.ethereum injection.
-                    walletList: ['wallet_connect'],
+                    // Re-enabling ALL wallets to debug the root cause with logs
+                    walletList: ['metamask', 'phantom', 'rainbow', 'wallet_connect'],
                 },
             }}
         >

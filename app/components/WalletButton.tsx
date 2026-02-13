@@ -28,7 +28,9 @@ export default function WalletButton({
 
     useEffect(() => {
         setMounted(true);
-    }, []);
+        console.log('🔌 [WalletButton] Mounted');
+        console.log('🔌 [WalletButton] State:', { ready, authenticated, userWallet: user?.wallet?.address });
+    }, [ready, authenticated, user?.wallet?.address]);
 
     const copyAddress = () => {
         if (user?.wallet?.address) {
@@ -92,6 +94,12 @@ export default function WalletButton({
     }
 
     const handleLogin = () => {
+        console.log(' [WalletButton] handleLogin clicked');
+        if (!ready) {
+            console.warn('⚠️ [WalletButton] Privy not ready yet');
+            return;
+        }
+        console.log('🚀 [WalletButton] Calling login()');
         login();
     };
 

@@ -60,8 +60,8 @@ export default function LoginPage() {
         setIsLoading(true);
         setError(null);
         try {
-            // Login with code and email
-            await loginWithCode({ code, email });
+            // Login with code only (email is handled by Privy state)
+            await loginWithCode({ code });
         } catch (err: any) {
             console.error(err);
             setError('Invalid code. Please try again.');
