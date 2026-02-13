@@ -168,6 +168,10 @@ export const db = {
         }
     },
     memberships: {
+        getAll: async () => {
+            const res = await pool.query('SELECT * FROM memberships ORDER BY "createdAt" DESC');
+            return res.rows;
+        },
         getByUser: async (address: string) => {
             const res = await pool.query('SELECT * FROM memberships WHERE "userAddress" = $1', [address]);
             return res.rows;
