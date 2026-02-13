@@ -15,14 +15,15 @@ export function Providers({ children }) {
             appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID}
             onSuccess={(user) => console.log('Privy login success!', user)}
             config={{
-                defaultChain: mainnet,
-                supportedChains: [mainnet, tempoModerato],
+                defaultChain: tempoModerato,
+                supportedChains: [tempoModerato, mainnet],
                 embeddedWallets: {
                     ethereum: {
                         createOnLogin: 'users-without-wallets',
                     },
                 },
                 appearance: {
+                    theme: 'dark',
                     accentColor: '#6366f1',
                     loginMethods: ['email', 'google', 'wallet'],
                     showWalletLoginFirst: false,
