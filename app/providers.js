@@ -25,7 +25,7 @@ export function Providers({ children }) {
                 appearance: {
                     theme: 'dark',
                     accentColor: '#6366f1',
-                    loginMethods: ['email', 'google', 'wallet', 'passkey'],
+                    loginMethods: ['email', 'google', 'wallet', 'passkey', 'sms'],
                     showWalletLoginFirst: false,
                 },
             }}
