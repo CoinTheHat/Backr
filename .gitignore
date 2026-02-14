@@ -42,7 +42,9 @@ yarn-debug.log*
 next-env.d.ts
 
 # Smart Contracts
-smart-contracts/node_modules
-smart-contracts/artifacts
-smart-contracts/cache
-smart-contracts/typechain-types
+artifacts/
+**/artifacts/
+cache/
+**/cache/
+typechain-types/
+**/typechain-types/
