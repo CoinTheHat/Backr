@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
         const wallet = user.linked_accounts?.find(
             (account: any) =>
                 account.type === "wallet" && account.chain_type === "ethereum"
-        );
+        ) as any;
 
-        if (!wallet || !wallet.address) {
+        if (!wallet?.address) {
             return NextResponse.json(
                 { error: "Wallet not found" },
                 { status: 500 }
