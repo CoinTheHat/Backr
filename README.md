@@ -45,8 +45,8 @@
     Create a `.env.local` file in the root directory and add the following:
 
     ```env
-    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+    SUPABASE_URL=your_supabase_url
+    SUPABASE_ANON_KEY=your_supabase_anon_key
     NEXT_PUBLIC_FACTORY_ADDRESS=0x48c87643EE7A20B5741F7d78B09ba23CF246D59F
     NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID=your_walletconnect_id
     ```
