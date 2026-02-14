@@ -7,83 +7,37 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
     icon?: React.ReactNode;
     containerStyle?: React.CSSProperties;
     textarea?: boolean;
+    className?: string;
 }
 
-export default function Input({ label, error, helperText, style, containerStyle, icon, textarea, ...props }: InputProps) {
+export default function Input({ label, error, helperText, className, containerStyle, icon, textarea, ...props }: InputProps) {
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', width: '100%', marginBottom: '16px', ...containerStyle }}>
-            {label && (
-                <label style={{
-                    fontSize: '0.875rem',
-                    fontWeight: 500,
-                    color: 'var(--color-text-primary)'
-                }}>
-                    {label}
-                </label>
-            )}
+        <div className={`flex flex-col gap-1.5 w-full mb-4 ${className || ''}`} style={containerStyle}>
+            {label && <label className="text-xs font-bold text-slate-500 uppercase ml-1 tracking-wider">{label}</label>}
 
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <div className="relative group">
                 {icon && (
-                    <div style={{
-                        position: 'absolute',
-                        left: '12px',
-                        top: textarea ? '12px' : '50%',
-                        transform: textarea ? 'none' : 'translateY(-50%)',
-                        color: 'var(--color-text-secondary)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        pointerEvents: 'none',
-                        zIndex: 10
-                    }}>
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-600 transition-colors pointer-events-none z-10">
                         {icon}
                     </div>
                 )}
                 {textarea ? (
                     <textarea
-                        className="focus-ring"
-                        style={{
-                            width: '100%',
-                            padding: '10px 14px',
-                            paddingLeft: icon ? '40px' : '14px',
-                            borderRadius: 'var(--radius-md)',
-                            border: error ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
-                            background: 'var(--color-bg-surface)',
-                            color: 'var(--color-text-primary)',
-                            fontSize: '0.925rem',
-                            minHeight: '100px',
-                            fontFamily: 'inherit',
-                            resize: 'vertical',
-                            transition: 'all 0.2s ease',
-                            ...style
-                        }}
                         {...(props as any)}
+                        className={`w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all min-h-[120px] ${icon ? 'pl-11' : ''} ${error ? 'border-red-500' : ''}`}
                     />
                 ) : (
                     <input
-                        className="focus-ring"
-                        style={{
-                            width: '100%',
-                            padding: '10px 14px',
-                            paddingLeft: icon ? '40px' : '14px',
-                            borderRadius: 'var(--radius-md)',
-                            border: error ? '1px solid var(--color-error)' : '1px solid var(--color-border)',
-                            background: 'var(--color-bg-surface)',
-                            color: 'var(--color-text-primary)',
-                            fontSize: '0.925rem',
-                            transition: 'all 0.2s ease',
-                            ...style
-                        }}
                         {...props}
+                        className={`w-full rounded-2xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all h-12 ${icon ? 'pl-11' : ''} ${error ? 'border-red-500' : ''}`}
                     />
                 )}
             </div>
 
-            {helperText && !error && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-text-tertiary)' }}>{helperText}</span>
-            )}
-            {error && (
-                <span style={{ fontSize: '0.75rem', color: 'var(--color-error)' }}>{error}</span>
+            {(error || helperText) && (
+                <p className={`text-[11px] font-medium ml-1 ${error ? 'text-red-500' : 'text-slate-400'}`}>
+                    {error || helperText}
+                </p>
             )}
         </div>
     );

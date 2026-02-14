@@ -3,7 +3,7 @@
 import { usePrivy, useLogin } from '@privy-io/react-auth';
 import Button from './Button';
 import { useEffect, useState } from 'react';
-import { Copy, LogOut, Wallet } from 'lucide-react';
+import { Copy, LogOut, Wallet, Plus } from 'lucide-react';
 import { useToast } from './Toast';
 // import LoginModal from './LoginModal'; // Removed
 import { useRouter } from 'next/navigation';
@@ -19,17 +19,36 @@ export default function WalletButton({
     size?: 'sm' | 'md' | 'lg',
     variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
 }) {
-    const { logout, authenticated, user, ready } = usePrivy();
-    const { login } = useLogin();
+    const { logout, authenticated, user, ready, login, createWallet } = usePrivy();
+    // const { login } = useLogin(); // Removed to use standard privy login
     const router = useRouter();
     const { addToast } = useToast();
     const [mounted, setMounted] = useState(false);
     const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [isCreatingWallet, setIsCreatingWallet] = useState(false);
 
     useEffect(() => {
         setMounted(true);
         console.log('🔌 [WalletButton] Mounted');
         console.log('🔌 [WalletButton] State:', { ready, authenticated, userWallet: user?.wallet?.address });
+
+        // 🔍 DIAGNOSTIC: Check CSS theme configuration
+        if (typeof window !== 'undefined') {
+            const rootStyles = getComputedStyle(document.documentElement);
+            const themeColor = rootStyles.getPropertyValue('--color-primary').trim();
+            const bgColor = rootStyles.getPropertyValue('--color-bg-page').trim();
+            const textColor = rootStyles.getPropertyValue('--color-text-primary').trim();
+            console.log('🎨 [WalletButton] CSS Theme:', { themeColor, bgColor, textColor });
+
+            // 🔍 DIAGNOSTIC: Check if current page has dark/light theme
+            const bodyBg = getComputedStyle(document.body).backgroundColor;
+            console.log('🎨 [WalletButton] Body background:', bodyBg);
+        }
+
+        // 🔍 DIAGNOSTIC: Check if SIWE hook is available
+        console.log('🔍 [WalletButton] Checking SIWE availability...');
+        console.log('🔍 [WalletButton] useLoginWithSiwe is NOT imported in WalletButton');
+        console.log('🔍 [WalletButton] login/page.tsx DOES import useLoginWithSiwe');
     }, [ready, authenticated, user?.wallet?.address]);
 
     const copyAddress = () => {
@@ -65,11 +84,26 @@ export default function WalletButton({
                 <Button
                     variant="outline"
                     size={size}
-                    onClick={() => {
+                    onClick={async () => {
                         if (user?.wallet?.address) {
                             copyAddress();
                         } else {
-                            router.push('/dashboard');
+                            // No wallet found - create one
+                            if (isCreatingWallet) {
+                                addToast('Creating wallet...', 'info');
+                                return;
+                            }
+                            try {
+                                setIsCreatingWallet(true);
+                                addToast('Creating your embedded wallet...', 'info');
+                                await createWallet();
+                                addToast('Wallet created successfully!', 'success');
+                            } catch (error) {
+                                console.error('Failed to create wallet:', error);
+                                addToast('Failed to create wallet. Please try again.', 'error');
+                            } finally {
+                                setIsCreatingWallet(false);
+                            }
                         }
                     }}
                     className="flex items-center gap-2 font-mono text-xs"
@@ -77,7 +111,7 @@ export default function WalletButton({
                 >
                     <span className={`w-2 h-2 rounded-full ${user?.wallet ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`}></span>
                     {user?.wallet ? formatAddress(user.wallet.address) : (user?.email?.address || 'No Wallet')}
-                    {user?.wallet ? <Copy size={12} className="opacity-50" /> : null}
+                    {user?.wallet ? <Copy size={12} className="opacity-50" /> : <Plus size={12} className="opacity-50" />}
                 </Button>
 
                 <Button
@@ -94,11 +128,16 @@ export default function WalletButton({
     }
 
     const handleLogin = () => {
-        console.log(' [WalletButton] handleLogin clicked');
+        console.log('🖱️ [WalletButton] handleLogin clicked');
+        console.log('🔍 [WalletButton] Login Method Check:');
+        console.log('  - Using standard login() from usePrivy');
+        console.log('  - NOT using useLoginWithSiwe (not imported)');
+
         if (!ready) {
             console.warn('⚠️ [WalletButton] Privy not ready yet');
             return;
         }
+
         console.log('🚀 [WalletButton] Calling login()');
         login();
     };

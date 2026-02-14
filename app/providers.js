@@ -41,15 +41,10 @@ export function Providers({ children }) {
                         createOnLogin: 'users-without-wallets',
                     },
                 },
-                intl: {
-                    defaultCountry: 'US',
-                },
                 appearance: {
-                    theme: 'dark',
+                    theme: 'light',
                     accentColor: '#6366f1',
-                    loginMethods: ['email', 'wallet', 'sms', 'passkey', 'google', 'twitter', 'discord', 'github'],
-                    // Re-enabling ALL wallets to debug the root cause with logs
-                    walletList: ['metamask', 'phantom', 'rainbow', 'wallet_connect'],
+                    showWalletLoginFirst: true,
                 },
             }}
         >

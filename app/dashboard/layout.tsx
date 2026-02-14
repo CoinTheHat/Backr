@@ -161,12 +161,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         })}
                     </nav>
 
-                    {/* User Profile */}
                     <div className="mt-auto pt-6 border-t border-slate-50">
                         <div className="flex items-center gap-3 mb-4 p-2 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer" onClick={() => router.push(`/${address}`)}>
-                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden">
-                                {profile?.avatar_url ? (
-                                    <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                {(profile?.avatarUrl || profile?.profileImage) ? (
+                                    <img src={profile.avatarUrl || profile.profileImage} alt="Profile" className="w-full h-full object-cover" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-slate-400">
                                         <Users size={16} />

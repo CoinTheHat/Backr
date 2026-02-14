@@ -6,6 +6,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
+import ImageUpload from '../../components/ImageUpload';
 import { Plus, Trash2, Edit2, Save, X, Check } from 'lucide-react';
 import { useToast } from '../../components/Toast';
 
@@ -22,7 +23,8 @@ export default function MembershipPage() {
     const [formData, setFormData] = useState({
         name: '',
         price: '',
-        perks: ''
+        perks: '',
+        image: ''
     });
 
     useEffect(() => {
@@ -67,7 +69,7 @@ export default function MembershipPage() {
                 showToast("Tier saved successfully", "success");
                 setIsEditing(false);
                 setEditId(null);
-                setFormData({ name: '', price: '', perks: '' });
+                setFormData({ name: '', price: '', perks: '', image: '' });
                 fetchTiers();
             } else {
                 showToast("Failed to save tier", "error");
@@ -97,11 +99,12 @@ export default function MembershipPage() {
             setFormData({
                 name: tier.name,
                 price: tier.price,
-                perks: (tier.perks || []).join('\n')
+                perks: (tier.perks || []).join('\n'),
+                image: tier.image || ''
             });
         } else {
             setEditId(null);
-            setFormData({ name: '', price: '', perks: '' });
+            setFormData({ name: '', price: '', perks: '', image: '' });
         }
         setIsEditing(true);
     };
@@ -129,20 +132,31 @@ export default function MembershipPage() {
                         <X size={20} />
                     </button>
                     <h3 className="text-lg font-bold mb-6">{editId ? 'Edit Tier' : 'Create New Tier'}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Input
-                            label="Tier Name"
-                            placeholder="e.g. Bronze Supporter"
-                            value={formData.name}
-                            onChange={e => setFormData({ ...formData, name: e.target.value })}
-                        />
-                        <Input
-                            label="Monthly Price (USD)"
-                            type="number"
-                            placeholder="e.g. 5"
-                            value={formData.price}
-                            onChange={e => setFormData({ ...formData, price: e.target.value })}
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div className="space-y-6">
+                            <Input
+                                label="Tier Name"
+                                placeholder="e.g. Bronze Supporter"
+                                value={formData.name}
+                                onChange={e => setFormData({ ...formData, name: e.target.value })}
+                            />
+                            <Input
+                                label="Monthly Price (USD)"
+                                type="number"
+                                placeholder="e.g. 5"
+                                value={formData.price}
+                                onChange={e => setFormData({ ...formData, price: e.target.value })}
+                            />
+                        </div>
+                        <div>
+                            <ImageUpload
+                                label="Tier Image"
+                                bucket="posts"
+                                value={formData.image}
+                                onChange={url => setFormData({ ...formData, image: url })}
+                                helperText="Best: 1:1 or 16:9 ratio. Max 5MB."
+                            />
+                        </div>
                     </div>
                     <Input
                         label="Perks (One per line)"
@@ -162,20 +176,27 @@ export default function MembershipPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {tiers.map((tier) => (
-                    <Card key={tier.id} className="p-6 flex flex-col h-full hover:border-white/20 transition-colors">
-                        <div className="flex justify-between items-start mb-4">
-                            <h3 className="text-xl font-bold">{tier.name}</h3>
-                            <div className="text-xl font-mono text-brand-accent">${tier.price}</div>
+                    <Card key={tier.id} className="p-0 overflow-hidden flex flex-col h-full hover:border-white/20 transition-colors">
+                        {tier.image && (
+                            <div className="aspect-video w-full overflow-hidden border-b border-white/5">
+                                <img src={tier.image} alt={tier.name} className="w-full h-full object-cover" />
+                            </div>
+                        )}
+                        <div className="p-6 flex flex-col flex-1">
+                            <div className="flex justify-between items-start mb-4">
+                                <h3 className="text-xl font-bold">{tier.name}</h3>
+                                <div className="text-xl font-mono text-brand-accent">${tier.price}</div>
+                            </div>
+                            <ul className="space-y-2 mb-8 flex-1">
+                                {(tier.perks || []).map((perk: string, i: number) => (
+                                    <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
+                                        <Check size={14} className="mt-1 text-emerald-400 shrink-0" />
+                                        <span>{perk}</span>
+                                    </li>
+                                ))}
+                            </ul>
                         </div>
-                        <ul className="space-y-2 mb-8 flex-1">
-                            {(tier.perks || []).map((perk: string, i: number) => (
-                                <li key={i} className="flex items-start gap-2 text-sm text-gray-300">
-                                    <Check size={14} className="mt-1 text-emerald-400 shrink-0" />
-                                    <span>{perk}</span>
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="flex gap-2 pt-4 border-t border-white/5">
+                        <div className="p-6 flex gap-2 pt-4 border-t border-white/5">
                             <Button
                                 variant="outline"
                                 size="sm"

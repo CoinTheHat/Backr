@@ -6,6 +6,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
+import ImageUpload from '../../components/ImageUpload';
 import { useToast } from '../../components/Toast';
 import { useCommunity } from '../../context/CommunityContext';
 
@@ -18,8 +19,10 @@ export default function SettingsPage() {
     const { isDeployed, contractAddress, refreshData } = useCommunity();
 
     // Form State
+    const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState(''); // Avatar/Profile picture URL
     const [profileImage, setProfileImage] = useState(''); // URL for now
     const [coverImage, setCoverImage] = useState(''); // URL for now
     const [email, setEmail] = useState('');
@@ -37,9 +40,11 @@ export default function SettingsPage() {
                     const res = await fetch(`/api/creators?address=${address}`);
                     const data = await res.json();
                     if (data) {
+                        setUsername(data.username || '');
                         setName(data.name || '');
+                        setAvatarUrl(data.avatarUrl || data.profileImage || '');
                         setBio(data.bio || '');
-                        setProfileImage(data.profileImage || '');
+                        setProfileImage(data.profileImage || data.avatarUrl || '');
                         setCoverImage(data.coverImage || '');
                         setEmail(data.email || '');
                     }
@@ -55,6 +60,10 @@ export default function SettingsPage() {
 
     const handleSave = async () => {
         if (!name) return addToast("Name is required", 'error');
+        if (!username) return addToast("Username is required", 'error');
+        if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+            return addToast("Username must be 3-20 characters, letters, numbers, and underscores only", 'error');
+        }
 
         setIsSaving(true);
         try {
@@ -64,9 +73,10 @@ export default function SettingsPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     address,
+                    username,
                     name,
                     bio,
-                    profileImage,
+                    avatarUrl,
                     coverImage,
                     email
                 })
@@ -110,48 +120,85 @@ export default function SettingsPage() {
                         Profile Details
                     </h3>
                 </div>
-                <div className="p-6 space-y-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <Input
-                            label="Display Name"
-                            placeholder="e.g. Satoshi Nakamoto"
-                            value={name}
-                            onChange={e => setName(e.target.value)}
-                        />
-                        <Input
-                            label="Email (Optional)"
-                            placeholder="contact@example.com"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                        />
-                    </div>
+                <div className="space-y-10">
+                    {/* PROFILE HEADER AREA (SOCIAL STYLE) */}
+                    <div className="bg-slate-50/50 rounded-3xl border border-slate-100 overflow-hidden">
+                        <div className="relative mb-20">
+                            {/* Cover Image */}
+                            <ImageUpload
+                                bucket="avatars"
+                                value={coverImage}
+                                onChange={setCoverImage}
+                                aspectRatio="video"
+                                showLabel={false}
+                                className="w-full"
+                                label="Cover Image"
+                                helperText="1500x500px"
+                            />
 
-                    <Input
-                        label="Bio"
-                        placeholder="Tell your fans about yourself..."
-                        textarea
-                        value={bio}
-                        onChange={e => setBio(e.target.value)}
-                    />
+                            {/* Overlapping Avatar */}
+                            <div className="absolute -bottom-16 left-10 z-20">
+                                <ImageUpload
+                                    bucket="avatars"
+                                    value={avatarUrl}
+                                    onChange={setAvatarUrl}
+                                    aspectRatio="square"
+                                    showLabel={false}
+                                    className="w-40 h-40 rounded-full border-8 border-white shadow-2xl overflow-hidden bg-white"
+                                    label="Avatar"
+                                    helperText="PP"
+                                />
+                            </div>
+                        </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="p-8 pt-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <Input
+                                label="Username"
+                                placeholder="username"
+                                value={username}
+                                onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                                helperText="3-20 characters, letters, numbers, and underscores only. This will be your unique profile URL."
+                                containerStyle={{ gridColumn: 'span 2' }}
+                                disabled={true} // Usernames are usually permanent for now
+                            />
+                            <Input
+                                label="Display Name"
+                                placeholder="Your Name"
+                                value={name}
+                                onChange={e => setName(e.target.value)}
+                            />
+                            <Input
+                                label="Email (Optional)"
+                                placeholder="contact@example.com"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                            />
+                        </div>
+
                         <Input
-                            label="Profile Image URL"
-                            placeholder="https://..."
-                            value={profileImage}
-                            onChange={e => setProfileImage(e.target.value)}
-                        />
-                        <Input
-                            label="Cover Image URL"
-                            placeholder="https://..."
-                            value={coverImage}
-                            onChange={e => setCoverImage(e.target.value)}
+                            label="Bio"
+                            textarea
+                            placeholder="Tell your fans about yourself..."
+                            value={bio}
+                            onChange={e => setBio(e.target.value)}
+                            containerStyle={{ gridColumn: 'span 2' }}
                         />
                     </div>
                 </div>
-                <div className="p-4 bg-black/20 flex justify-end">
-                    <Button onClick={handleSave} disabled={isSaving}>
-                        {isSaving ? 'Saving...' : 'Save Changes'}
+
+                {/* STICKY SAVE BAR */}
+                <div className="mt-12 flex items-center justify-between p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100/50">
+                    <div className="flex items-center gap-3 text-indigo-900/60">
+                        <Info size={20} />
+                        <p className="text-sm font-medium">Your profile is visible to all supporters.</p>
+                    </div>
+                    <Button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="px-8 py-4 bg-[#0f172a] text-white rounded-2xl hover:bg-slate-800 transition-all font-bold shadow-lg shadow-slate-200"
+                    >
+                        {isSaving ? <RefreshCw className="animate-spin h-5 w-5 mr-2" /> : <Save className="h-5 w-5 mr-2" />}
+                        Save All Changes
                     </Button>
                 </div>
             </Card>

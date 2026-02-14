@@ -719,54 +719,40 @@ textarea {
   }
 }
 
-/* --------------------------------------------------------------------------
-   PRIVY MODAL FIX - Correct Stacking Context
--------------------------------------------------------------------------- */
-/* --------------------------------------------------------------------------
-   PRIVY / RADIX MODAL FIX - Best Practice
--------------------------------------------------------------------------- */
-/* Ensure overlay + content stack correctly using Radix primitives */
-/* Ensure overlay + content stack correctly using Radix primitives */
-[data-radix-portal],
-#privy-container,
-#privy-dialog {
+/* Surgical fix for Privy modal visibility */
+#privy-container {
+  z-index: 999999 !important;
   position: relative;
-  z-index: 2147483646 !important;
 }
 
-[data-radix-dialog-overlay],
-[data-privy-backdrop] {
+/* Additional fixes for Privy modal */
+#privy-modal-overlay,
+#privy-modal-content,
+[data-privy-modal-overlay],
+[data-privy-modal-content] {
+  z-index: 999999 !important;
   position: fixed !important;
-  inset: 0 !important;
-  z-index: 2147483646 !important;
-}
-
-[data-radix-dialog-content],
-[data-radix-dialog-content],
-#privy-modal-content {
-  /* Force fixed positioning and Z-Index */
-  position: fixed !important;
-  z-index: 2147483647 !important;
-  opacity: 1 !important;
+  display: block !important;
   visibility: visible !important;
-  pointer-events: auto !important;
+  opacity: 1 !important;
+}
 
-  /* MANUALLY CENTER THE MODAL */
-  /* This fixes the "yamuk" (misaligned) issue when flex is broken */
+/* Center the Privy modal */
+#privy-modal-content,
+[data-privy-modal-content] {
   top: 50% !important;
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
-
-  /* Ensure visibility */
-  opacity: 1 !important;
-  visibility: visible !important;
+  max-width: 90vw !important;
+  max-height: 90vh !important;
 }
 
+/* Ensure Privy modal is above everything */
+[class*="privy"],
+[class*="Privy"] {
+  z-index: 999999 !important;
+}
 
-/* --------------------------------------------------------------------------
-   HERO BACKGROUND
--------------------------------------------------------------------------- */
 .hero-bg {
   background-image: url('/backgrounds/hero-bg.png');
   background-repeat: no-repeat;

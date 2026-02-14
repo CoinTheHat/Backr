@@ -3,14 +3,15 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { usePrivy, useLoginWithOAuth, useLoginWithPasskey, useSignupWithPasskey, useLoginWithEmail } from '@privy-io/react-auth';
-import { Zap, Fingerprint, Mail, Chrome, Wallet, Loader2, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import { usePrivy, useLogin, useLoginWithOAuth, useLoginWithPasskey, useSignupWithPasskey, useLoginWithEmail } from '@privy-io/react-auth';
+import { Rocket, Fingerprint, Mail, Chrome, Wallet, Loader2, ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
 
 type LoginView = 'initial' | 'email' | 'otp';
 
 export default function LoginPage() {
     const router = useRouter();
     const { ready, authenticated, login } = usePrivy();
+
     const { initOAuth } = useLoginWithOAuth();
     const { loginWithPasskey } = useLoginWithPasskey();
     const { signupWithPasskey } = useSignupWithPasskey();
@@ -100,11 +101,15 @@ export default function LoginPage() {
     };
 
     const handleWallet = async () => {
-        setIsLoading(true);
+        console.log('🖱️ [Login] Wallet button clicked');
         setError(null);
-        // Explicitly call wallet login
-        login({ loginMethods: ['wallet'] });
-        setIsLoading(false);
+        try {
+            console.log('🚀 [Login] Calling login() - Privy will create embedded wallet');
+            await login();
+        } catch (err: any) {
+            console.error('❌ [Login] Error:', err);
+            setError('Failed to initiate wallet login.');
+        }
     };
 
     if (!ready) {
@@ -118,8 +123,8 @@ export default function LoginPage() {
     return (
         <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-slate-50 px-4">
             {/* ── Background Effects (Light) ── */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#e0e7ff_0%,transparent_50%)] opacity-70" />
-            <div className="absolute bottom-0 left-0 right-0 h-[500px] bg-[radial-gradient(circle_at_50%_100%,#dbeafe_0%,transparent_30%)] opacity-60" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,#cbd5e1_0%,transparent_50%)] opacity-30" />
+            <div className="absolute bottom-0 left-0 right-0 h-[500px] bg-[radial-gradient(circle_at_50%_100%,#f1f5f9_0%,transparent_30%)] opacity-60" />
 
             {/* ── Login Card ── */}
             <div className="relative z-10 w-full max-w-md space-y-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-xl transition-all">
@@ -128,8 +133,8 @@ export default function LoginPage() {
                 <div className="text-center relative">
                     {view === 'initial' && (
                         <>
-                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100">
-                                <Zap className="h-8 w-8" />
+                            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0f172a] text-white shadow-xl shadow-slate-200 rotate-12 transition-transform hover:rotate-0 duration-300">
+                                <Rocket size={32} />
                             </div>
                             <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Sign In</h1>
                             <p className="mt-2 text-sm text-slate-500">Secure access to your dashboard</p>
@@ -164,7 +169,7 @@ export default function LoginPage() {
                             <button
                                 onClick={handlePasskey}
                                 disabled={isLoading}
-                                className="group w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2.5 cursor-pointer"
+                                className="group relative flex w-full items-center justify-center gap-3 rounded-2xl bg-[#0f172a] py-4 text-white shadow-lg shadow-slate-100 transition-all hover:bg-slate-800 active:scale-[0.98] disabled:opacity-50"
                             >
                                 <Fingerprint className="h-5 w-5" />
                                 <span>Continue with Passkey</span>
@@ -216,14 +221,14 @@ export default function LoginPage() {
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     placeholder="name@example.com"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-[#0f172a] focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-500/10 transition-all"
                                     autoFocus
                                 />
                             </div>
                             <button
                                 onClick={handleSendCode}
                                 disabled={isLoading || !email}
-                                className="group w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
+                                className="group w-full rounded-xl bg-[#0f172a] py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <span>Send Code</span>}
                                 {!isLoading && <ArrowRight className="h-4 w-4 opacity-50" />}
@@ -241,7 +246,7 @@ export default function LoginPage() {
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
                                     placeholder="123456"
-                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-bold tracking-widest text-slate-900 focus:border-indigo-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-indigo-500/10 transition-all"
+                                    className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-bold tracking-widest text-slate-900 focus:border-[#0f172a] focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-500/10 transition-all"
                                     autoFocus
                                     maxLength={6}
                                 />
@@ -249,13 +254,13 @@ export default function LoginPage() {
                             <button
                                 onClick={handleLoginWithCode}
                                 disabled={isLoading || code.length < 6}
-                                className="group w-full rounded-xl bg-indigo-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-indigo-200 transition-all hover:bg-indigo-700 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
+                                className="group w-full rounded-xl bg-[#0f172a] py-3.5 text-sm font-bold text-white shadow-lg shadow-slate-200 transition-all hover:bg-slate-800 hover:scale-[1.01] active:scale-[0.99] disabled:opacity-70 flex items-center justify-center gap-2 cursor-pointer"
                             >
                                 {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CheckCircle className="h-5 w-5" />}
                                 <span>{isLoading ? 'Verifying...' : 'Login'}</span>
                             </button>
                             <div className="text-center">
-                                <button onClick={handleSendCode} className="text-xs text-indigo-600 font-medium hover:underline py-2">
+                                <button onClick={handleSendCode} className="text-xs text-[#0f172a] font-medium hover:underline py-2">
                                     Resend Code
                                 </button>
                             </div>
@@ -267,7 +272,7 @@ export default function LoginPage() {
 
             </div>
 
-            <div className="relative z-10 mt-8 text-center text-sm text-slate-500 hover:text-indigo-600 transition-colors">
+            <div className="relative z-10 mt-8 text-center text-sm text-slate-500 hover:text-slate-800 transition-colors">
                 <Link href="/" className="flex items-center justify-center gap-2">
                     <span>← Return to Home</span>
                 </Link>

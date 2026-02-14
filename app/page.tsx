@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { usePrivy } from '@privy-io/react-auth';
 import SiteFooter from './components/SiteFooter';
-import { Rocket, Menu, X, ArrowRight, ArrowDown, ChevronRight, Search, LogOut, LayoutDashboard, User } from 'lucide-react';
+import { Rocket, Menu, X, ArrowRight, ArrowDown, ChevronRight, Search, LogOut, LayoutDashboard, User, Loader2 } from 'lucide-react';
 
 /* ─── Pixabay / Picsum (Reliable & Free) ─── */
 const img = (id: number, w = 1200) => `https://picsum.photos/id/${id}/${w}/${Math.floor(w * 0.6)}`;
@@ -55,6 +55,11 @@ export default function Home() {
     const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
     const [userMenuOpen, setUserMenuOpen] = useState(false);
     const [profile, setProfile] = useState<any>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
     const heroRef = useRef<HTMLElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
@@ -70,10 +75,11 @@ export default function Home() {
         }
     }, [address]);
 
-    // Close menu on outside click
+    // Close menus on outside click
     useEffect(() => {
         const handleClick = (e: MouseEvent) => {
             if (menuRef.current && !menuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
         };
         document.addEventListener('mousedown', handleClick);
         return () => document.removeEventListener('mousedown', handleClick);
@@ -84,6 +90,37 @@ export default function Home() {
     const handleLogout = async () => {
         setUserMenuOpen(false);
         await logout();
+    };
+
+    // Search functionality
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (query.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+        setIsSearching(true);
+        try {
+            const res = await fetch(`/api/creators`);
+            const creators = await res.json();
+            const filtered = creators.filter((c: any) =>
+                c.name?.toLowerCase().includes(query.toLowerCase()) ||
+                c.username?.toLowerCase().includes(query.toLowerCase()) ||
+                c.bio?.toLowerCase().includes(query.toLowerCase())
+            );
+            setSearchResults(filtered.slice(0, 5)); // Show max 5 results
+        } catch (error) {
+            console.error('Search error:', error);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleCreatorClick = (creator: any) => {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        router.push(`/${creator.username || creator.address}`);
     };
 
     useEffect(() => {
@@ -124,16 +161,77 @@ export default function Home() {
                     <span className={`text-xl font-bold tracking-tight transition-colors duration-500 ${scrolled ? 'text-slate-900' : 'text-white'}`}>Backr</span>
                 </div>
                 <div className={`hidden md:flex items-center gap-8 transition-colors duration-500 ${scrolled ? 'text-slate-600' : 'text-white/80'}`}>
+                    <div className="relative" ref={searchRef}>
+                        <button
+                            onClick={() => setSearchOpen(!searchOpen)}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all hover:-translate-y-0.5 ${scrolled ? 'bg-slate-100 text-slate-900' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}
+                        >
+                            <Search size={16} />
+                        </button>
+                        {searchOpen && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden p-2 z-50 animate-fade-in-up">
+                                <input
+                                    type="text"
+                                    placeholder="Search creators..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                    autoFocus
+                                />
+                                {searchQuery.length >= 2 && (
+                                    <div className="mt-2 border-t border-slate-100 pt-2">
+                                        {isSearching ? (
+                                            <div className="flex items-center justify-center py-4 text-slate-500">
+                                                <Loader2 size={20} className="animate-spin" />
+                                            </div>
+                                        ) : searchResults.length > 0 ? (
+                                            searchResults.map((creator: any) => (
+                                                <button
+                                                    key={creator.address}
+                                                    onClick={() => handleCreatorClick(creator)}
+                                                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-slate-50 rounded-xl transition-colors"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+                                                        {creator.profileImage || creator.avatarUrl ? (
+                                                            <img src={creator.profileImage || creator.avatarUrl} alt={creator.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <User size={18} />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-slate-900 text-sm truncate">{creator.name}</p>
+                                                        {creator.username && (
+                                                            <p className="text-xs text-slate-500 truncate">@{creator.username}</p>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="py-4 text-center text-slate-500 text-sm">
+                                                No creators found
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
                     <button onClick={() => router.push('/explore')} className="font-medium hover:opacity-100 opacity-80 transition-opacity">Explore</button>
                     <button onClick={() => router.push('/dashboard')} className="font-medium hover:opacity-100 opacity-80 transition-opacity">Creators</button>
                     {authenticated ? (
                         <div className="relative" ref={menuRef}>
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 ${scrolled ? 'bg-slate-100 text-slate-900' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 ${scrolled ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}
                             >
-                                <User size={16} />
-                                {displayName}
+                                <div className="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    {(profile?.avatarUrl || profile?.profileImage) ? (
+                                        <img src={profile.avatarUrl || profile.profileImage} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={14} className={scrolled ? 'text-slate-600' : 'text-white'} />
+                                    )}
+                                </div>
+                                <span className="pr-1">{displayName}</span>
                             </button>
                             {userMenuOpen && (
                                 <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden py-2 z-50 animate-fade-in-up">
@@ -191,15 +289,19 @@ export default function Home() {
                             <div className="h-px bg-slate-100 my-2" />
                             {authenticated ? (
                                 <>
-                                    <div className="flex items-center gap-3 p-4">
-                                        <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold">
-                                            <User size={20} />
+                                    <button onClick={() => { router.push('/dashboard'); setMobileMenuOpen(false); }} className="flex items-center gap-3 p-4 w-full text-left hover:bg-slate-50 rounded-2xl transition-colors">
+                                        <div className="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+                                            {(profile?.avatarUrl || profile?.profileImage) ? (
+                                                <img src={profile.avatarUrl || profile.profileImage} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <User size={24} />
+                                            )}
                                         </div>
                                         <div>
                                             <p className="font-bold text-slate-900">{displayName}</p>
                                             <p className="text-xs text-slate-500 font-medium">Logged in</p>
                                         </div>
-                                    </div>
+                                    </button>
                                     <button onClick={() => { router.push('/dashboard/settings'); setMobileMenuOpen(false); }} className="p-4 text-lg font-medium text-left hover:bg-slate-50 rounded-2xl transition-colors text-slate-600">
                                         Settings
                                     </button>

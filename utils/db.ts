@@ -12,6 +12,7 @@ const initDb = async () => {
         await client.query(`
             CREATE TABLE IF NOT EXISTS creators (
                 address TEXT PRIMARY KEY,
+                username TEXT UNIQUE,
                 name TEXT,
                 bio TEXT,
                 description TEXT,
@@ -25,6 +26,10 @@ const initDb = async () => {
                 "createdAt" TIMESTAMP DEFAULT NOW(),
                 "updatedAt" TIMESTAMP DEFAULT NOW()
             );
+            
+            -- Add username column if it doesn't exist (for existing tables)
+            ALTER TABLE creators
+            ADD COLUMN IF NOT EXISTS username TEXT UNIQUE;
 
             CREATE TABLE IF NOT EXISTS tiers (
                 id TEXT PRIMARY KEY,
@@ -111,16 +116,23 @@ export const db = {
             const res = await pool.query('SELECT * FROM creators WHERE address = $1', [address]);
             return res.rows[0];
         },
+        findByUsername: async (username: string) => {
+            const res = await pool.query('SELECT * FROM creators WHERE LOWER(username) = LOWER($1)', [username]);
+            return res.rows[0];
+        },
         create: async (creator: any) => {
-            const { address, name, bio, profileImage, coverImage, email } = creator;
+            const { address, username, name, bio, profileImage, coverImage, email, avatarUrl } = creator;
+            // Sync avatar fields for compatibility across different components
+            const finalAvatar = avatarUrl || profileImage || '';
+
             const query = `
-                INSERT INTO creators (address, name, bio, "profileImage", "coverImage", email, "updatedAt")
-                VALUES ($1, $2, $3, $4, $5, $6, NOW())
-                ON CONFLICT (address) DO UPDATE 
-                SET name = $2, bio = $3, "profileImage" = $4, "coverImage" = $5, email = $6, "updatedAt" = NOW()
+                INSERT INTO creators (address, username, name, bio, "profileImage", "coverImage", email, "avatarUrl", "updatedAt")
+                VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+                ON CONFLICT (address) DO UPDATE
+                SET username = $2, name = $3, bio = $4, "profileImage" = $5, "coverImage" = $6, email = $7, "avatarUrl" = $8, "updatedAt" = NOW()
                 RETURNING *;
             `;
-            const res = await pool.query(query, [address, name, bio, profileImage, coverImage, email]);
+            const res = await pool.query(query, [address, username, name, bio, finalAvatar, coverImage, email, finalAvatar]);
             return res.rows[0];
         },
         updateSocials: async (address: string, socials: any) => {

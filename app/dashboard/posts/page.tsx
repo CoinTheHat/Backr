@@ -6,6 +6,7 @@ import Card from '../../components/Card';
 import SectionHeader from '../../components/SectionHeader';
 import Input from '../../components/Input';
 import Dropdown from '../../components/Dropdown';
+import ImageUpload from '../../components/ImageUpload';
 import { usePrivy } from '@privy-io/react-auth';
 import { useRouter } from 'next/navigation';
 
@@ -204,14 +205,13 @@ export default function PostsPage() {
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
                                 <Card padding="lg">
                                     <h3 className="text-h3" style={{ marginBottom: '16px' }}>Media</h3>
-                                    {postImage ? (
-                                        <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--color-border)', height: '200px' }}>
-                                            <img src={postImage} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                            <Button size="sm" variant="danger" style={{ position: 'absolute', top: 12, right: 12 }} onClick={() => setPostImage('')}>Remove</Button>
-                                        </div>
-                                    ) : (
-                                        <div onClick={() => { const url = prompt('Enter Image URL'); if (url) setPostImage(url); }} style={{ height: '120px', border: '2px dashed var(--color-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }} className="hover-border-primary">📸 Add Cover Image</div>
-                                    )}
+                                    <ImageUpload
+                                        bucket="posts"
+                                        value={postImage}
+                                        onChange={setPostImage}
+                                        aspectRatio="video"
+                                        helperText="Recommended: 16:9 aspect ratio. Max 5MB."
+                                    />
                                     <div style={{ marginTop: '16px' }}><label className="text-caption" style={{ fontWeight: 600 }}>TEASER</label><textarea placeholder="Public hook..." value={teaser} onChange={(e) => setTeaser(e.target.value)} style={{ width: '100%', padding: '12px', marginTop: '8px', borderRadius: 'var(--radius-md)', border: '1px solid var(--color-border)', minHeight: '80px' }} /></div>
                                 </Card>
                                 <Card padding="none" style={{ overflow: 'hidden' }}>
