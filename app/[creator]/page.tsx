@@ -98,8 +98,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                         .then(res => res.json())
                         .then(data => { if (Array.isArray(data)) setCreatorTiers(data); });
 
-                    // 3. Fetch Posts using REAL address
-                    fetch(`/api/posts?address=${realAddress}`)
+                    // 3. Fetch Posts using REAL address and viewer address for unlocking content
+                    const viewerParam = address ? `&viewer=${address}` : '';
+                    fetch(`/api/posts?address=${realAddress}${viewerParam}`)
                         .then(res => res.json())
                         .then(data => setPosts(data));
 

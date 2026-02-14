@@ -4,14 +4,62 @@ import { db } from '@/utils/db';
 export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
+    const viewer = searchParams.get('viewer');
 
     if (address) {
         const posts = await db.posts.getByCreator(address);
-        return NextResponse.json(posts);
+
+        // Determine access level
+        let hasAccess = false;
+
+        if (viewer && viewer.toLowerCase() === address.toLowerCase()) {
+            hasAccess = true; // Creator viewing own profile
+        } else if (viewer) {
+            // Check subscription
+            try {
+                const memberships = await db.memberships.getByUser(viewer);
+                const activeSubscription = memberships.find((m: any) =>
+                    m.creatorAddress.toLowerCase() === address.toLowerCase() &&
+                    new Date(m.expiresAt) > new Date()
+                );
+                if (activeSubscription) hasAccess = true;
+            } catch (error) {
+                console.error("Error checking subscription in posts API:", error);
+            }
+        }
+
+        // Filter/Sanitize posts
+        const sanitizedPosts = posts.map((post: any) => {
+            if (post.isPublic || hasAccess) {
+                return post;
+            }
+            // Locked content - Sanitize potentially sensitive data
+            return {
+                ...post,
+                content: "LOCKED",
+                image: null,
+                videoUrl: null,
+                // Keep title and other metadata for preview if needed
+            };
+        });
+
+        return NextResponse.json(sanitizedPosts);
     }
 
+    // Global feed - Default to safe (sanitize all non-public)
+    // To support global unlocking, we'd need more complex logic here.
+    // For now, assume global feed shows public context or sanitized previews.
     const posts = await db.posts.getAll();
-    return NextResponse.json(posts);
+    const sanitizedGlobalPosts = posts.map((post: any) => {
+        if (post.isPublic) return post;
+        return {
+            ...post,
+            content: "LOCKED",
+            image: null,
+            videoUrl: null
+        };
+    });
+    return NextResponse.json(sanitizedGlobalPosts);
 }
 
 export async function POST(request: Request) {
