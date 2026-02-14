@@ -11,6 +11,7 @@ import { useToast } from '../../components/Toast';
 import { useCommunity } from '../../context/CommunityContext';
 
 import { Copy, ExternalLink, Save, RefreshCw, Trash2, Info, Wallet } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 export default function SettingsPage() {
     const { user } = usePrivy();
@@ -22,9 +23,8 @@ export default function SettingsPage() {
     const [username, setUsername] = useState('');
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
-    const [avatarUrl, setAvatarUrl] = useState(''); // Avatar/Profile picture URL
-    const [profileImage, setProfileImage] = useState(''); // URL for now
-    const [coverImage, setCoverImage] = useState(''); // URL for now
+    const [avatarUrl, setAvatarUrl] = useState('');
+    const [coverImage, setCoverImage] = useState('');
     const [email, setEmail] = useState('');
 
     const [isLoading, setIsLoading] = useState(false);
@@ -35,16 +35,14 @@ export default function SettingsPage() {
         if (address) {
             setIsLoading(true);
             const fetchData = async () => {
-                // Fetch from JSON/Supabase (using existing API)
                 try {
                     const res = await fetch(`/api/creators?address=${address}`);
                     const data = await res.json();
-                    if (data) {
+                    if (data && data.address) {
                         setUsername(data.username || '');
                         setName(data.name || '');
                         setAvatarUrl(data.avatarUrl || data.profileImage || '');
                         setBio(data.bio || '');
-                        setProfileImage(data.profileImage || data.avatarUrl || '');
                         setCoverImage(data.coverImage || '');
                         setEmail(data.email || '');
                     }
@@ -59,14 +57,27 @@ export default function SettingsPage() {
     }, [address]);
 
     const handleSave = async () => {
-        if (!name) return addToast("Name is required", 'error');
-        if (!username) return addToast("Username is required", 'error');
+        console.log("handleSave called");
+        if (!address) {
+            alert("No wallet connected");
+            return;
+        }
+        if (!name) {
+            alert("Name is required");
+            return addToast("Name is required", 'error');
+        }
+        if (!username) {
+            alert("Username is required");
+            return addToast("Username is required", 'error');
+        }
         if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) {
+            alert("Username must be 3-20 characters, letters, numbers, and underscores only");
             return addToast("Username must be 3-20 characters, letters, numbers, and underscores only", 'error');
         }
 
         setIsSaving(true);
         try {
+            console.log("Sending data to API:", { address, username, name, bio, avatarUrl, coverImage, email });
             // Save to JSON/Supabase via API
             const res = await fetch('/api/creators', {
                 method: 'POST', // or PUT
@@ -82,14 +93,24 @@ export default function SettingsPage() {
                 })
             });
 
+            console.log("API Response:", res.status);
             if (res.ok) {
-                addToast("Profile updated successfully", 'success');
-                refreshData();
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+                addToast("Kayıt Başarılı / Saved Successfully!", 'success');
+                if (refreshData) refreshData();
             } else {
+                const err = await res.json();
+                console.error("API Error:", err);
+                alert("Failed to update profile: " + (err.error || 'Unknown error'));
                 addToast("Failed to update profile", 'error');
             }
-        } catch (e) {
-            console.error(e);
+        } catch (e: any) {
+            console.error("Save Error:", e);
+            alert("Error saving profile: " + e.message);
             addToast("Error saving profile", 'error');
         } finally {
             setIsSaving(false);
@@ -159,7 +180,6 @@ export default function SettingsPage() {
                                 onChange={e => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                                 helperText="3-20 characters, letters, numbers, and underscores only. This will be your unique profile URL."
                                 containerStyle={{ gridColumn: 'span 2' }}
-                                disabled={true} // Usernames are usually permanent for now
                             />
                             <Input
                                 label="Display Name"

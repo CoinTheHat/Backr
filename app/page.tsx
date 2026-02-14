@@ -101,14 +101,9 @@ export default function Home() {
         }
         setIsSearching(true);
         try {
-            const res = await fetch(`/api/creators`);
-            const creators = await res.json();
-            const filtered = creators.filter((c: any) =>
-                c.name?.toLowerCase().includes(query.toLowerCase()) ||
-                c.username?.toLowerCase().includes(query.toLowerCase()) ||
-                c.bio?.toLowerCase().includes(query.toLowerCase())
-            );
-            setSearchResults(filtered.slice(0, 5)); // Show max 5 results
+            const res = await fetch(`/api/creators?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            setSearchResults(Array.isArray(data) ? data.slice(0, 5) : []);
         } catch (error) {
             console.error('Search error:', error);
         } finally {
@@ -222,22 +217,22 @@ export default function Home() {
                         <div className="relative" ref={menuRef}>
                             <button
                                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 ${scrolled ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}
+                                className={`flex items-center gap-1.5 px-2 py-1 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 ${scrolled ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'bg-white/15 backdrop-blur-md text-white border border-white/20'}`}
                             >
-                                <div className="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                <div className="w-6 h-6 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0">
                                     {(profile?.avatarUrl || profile?.profileImage) ? (
                                         <img src={profile.avatarUrl || profile.profileImage} alt="" className="w-full h-full object-cover" />
                                     ) : (
-                                        <User size={14} className={scrolled ? 'text-slate-600' : 'text-white'} />
+                                        <User size={12} className={scrolled ? 'text-slate-600' : 'text-white'} />
                                     )}
                                 </div>
-                                <span className="pr-1">{displayName}</span>
+                                <span className="pr-0.5">{displayName}</span>
                             </button>
                             {userMenuOpen && (
-                                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden py-2 z-50 animate-fade-in-up">
+                                <div className="absolute right-0 mt-2 w-44 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden py-2 z-50 animate-fade-in-up">
                                     <button
                                         onClick={() => { setUserMenuOpen(false); router.push('/dashboard'); }}
-                                        className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
                                     >
                                         <LayoutDashboard size={16} className="text-slate-400" />
                                         Creator Studio
@@ -245,7 +240,7 @@ export default function Home() {
                                     <div className="h-px bg-slate-100 mx-3" />
                                     <button
                                         onClick={handleLogout}
-                                        className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors"
+                                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors"
                                     >
                                         <LogOut size={16} />
                                         Çıkış Yap

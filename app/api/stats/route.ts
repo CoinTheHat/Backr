@@ -29,42 +29,74 @@ export async function GET(request: Request) {
 
         // 2. Calculate Revenue
         const tiers = await db.tiers.getByCreator(creatorAddress);
+        const tips = await db.tips.getByReceiver(creatorAddress);
 
         let totalRevenue = 0;
 
+        // Add Tip Revenue
+        if (tips) {
+            tips.forEach((t: any) => {
+                totalRevenue += parseFloat(t.amount || '0');
+            });
+        }
+
+        // Add Subscription Revenue
         if (tiers && validSubs.length > 0) {
             validSubs.forEach((sub: any) => {
                 // TierID is string in our DB but might be mapped from index in frontend previously.
-                // We check if tiers have numeric prices.
                 // Simple Match:
                 const tier = tiers.find((t: any) => String(t.id) === String(sub.tierId));
                 if (tier) {
                     totalRevenue += parseFloat(tier.price || '0');
+                } else if (!isNaN(Number(sub.tierId)) && tiers[Number(sub.tierId)]) {
+                    // Fallback for index-based IDs (0, 1, 2)
+                    totalRevenue += parseFloat(tiers[Number(sub.tierId)].price || '0');
                 } else if (sub.tierName) {
-                    // Fallback
                     const t = tiers.find((t: any) => t.name === sub.tierName);
                     if (t) totalRevenue += parseFloat(t.price || '0');
-                } else {
-                    // Try index based fallback if tiers are ordered?
-                    // Not reliable in DB. Assume 0.
                 }
             });
         }
 
-        // 3. Generate Synthetic History (for Chart)
-        const history = [];
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-        const currentMonth = now.getMonth();
+        // 3. Generate Real History
+        const historyMap: { [key: string]: number } = {};
+        const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
+        // Initialize last 6 months
         for (let i = 5; i >= 0; i--) {
-            const d = new Date(now.getFullYear(), currentMonth - i, 1);
-            const rev = (i === 0) ? totalRevenue : 0; // Simple logic from original
+            const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+            historyMap[key] = 0;
+        }
 
-            history.push({
-                name: months[d.getMonth()],
-                revenue: parseFloat(rev.toFixed(2))
+        // Add Tips to history
+        if (tips) {
+            tips.forEach((t: any) => {
+                const d = new Date(t.timestamp);
+                const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+                if (historyMap[key] !== undefined) {
+                    historyMap[key] += parseFloat(t.amount || '0');
+                }
             });
         }
+
+        // Add Subscriptions to history (estimate based on current tier price)
+        validSubs.forEach((sub: any) => {
+            const d = new Date(sub.createdAt);
+            const key = `${months[d.getMonth()]} ${d.getFullYear()}`;
+            if (historyMap[key] !== undefined) {
+                const tier = tiers.find((t: any) => String(t.id) === String(sub.tierId));
+                // totalRevenue is already calculated for current active subs.
+                // This loop is for historical revenue distribution.
+                const price = tier ? parseFloat(tier.price || '0') : 0;
+                historyMap[key] += price;
+            }
+        });
+
+        const history = Object.keys(historyMap).map(key => ({
+            name: key.split(' ')[0], // Just show month name for display
+            revenue: parseFloat(historyMap[key].toFixed(2))
+        }));
 
         // 4. Checklist Data
         const creatorProfile = await db.creators.find(creatorAddress);

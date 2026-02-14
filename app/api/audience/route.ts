@@ -56,7 +56,8 @@ export async function GET(request: Request) {
                 tierName: matchedTier?.name || `Tier ${sub.tierId}`,
                 price: matchedTier?.price || '-',
                 subscriberName: profile?.name,
-                subscriberAvatar: profile?.avatarUrl || profile?.profileImage
+                subscriberAvatar: profile?.avatarUrl || profile?.profileImage,
+                status: new Date(sub.expiresAt) > new Date() ? 'Active' : 'Expired'
             };
         });
 

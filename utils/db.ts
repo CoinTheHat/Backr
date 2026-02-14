@@ -61,8 +61,13 @@ const initDb = async () => {
                 amount NUMERIC,
                 currency TEXT,
                 message TEXT,
+                "txHash" TEXT,
                 timestamp TIMESTAMP DEFAULT NOW()
             );
+
+            -- Add txHash column if it doesn't exist (for existing tables)
+            ALTER TABLE tips
+            ADD COLUMN IF NOT EXISTS "txHash" TEXT;
 
             CREATE TABLE IF NOT EXISTS memberships (
                 id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -70,9 +75,14 @@ const initDb = async () => {
                 "creatorAddress" TEXT REFERENCES creators(address),
                 "tierId" INTEGER,
                 "expiresAt" TIMESTAMP,
+                "txHash" TEXT,
                 "createdAt" TIMESTAMP DEFAULT NOW(),
                 "updatedAt" TIMESTAMP DEFAULT NOW()
             );
+
+            -- Add txHash column if it doesn't exist (for existing tables)
+            ALTER TABLE memberships
+            ADD COLUMN IF NOT EXISTS "txHash" TEXT;
 
             CREATE TABLE IF NOT EXISTS categories (
                 id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -113,7 +123,7 @@ export const db = {
             return res.rows;
         },
         find: async (address: string) => {
-            const res = await pool.query('SELECT * FROM creators WHERE address = $1', [address]);
+            const res = await pool.query('SELECT * FROM creators WHERE address = $1', [address.toLowerCase()]);
             return res.rows[0];
         },
         findByUsername: async (username: string) => {
@@ -129,17 +139,25 @@ export const db = {
                 INSERT INTO creators (address, username, name, bio, "profileImage", "coverImage", email, "avatarUrl", "updatedAt")
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
                 ON CONFLICT (address) DO UPDATE
-                SET username = $2, name = $3, bio = $4, "profileImage" = $5, "coverImage" = $6, email = $7, "avatarUrl" = $8, "updatedAt" = NOW()
+                SET 
+                    username = $2, 
+                    name = COALESCE(NULLIF($3, ''), creators.name), 
+                    bio = COALESCE(NULLIF($4, ''), creators.bio), 
+                    "profileImage" = CASE WHEN $5 <> '' THEN $5 ELSE creators."profileImage" END,
+                    "coverImage" = CASE WHEN $6 <> '' THEN $6 ELSE creators."coverImage" END,
+                    email = COALESCE(NULLIF($7, ''), creators.email), 
+                    "avatarUrl" = CASE WHEN $8 <> '' THEN $8 ELSE creators."avatarUrl" END,
+                    "updatedAt" = NOW()
                 RETURNING *;
             `;
-            const res = await pool.query(query, [address, username, name, bio, finalAvatar, coverImage, email, finalAvatar]);
+            const res = await pool.query(query, [address.toLowerCase(), username, name, bio, finalAvatar, coverImage, email, finalAvatar]);
             return res.rows[0];
         },
         updateSocials: async (address: string, socials: any) => {
             const query = `
                 UPDATE creators 
                 SET socials = $2, "updatedAt" = NOW()
-                WHERE address = $1
+                WHERE LOWER(address) = LOWER($1)
                 RETURNING *;
             `;
             const res = await pool.query(query, [address, socials]);
@@ -148,17 +166,17 @@ export const db = {
     },
     tiers: {
         getByCreator: async (address: string) => {
-            const res = await pool.query('SELECT * FROM tiers WHERE "creatorAddress" = $1', [address]);
+            const res = await pool.query('SELECT * FROM tiers WHERE LOWER("creatorAddress") = LOWER($1)', [address]);
             return res.rows;
         },
         saveAll: async (address: string, newTiers: any[]) => {
             const client = await pool.connect();
             try {
                 await client.query('BEGIN');
-                await client.query('DELETE FROM tiers WHERE "creatorAddress" = $1', [address]);
+                await client.query('DELETE FROM tiers WHERE LOWER("creatorAddress") = LOWER($1)', [address]);
                 for (const tier of newTiers) {
                     await client.query(
-                        'INSERT INTO tiers (id, "creatorAddress", name, price, description, perks, image) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                        'INSERT INTO tiers (id, "creatorAddress", name, price, description, perks, image) VALUES ($1, LOWER($2), $3, $4, $5, $6, $7)',
                         [tier.id || Math.random().toString(36).substr(2, 9), address, tier.name, tier.price, tier.description, JSON.stringify(tier.perks), tier.image]
                     );
                 }
@@ -177,7 +195,7 @@ export const db = {
             return res.rows;
         },
         getByCreator: async (address: string) => {
-            const res = await pool.query('SELECT * FROM posts WHERE "creatorAddress" = $1 ORDER BY "createdAt" DESC', [address]);
+            const res = await pool.query('SELECT * FROM posts WHERE LOWER("creatorAddress") = LOWER($1) ORDER BY "createdAt" DESC', [address]);
             return res.rows;
         },
         getById: async (id: string) => {
@@ -191,7 +209,7 @@ export const db = {
                 RETURNING *;
             `;
             const res = await pool.query(query, [
-                post.creatorAddress, post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
+                post.creatorAddress.toLowerCase(), post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
             ]);
             return res.rows[0];
         },
@@ -301,20 +319,27 @@ export const db = {
             return res.rows;
         },
         getByReceiver: async (address: string) => {
-            const res = await pool.query('SELECT * FROM tips WHERE receiver = $1 ORDER BY timestamp DESC', [address]);
+            const res = await pool.query('SELECT * FROM tips WHERE LOWER(receiver) = LOWER($1) ORDER BY timestamp DESC', [address]);
             return res.rows;
         },
         getBySender: async (address: string) => {
-            const res = await pool.query('SELECT * FROM tips WHERE sender = $1 ORDER BY timestamp DESC', [address]);
+            const res = await pool.query('SELECT * FROM tips WHERE LOWER(sender) = LOWER($1) ORDER BY timestamp DESC', [address]);
             return res.rows;
         },
         create: async (tip: any) => {
             const query = `
-                INSERT INTO tips (sender, receiver, amount, currency, message, timestamp)
-                VALUES ($1, $2, $3, $4, $5, NOW())
+                INSERT INTO tips (sender, receiver, amount, currency, message, "txHash", timestamp)
+                VALUES ($1, $2, $3, $4, $5, $6, NOW())
                 RETURNING *;
             `;
-            const res = await pool.query(query, [tip.sender, tip.receiver, tip.amount, tip.currency, tip.message]);
+            const res = await pool.query(query, [
+                tip.sender.toLowerCase(),
+                tip.receiver.toLowerCase(),
+                tip.amount,
+                tip.currency || 'USDC',
+                tip.message,
+                tip.txHash || null
+            ]);
             return res.rows[0];
         }
     },
@@ -324,27 +349,33 @@ export const db = {
             return res.rows;
         },
         getByUser: async (address: string) => {
-            const res = await pool.query('SELECT * FROM memberships WHERE "userAddress" = $1', [address]);
+            const query = `
+                SELECT m.*, c.name as "creatorName", c.username as "creatorUsername", c."avatarUrl" as "creatorAvatar", c."profileImage" as "creatorProfileImage"
+                FROM memberships m
+                LEFT JOIN creators c ON m."creatorAddress" = c.address
+                WHERE m."userAddress" = $1
+                ORDER BY m."createdAt" DESC
+            `;
+            const res = await pool.query(query, [address.toLowerCase()]);
             return res.rows;
         },
         getByCreator: async (address: string) => {
-            const res = await pool.query('SELECT * FROM memberships WHERE "creatorAddress" = $1', [address]);
+            const res = await pool.query('SELECT * FROM memberships WHERE LOWER("creatorAddress") = LOWER($1)', [address]);
             return res.rows;
         },
         create: async (membership: any) => {
             const query = `
-                INSERT INTO memberships ("userAddress", "creatorAddress", "tierId", "expiresAt", "createdAt", "updatedAt")
-                VALUES ($1, $2, $3, $4, NOW(), NOW())
-                ON CONFLICT DO NOTHING
-                RETURNING *; 
-            `;
-            // Simple insert as fallback
-            const insertQuery = `
-                INSERT INTO memberships ("userAddress", "creatorAddress", "tierId", "expiresAt", "createdAt", "updatedAt")
-                VALUES ($1, $2, $3, $4, NOW(), NOW())
+                INSERT INTO memberships ("userAddress", "creatorAddress", "tierId", "expiresAt", "txHash", "createdAt", "updatedAt")
+                VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
                 RETURNING *;
             `;
-            const res = await pool.query(insertQuery, [membership.userAddress, membership.creatorAddress, membership.tierId, membership.expiresAt]);
+            const res = await pool.query(query, [
+                membership.userAddress.toLowerCase(),
+                membership.creatorAddress.toLowerCase(),
+                membership.tierId,
+                membership.expiresAt,
+                membership.txHash || null
+            ]);
             return res.rows[0];
         }
     }

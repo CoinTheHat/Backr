@@ -1,18 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Button from '../components/Button';
 import BrandLogo from '../components/BrandLogo';
 import WalletButton from '../components/WalletButton';
 import { usePrivy } from '@privy-io/react-auth';
+import { Search, Loader2, User } from 'lucide-react';
 
 export default function SupporterLayout({ children }: { children: React.ReactNode }) {
     const router = useRouter();
     const pathname = usePathname();
     const { authenticated: isConnected } = usePrivy();
+
+    // Search State (matching main page)
+    const [searchOpen, setSearchOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchFocused, setSearchFocused] = useState(false);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
 
     const navItems = [
         { label: 'Explore', path: '/explore' },
@@ -20,12 +26,39 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
         { label: 'My Memberships', path: '/memberships' },
     ];
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        if (searchQuery.trim()) {
-            router.push(`/explore?q=${encodeURIComponent(searchQuery.trim())}`);
-            setSearchQuery('');
+    // Close search on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (query.length < 2) {
+            setSearchResults([]);
+            return;
         }
+        setIsSearching(true);
+        try {
+            const res = await fetch(`/api/creators?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            setSearchResults(Array.isArray(data) ? data.slice(0, 5) : []);
+        } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleCreatorClick = (creator: any) => {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        router.push(`/${creator.username || creator.address}`);
     };
 
     return (
@@ -76,12 +109,10 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                 @media (max-width: 768px) {
                     .desktop-nav { display: none !important; }
                     .mobile-bottom-nav { display: flex !important; }
-                    .nav-search { display: none !important; } /* Hide search on mobile header to save space, maybe move to explore page layout or show icon */
+                    .nav-search { display: none !important; } 
                     
                     /* Adjust padding for bottom nav */
                     main { padding-bottom: 80px !important; }
-                    
-                    /* Search icon toggle for mobile could be added here later */
                 }
             `}} />
 
@@ -114,40 +145,61 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                     </div>
                 </div>
 
-                {/* Center: Search Bar (Desktop Only) */}
-                <div className="nav-search" style={{ flex: '0 1 400px', maxWidth: '400px', display: 'flex' }}>
-                    <form onSubmit={handleSearch} style={{ width: '100%', position: 'relative' }}>
-                        <span style={{
-                            position: 'absolute',
-                            left: '16px',
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            fontSize: '1rem',
-                            color: searchFocused ? 'var(--color-brand-blue)' : 'var(--color-text-tertiary)',
-                            transition: 'color 0.2s'
-                        }}>
-                            🔍
-                        </span>
-                        <input
-                            type="text"
-                            placeholder="Find creators..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onFocus={() => setSearchFocused(true)}
-                            onBlur={() => setSearchFocused(false)}
-                            className="search-input"
-                            style={{
-                                width: '100%',
-                                background: 'var(--color-bg-page)',
-                                border: '1px solid var(--color-border)',
-                                padding: '10px 16px 10px 44px',
-                                borderRadius: 'var(--radius-full)',
-                                color: 'var(--color-text-primary)',
-                                fontSize: '0.9rem',
-                                outline: 'none'
-                            }}
-                        />
-                    </form>
+                {/* Center: Search Bar (Replaced with Main Page Expandable Button) */}
+                <div className="nav-search relative" ref={searchRef}>
+                    <button
+                        onClick={() => setSearchOpen(!searchOpen)}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium transition-all hover:-translate-y-0.5 bg-slate-100 text-slate-900 border border-slate-200`}
+                    >
+                        <Search size={16} />
+                    </button>
+                    {searchOpen && (
+                        <div className="absolute top-12 left-1/2 -translate-x-1/2 w-80 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden p-2 z-50 animate-fade-in-up">
+                            <input
+                                type="text"
+                                placeholder="Search creators..."
+                                value={searchQuery}
+                                onChange={(e) => handleSearch(e.target.value)}
+                                className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                autoFocus
+                            />
+                            {searchQuery.length >= 2 && (
+                                <div className="mt-2 border-t border-slate-100 pt-2">
+                                    {isSearching ? (
+                                        <div className="flex items-center justify-center py-4 text-slate-500">
+                                            <Loader2 size={20} className="animate-spin" />
+                                        </div>
+                                    ) : searchResults.length > 0 ? (
+                                        searchResults.map((creator: any) => (
+                                            <button
+                                                key={creator.address}
+                                                onClick={() => handleCreatorClick(creator)}
+                                                className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-slate-50 rounded-xl transition-colors"
+                                            >
+                                                <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+                                                    {creator.profileImage || creator.avatarUrl ? (
+                                                        <img src={creator.profileImage || creator.avatarUrl} alt={creator.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        <User size={18} />
+                                                    )}
+                                                </div>
+                                                <div className="flex-1 min-w-0">
+                                                    <p className="font-bold text-slate-900 text-sm truncate">{creator.name}</p>
+                                                    {creator.username && (
+                                                        <p className="text-xs text-slate-500 truncate">@{creator.username}</p>
+                                                    )}
+                                                </div>
+                                            </button>
+                                        ))
+                                    ) : (
+                                        <div className="py-4 text-center text-slate-500 text-sm">
+                                            No creators found
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Right: Actions */}
@@ -181,8 +233,6 @@ export default function SupporterLayout({ children }: { children: React.ReactNod
                     )}
 
                     <WalletButton />
-
-                    {/* Mobile Only: Menu Toggle (if needed, but using bottom bar instead) */}
                 </div>
             </nav>
 

@@ -1,11 +1,13 @@
 'use client';
 
 import { useState } from 'react';
+import { usePrivy } from '@privy-io/react-auth';
 import { useSend } from '../hooks/useSend';
 import Button from './Button';
 import Input from './Input';
-import { Coffee, Send, X } from 'lucide-react';
+import { Coffee, Send, X, AlertCircle } from 'lucide-react';
 import { createPortal } from 'react-dom';
+import confetti from 'canvas-confetti';
 
 interface TipButtonProps {
     receiverAddress: string;
@@ -29,18 +31,45 @@ export default function TipButton({ receiverAddress, creatorName }: TipButtonPro
 }
 
 function TipModal({ receiverAddress, creatorName, onClose }: { receiverAddress: string, creatorName: string, onClose: () => void }) {
+    const { user } = usePrivy();
     const { send, isSending } = useSend();
     const [amount, setAmount] = useState('');
     const [message, setMessage] = useState('');
     const [step, setStep] = useState<'amount' | 'confirm' | 'success'>('amount');
+    const [error, setError] = useState<string | null>(null);
 
     const handleSend = async () => {
         if (!amount) return;
+        setError(null);
+
         try {
-            await send(receiverAddress, amount, message);
+            // 1. Send Transaction
+            const txHash = await send(receiverAddress, amount, message || `Tip for ${creatorName}`);
+
+            if (!txHash) throw new Error("Transaction failed");
+
+            // 2. Save Tip to DB
+            if (user?.wallet?.address) {
+                await fetch('/api/tips', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: user.wallet.address,
+                        receiver: receiverAddress,
+                        amount: amount,
+                        message: message,
+                        currency: 'USDC',
+                        txHash: txHash
+                    })
+                });
+            }
+
+            // 3. Success
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
             setStep('success');
-        } catch (e) {
-            // Error handled in hook
+        } catch (e: any) {
+            console.error(e);
+            setError(e.message || "Failed to send tip. Please try again.");
         }
     };
 
@@ -67,6 +96,13 @@ function TipModal({ receiverAddress, creatorName, onClose }: { receiverAddress: 
 
                 <h3 className="text-lg font-bold mb-1">Support {creatorName}</h3>
                 <p className="text-sm text-gray-500 mb-6">Send a tip on Tempo Network</p>
+
+                {error && (
+                    <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm flex items-center gap-2">
+                        <AlertCircle size={16} />
+                        {error}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-3 gap-3 mb-4">
                     {['1', '5', '10'].map((val) => (

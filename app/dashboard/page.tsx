@@ -31,10 +31,13 @@ export default function StudioOverview() {
         monthlyRecurring: 0,
         history: [],
     });
+    const [activity, setActivity] = useState<any[]>([]);
 
     useEffect(() => {
         if (!address) return;
-        fetch(`/api/stats?creator=${address}`)
+
+        // Fetch Stats
+        fetch(`/api/stats?creator=${address.toLowerCase()}`)
             .then(res => res.json())
             .then(data => {
                 if (data) setStats({
@@ -45,7 +48,55 @@ export default function StudioOverview() {
                 });
             })
             .catch(err => console.error('Failed to fetch stats', err));
+
+        // Fetch Activity (Recent Tips)
+        fetch(`/api/tips?receiver=${address.toLowerCase()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const mappedTips = data.map(t => ({
+                        id: t.id,
+                        type: 'tip',
+                        title: 'New Tip Received',
+                        description: `Received ${t.amount} ${t.currency || 'USDC'} from ${t.sender.slice(0, 6)}...`,
+                        timestamp: new Date(t.timestamp),
+                        icon: <CheckCircle size={20} />,
+                        color: 'bg-emerald-50 text-emerald-600'
+                    }));
+                    setActivity(prev => [...prev, ...mappedTips].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 5));
+                }
+            })
+            .catch(err => console.error('Failed to fetch tips', err));
+
+        // Fetch Activity (Recent Subscriptions)
+        fetch(`/api/audience?creator=${address.toLowerCase()}`)
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    const mappedSubs = data.map(s => ({
+                        id: s.id,
+                        type: 'sub',
+                        title: 'New Member Joined',
+                        description: `${s.subscriberName || s.username || 'A supporter'} subscribed to your content`,
+                        timestamp: new Date(s.createdAt || s.startDate),
+                        icon: <UserPlus size={20} />,
+                        color: 'bg-blue-50 text-blue-600'
+                    }));
+                    setActivity(prev => [...prev, ...mappedSubs].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()).slice(0, 5));
+                }
+            })
+            .catch(err => console.error('Failed to fetch subscriptions', err));
+
     }, [address]);
+
+    const formatRelativeTime = (date: Date) => {
+        const now = new Date();
+        const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+        if (diffInSeconds < 60) return 'just now';
+        if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m ago`;
+        if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h ago`;
+        return date.toLocaleDateString();
+    };
 
     return (
         <div className="space-y-8">
@@ -138,43 +189,24 @@ export default function StudioOverview() {
                 </div>
 
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-100 divide-y divide-slate-50">
-
-                    {/* Mock Activity Item 1 */}
-                    <div className="p-5 flex items-center gap-5 hover:bg-slate-50 transition-colors cursor-pointer first:rounded-t-3xl last:rounded-b-3xl">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-                            <UserPlus size={20} />
+                    {activity.length > 0 ? (
+                        activity.map((item) => (
+                            <div key={item.id} className="p-5 flex items-center gap-5 hover:bg-slate-50 transition-colors cursor-pointer first:rounded-t-3xl last:rounded-b-3xl">
+                                <div className={`w-12 h-12 rounded-full ${item.color} flex items-center justify-center shrink-0`}>
+                                    {item.icon}
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-sm font-bold text-slate-900">{item.title}</p>
+                                    <p className="text-xs text-slate-500 mt-0.5">{item.description}</p>
+                                </div>
+                                <span className="text-xs font-bold text-slate-400">{formatRelativeTime(item.timestamp)}</span>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="p-10 text-center">
+                            <p className="text-slate-400">No recent activity found.</p>
                         </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-900">New Member Joined</p>
-                            <p className="text-xs text-slate-500 mt-0.5">A new supporter subscribed to <span className="text-primary font-medium">Silver Tier</span></p>
-                        </div>
-                        <span className="text-xs font-bold text-slate-400">2m ago</span>
-                    </div>
-
-                    {/* Mock Activity Item 2 */}
-                    <div className="p-5 flex items-center gap-5 hover:bg-slate-50 transition-colors cursor-pointer">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-                            <CheckCircle size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-900">Payout Processed</p>
-                            <p className="text-xs text-slate-500 mt-0.5">Withdrawal of <span className="text-slate-900 font-medium">$850.00</span> sent to wallet</p>
-                        </div>
-                        <span className="text-xs font-bold text-slate-400">1h ago</span>
-                    </div>
-
-                    {/* Mock Activity Item 3 */}
-                    <div className="p-5 flex items-center gap-5 hover:bg-slate-50 transition-colors cursor-pointer">
-                        <div className="w-12 h-12 rounded-full bg-violet-50 flex items-center justify-center text-primary shrink-0">
-                            <MessageSquare size={20} />
-                        </div>
-                        <div className="flex-1">
-                            <p className="text-sm font-bold text-slate-900">New Comment</p>
-                            <p className="text-xs text-slate-500 mt-0.5"><span className="text-slate-900 font-medium">Marcus Lee</span> commented on "Exclusive BTS"</p>
-                        </div>
-                        <span className="text-xs font-bold text-slate-400">3h ago</span>
-                    </div>
-
+                    )}
                 </div>
             </section>
         </div>

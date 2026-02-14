@@ -12,12 +12,14 @@ export default function WalletButton({
     className = '',
     style = {},
     size = 'md',
-    variant = 'primary'
+    variant = 'primary',
+    transparent = false
 }: {
     className?: string,
     style?: React.CSSProperties,
     size?: 'sm' | 'md' | 'lg',
-    variant?: 'primary' | 'secondary' | 'outline' | 'ghost'
+    variant?: 'primary' | 'secondary' | 'outline' | 'ghost',
+    transparent?: boolean
 }) {
     const { logout, authenticated, user, ready, login, createWallet } = usePrivy();
     // const { login } = useLogin(); // Removed to use standard privy login
@@ -80,9 +82,9 @@ export default function WalletButton({
 
     if (authenticated) {
         return (
-            <div className="flex items-center gap-2">
+            <div className={`flex items-center gap-2 ${className}`}>
                 <Button
-                    variant="outline"
+                    variant={transparent ? "ghost" : "outline"}
                     size={size}
                     onClick={async () => {
                         if (user?.wallet?.address) {
@@ -106,19 +108,19 @@ export default function WalletButton({
                             }
                         }
                     }}
-                    className="flex items-center gap-2 font-mono text-xs"
-                    style={{ ...style, borderColor: 'var(--color-border)' }}
+                    className={`flex items-center gap-2 font-mono text-xs ${transparent ? 'bg-black/20 text-white hover:bg-black/40 border border-white/20 backdrop-blur-md' : ''}`}
+                    style={{ ...style, borderColor: transparent ? 'rgba(255,255,255,0.2)' : 'var(--color-border)' }}
                 >
                     <span className={`w-2 h-2 rounded-full ${user?.wallet ? 'bg-emerald-500 animate-pulse' : 'bg-yellow-500'}`}></span>
                     {user?.wallet ? formatAddress(user.wallet.address) : (user?.email?.address || 'No Wallet')}
-                    {user?.wallet ? <Copy size={12} className="opacity-50" /> : <Plus size={12} className="opacity-50" />}
+                    {user?.wallet ? <Copy size={12} className={transparent ? "opacity-70" : "opacity-50"} /> : <Plus size={12} className={transparent ? "opacity-70" : "opacity-50"} />}
                 </Button>
 
                 <Button
                     variant="ghost"
                     size="sm"
                     onClick={logout}
-                    className="p-2 text-gray-400 hover:text-red-400"
+                    className={`p-2 ${transparent ? 'text-white/70 hover:text-white hover:bg-white/10' : 'text-gray-400 hover:text-red-400'}`}
                     title="Logout"
                 >
                     <LogOut size={16} />

@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { usePrivy } from '@privy-io/react-auth';
 import SiteFooter from '../components/SiteFooter';
-import { Rocket, Search, Music, Mic, Palette, Camera, Code, Utensils, Film, ChevronRight, ArrowRight, Users, Sparkles } from 'lucide-react';
+import { Rocket, Search, Music, Mic, Palette, Camera, Code, Utensils, Film, ChevronRight, ArrowRight, Users, Sparkles, User, LayoutDashboard, LogOut, Loader2 } from 'lucide-react';
 
 /* ─── Pixabay / Picsum (Reliable & Free) ─── */
 const img = (id: number, w = 800) => `https://picsum.photos/id/${id}/${w}/${Math.floor(w * 0.6)}`;
@@ -63,15 +64,45 @@ const ALL_CREATORS = [
 
 export default function Explore() {
     const router = useRouter();
+    const { user } = usePrivy();
+    const address = user?.wallet?.address;
+
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [activeFeatured, setActiveFeatured] = useState(0);
+    const [myMemberships, setMyMemberships] = useState<any[]>([]);
+    const [loadingMemberships, setLoadingMemberships] = useState(true);
 
     // Auto-rotate featured
     useEffect(() => {
         const timer = setInterval(() => setActiveFeatured(p => (p + 1) % FEATURED_CREATORS.length), 4000);
         return () => clearInterval(timer);
     }, []);
+
+    // Fetch My Memberships
+    useEffect(() => {
+        if (!address) {
+            setLoadingMemberships(false);
+            return;
+        }
+
+        const fetchMemberships = async () => {
+            try {
+                const res = await fetch(`/api/subscriptions?subscriber=${address}`);
+                const data = await res.json();
+                if (Array.isArray(data)) {
+                    // Unique creators only (in case multiple tiers for same creator)
+                    const unique = data.filter((v, i, a) => a.findIndex(t => (t.creatorAddress === v.creatorAddress)) === i);
+                    setMyMemberships(unique);
+                }
+            } catch (e) {
+                console.error("Failed to fetch memberships", e);
+            } finally {
+                setLoadingMemberships(false);
+            }
+        };
+        fetchMemberships();
+    }, [address]);
 
     const filteredCreators = selectedCategory === 'All'
         ? ALL_CREATORS
@@ -83,32 +114,268 @@ export default function Explore() {
 
     const featured = FEATURED_CREATORS[activeFeatured];
 
+    const [scrolled, setScrolled] = useState(false);
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [userMenuOpen, setUserMenuOpen] = useState(false);
+    const [membershipsOpen, setMembershipsOpen] = useState(false);
+    const [profile, setProfile] = useState<any>(null);
+    const [searchOpen, setSearchOpen] = useState(false);
+    const [searchResults, setSearchResults] = useState<any[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const menuRef = useRef<HTMLDivElement>(null);
+    const membershipsRef = useRef<HTMLDivElement>(null);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    // Close menus on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+            if (membershipsRef.current && !membershipsRef.current.contains(e.target as Node)) setMembershipsOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    // Fetch user profile
+    useEffect(() => {
+        if (address) {
+            fetch(`/api/creators?address=${address}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.address) setProfile(data);
+                }).catch(() => { });
+        }
+    }, [address]);
+
+    const displayName = profile?.name || (address ? `${address.slice(0, 6)}...${address.slice(-4)}` : '');
+    const { logout } = usePrivy();
+
+    const handleLogout = async () => {
+        setUserMenuOpen(false);
+        await logout();
+        router.push('/');
+    };
+
+    // Scroll effect
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    // Close menus on outside click
+    useEffect(() => {
+        const handleClick = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) setUserMenuOpen(false);
+            if (membershipsRef.current && !membershipsRef.current.contains(e.target as Node)) setMembershipsOpen(false);
+            if (searchRef.current && !searchRef.current.contains(e.target as Node)) setSearchOpen(false);
+        };
+        document.addEventListener('mousedown', handleClick);
+        return () => document.removeEventListener('mousedown', handleClick);
+    }, []);
+
+    // Search functionality matching main page
+    const handleSearch = async (query: string) => {
+        setSearchQuery(query);
+        if (query.length < 2) {
+            setSearchResults([]);
+            return;
+        }
+        setIsSearching(true);
+        try {
+            const res = await fetch(`/api/creators?q=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            setSearchResults(Array.isArray(data) ? data.slice(0, 5) : []);
+        } catch (error) {
+            console.error('Search error:', error);
+            setSearchResults([]);
+        } finally {
+            setIsSearching(false);
+        }
+    };
+
+    const handleCreatorClick = (creator: any) => {
+        setSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+        // Navigate to creator page using username or address
+        const slug = creator.username || creator.address;
+        router.push(`/${slug}`);
+    };
+
     return (
         <div className="min-h-screen bg-mist text-slate-900 font-sans">
             {/* ═══ NAVIGATION ═══ */}
-            <nav className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100 px-6 md:px-10 py-3.5 flex items-center justify-between">
+            <nav className={`sticky top-0 z-50 px-6 md:px-10 py-4 flex items-center justify-between transition-all duration-500 bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm`}>
                 <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push('/')}>
                     <div className="w-9 h-9 bg-slate-900 rounded-xl flex items-center justify-center text-white">
                         <Rocket size={18} />
                     </div>
                     <span className="text-xl font-bold tracking-tight text-slate-900">Backr</span>
                 </div>
-                {/* Center Search (Desktop) */}
-                <div className="hidden md:flex flex-1 max-w-lg mx-8">
-                    <div className="relative w-full group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors" size={18} />
-                        <input
-                            type="text"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="w-full py-2.5 pl-11 pr-4 bg-slate-50 rounded-xl border border-slate-200 focus:border-primary/30 focus:bg-white focus:shadow-lg focus:shadow-primary/5 outline-none transition-all placeholder:text-slate-400 text-sm"
-                            placeholder="Search creators..."
-                        />
+
+                <div className="flex gap-4 items-center">
+                    {/* SEARCH - MOVED TO RIGHT */}
+                    <div className="hidden md:block relative" ref={searchRef}>
+                        <button
+                            onClick={() => setSearchOpen(!searchOpen)}
+                            className="flex items-center gap-2 px-3 py-2 rounded-full font-medium transition-all hover:-translate-y-0.5 bg-slate-100 text-slate-900 border border-slate-200"
+                        >
+                            <Search size={18} />
+                        </button>
+                        {searchOpen && (
+                            <div className="absolute right-0 mt-2 w-80 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden p-2 z-50 animate-fade-in-up">
+                                <input
+                                    type="text"
+                                    placeholder="Search creators..."
+                                    value={searchQuery}
+                                    onChange={(e) => handleSearch(e.target.value)}
+                                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+                                    autoFocus
+                                />
+                                {searchQuery.length >= 2 && (
+                                    <div className="mt-2 border-t border-slate-100 pt-2">
+                                        {isSearching ? (
+                                            <div className="flex items-center justify-center py-4 text-slate-500">
+                                                <Loader2 size={20} className="animate-spin" />
+                                            </div>
+                                        ) : searchResults.length > 0 ? (
+                                            searchResults.map((creator: any) => (
+                                                <button
+                                                    key={creator.address}
+                                                    onClick={() => handleCreatorClick(creator)}
+                                                    className="flex items-center gap-3 w-full px-3 py-2 text-left hover:bg-slate-50 rounded-xl transition-colors"
+                                                >
+                                                    <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold overflow-hidden">
+                                                        {creator.profileImage || creator.avatarUrl ? (
+                                                            <img src={creator.profileImage || creator.avatarUrl} alt={creator.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <User size={18} />
+                                                        )}
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-slate-900 text-sm truncate">{creator.name}</p>
+                                                        {creator.username && (
+                                                            <p className="text-xs text-slate-500 truncate">@{creator.username}</p>
+                                                        )}
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="py-4 text-center text-slate-500 text-sm">
+                                                No creators found
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
+
+                    {/* MEMBERSHIPS DROPDOWN */}
+                    {address && (
+                        <div className="relative" ref={membershipsRef}>
+                            <button
+                                onClick={() => setMembershipsOpen(!membershipsOpen)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 ${membershipsOpen ? 'bg-slate-100 text-slate-900' : 'bg-white text-slate-600 border border-slate-200'}`}
+                            >
+                                <div className="relative">
+                                    <Users size={18} />
+                                    {myMemberships.length > 0 && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
+                                    )}
+                                </div>
+                                <span className="hidden md:inline">Memberships</span>
+                            </button>
+
+                            {membershipsOpen && (
+                                <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden py-2 z-50 animate-fade-in-up">
+                                    <div className="px-4 py-2 border-b border-slate-50 flex justify-between items-center">
+                                        <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Your Communities</h3>
+                                        {myMemberships.length > 0 && <span className="text-xs font-bold text-slate-900 bg-slate-100 px-2 py-0.5 rounded-full">{myMemberships.length}</span>}
+                                    </div>
+                                    <div className="max-h-80 overflow-y-auto">
+                                        {myMemberships.length > 0 ? (
+                                            myMemberships.map((sub, i) => (
+                                                <button
+                                                    key={i}
+                                                    onClick={() => { router.push(`/${sub.creatorAddress}`); setMembershipsOpen(false); }}
+                                                    className="flex items-center gap-3 w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left"
+                                                >
+                                                    <div className="relative w-10 h-10 shrink-0">
+                                                        <img
+                                                            src={sub.creatorAvatar || "https://via.placeholder.com/150"}
+                                                            alt={sub.creatorName}
+                                                            className="w-full h-full rounded-full object-cover border border-slate-100"
+                                                        />
+                                                        <div className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white"></div>
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="font-bold text-slate-900 text-sm truncate">{sub.creatorName}</p>
+                                                        <p className="text-xs text-slate-500 truncate">@{sub.creatorUsername || sub.creatorAddress?.slice(0, 6)}</p>
+                                                    </div>
+                                                </button>
+                                            ))
+                                        ) : (
+                                            <div className="p-6 text-center text-slate-500">
+                                                <p className="text-sm font-medium">No memberships yet.</p>
+                                                <p className="text-xs mt-1">Join a creator to see them here!</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="bg-slate-50 p-2 text-center border-t border-slate-100">
+                                        <button onClick={() => { router.push('/explore'); setMembershipsOpen(false); }} className="text-xs font-bold text-primary hover:underline">
+                                            Find more creators
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {address ? (
+                        <div className="relative" ref={menuRef}>
+                            <button
+                                onClick={() => setUserMenuOpen(!userMenuOpen)}
+                                className={`flex items-center gap-2 px-3 py-1.5 rounded-full font-bold text-sm transition-all hover:-translate-y-0.5 bg-slate-100 text-slate-900 border border-slate-200`}
+                            >
+                                <div className="w-7 h-7 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center shrink-0">
+                                    {(profile?.avatarUrl || profile?.profileImage) ? (
+                                        <img src={profile.avatarUrl || profile.profileImage} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <User size={14} className="text-slate-600" />
+                                    )}
+                                </div>
+                                <span className="pr-1">{displayName}</span>
+                            </button>
+                            {userMenuOpen && (
+                                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-2xl shadow-slate-200/50 border border-slate-100 overflow-hidden py-2 z-50 animate-fade-in-up">
+                                    <button
+                                        onClick={() => { setUserMenuOpen(false); router.push('/dashboard'); }}
+                                        className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                                    >
+                                        <LayoutDashboard size={16} className="text-slate-400" />
+                                        Creator Studio
+                                    </button>
+                                    <div className="h-px bg-slate-100 mx-3" />
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center gap-3 w-full px-5 py-3 text-sm font-medium text-rose-500 hover:bg-rose-50 transition-colors"
+                                    >
+                                        <LogOut size={16} />
+                                        Log Out
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <button onClick={() => router.push('/login')} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all hover:-translate-y-0.5 shadow-lg shadow-slate-900/20">
+                            Get Started
+                        </button>
+                    )}
                 </div>
-                <button onClick={() => router.push('/dashboard')} className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs transition-all hover:-translate-y-0.5">
-                    Get Started
-                </button>
             </nav>
 
             <main>

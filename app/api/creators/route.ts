@@ -5,6 +5,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const address = searchParams.get('address');
     const username = searchParams.get('username');
+    const query = searchParams.get('q');
 
     if (address) {
         const creator = await db.creators.find(address);
@@ -18,6 +19,17 @@ export async function GET(request: Request) {
     }
 
     const creators = await db.creators.getAll();
+
+    if (query) {
+        const lowerQuery = query.toLowerCase();
+        const filtered = creators.filter((c: any) =>
+            c.name?.toLowerCase().includes(lowerQuery) ||
+            c.username?.toLowerCase().includes(lowerQuery) ||
+            c.bio?.toLowerCase().includes(lowerQuery)
+        );
+        return NextResponse.json(filtered);
+    }
+
     return NextResponse.json(creators);
 }
 
@@ -39,8 +51,20 @@ export async function POST(request: Request) {
         if (username) {
             const existingWithUsername = await db.creators.findByUsername(username);
 
-            if (existingWithUsername && existingWithUsername.address !== address) {
+            if (existingWithUsername && existingWithUsername.address.toLowerCase() !== address.toLowerCase()) {
                 return NextResponse.json({ error: 'Username is already taken' }, { status: 409 });
+            }
+        }
+
+        // Check if email is already taken by another creator (prevent duplicate accounts for same email)
+        if (body.email) {
+            const users = await db.creators.getAll();
+            // Note: This is inefficient for large DBs, should add findByEmail to db.ts. 
+            // optimized instruction: I should add findByEmail to db.ts properly, but for now I can iterate or just assume address limit.
+            // Actually, let's keep it simple and safe.
+            const existingWithEmail = users.find((u: any) => u.email === body.email && u.address.toLowerCase() !== address.toLowerCase());
+            if (existingWithEmail) {
+                return NextResponse.json({ error: 'Email is already linked to another wallet. Please login with your original wallet.' }, { status: 409 });
             }
         }
 

@@ -223,7 +223,7 @@ export default function AudiencePage() {
                                                 display: 'flex', alignItems: 'center', gap: '6px', width: 'fit-content'
                                             }}>
                                                 <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'currentColor' }}></span>
-                                                {m.status.toUpperCase()}
+                                                {(m.status || 'Unknown').toUpperCase()}
                                             </span>
                                         </td>
                                         <td style={{ padding: '16px 24px', textAlign: 'right' }}>

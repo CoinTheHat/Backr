@@ -28,9 +28,34 @@ export default function EarningsPage() {
     const [transactions, setTransactions] = useState<any[]>([]);
 
     useEffect(() => {
-        // TODO: Phase 2 - Fetch actual tip data
         if (address) {
-            // Placeholder: Fetch tips from API
+            // Fetch stats for balance and history
+            fetch(`/api/stats?address=${address.toLowerCase()}`)
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Stats data received:", data);
+                    if (data && data.totalRevenue !== undefined) {
+                        setBalance(String(data.totalRevenue));
+                    }
+                    if (data && data.history) {
+                        setEarningsHistory(data.history.map((h: any) => ({
+                            date: h.name,
+                            amount: h.revenue
+                        })));
+                    }
+                })
+                .catch(err => {
+                    console.error("Stats fetch error:", err);
+                    setBalance('0.00');
+                });
+
+            // Fetch recent tips for transactions
+            fetch(`/api/tips?receiver=${address.toLowerCase()}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) setTransactions(data);
+                })
+                .catch(err => console.error("Tips fetch error:", err));
         }
     }, [address]);
 
@@ -49,18 +74,18 @@ export default function EarningsPage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <Card className="p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <DollarSign size={100} />
+                        <DollarSign size={100} className="text-slate-900" />
                     </div>
                     <div className="flex flex-col h-full justify-between relative z-10">
-                        <div className="flex items-center gap-2 mb-2 text-gray-400">
+                        <div className="flex items-center gap-2 mb-2 text-gray-500">
                             <TrendingUp size={16} />
                             <span className="text-sm font-medium">Total Revenue</span>
                         </div>
                         <div>
-                            <div className="text-3xl font-display font-bold text-white mb-1">
-                                $ {balance}
+                            <div className="text-3xl font-display font-bold text-slate-900 mb-1">
+                                $ {parseFloat(balance || '0').toFixed(2)}
                             </div>
-                            <div className="text-xs text-emerald-400 font-medium">
+                            <div className="text-xs text-emerald-600 font-medium">
                                 +0.0% this month
                             </div>
                         </div>
@@ -69,31 +94,31 @@ export default function EarningsPage() {
 
                 <Card className="p-6 relative overflow-hidden group">
                     <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <CreditCard size={100} />
+                        <CreditCard size={100} className="text-slate-900" />
                     </div>
                     <div className="flex flex-col h-full justify-between relative z-10">
-                        <div className="flex items-center gap-2 mb-2 text-gray-400">
+                        <div className="flex items-center gap-2 mb-2 text-gray-500">
                             <Calendar size={16} />
                             <span className="text-sm font-medium">Pending Payout</span>
                         </div>
                         <div>
-                            <div className="text-3xl font-display font-bold text-white mb-1">
+                            <div className="text-3xl font-display font-bold text-slate-900 mb-1">
                                 $ 0.00
                             </div>
-                            <div className="text-xs text-blue-400 font-medium flex items-center gap-1">
+                            <div className="text-xs text-blue-600 font-medium flex items-center gap-1">
                                 Automatic settlement <ArrowUpRight size={10} />
                             </div>
                         </div>
                     </div>
                 </Card>
 
-                <Card className="p-6 flex flex-col justify-center items-center gap-4 border-dashed border-2 border-white/10 bg-transparent hover:bg-white/5 transition-colors cursor-pointer">
-                    <div className="w-12 h-12 rounded-full bg-brand-accent/20 flex items-center justify-center text-brand-accent mb-2">
+                <Card className="p-6 flex flex-col justify-center items-center gap-4 border-dashed border-2 border-slate-200 bg-transparent hover:bg-slate-50 transition-colors cursor-pointer">
+                    <div className="w-12 h-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 mb-2">
                         <Download size={24} />
                     </div>
                     <div className="text-center">
-                        <h3 className="font-bold text-white">Export CSV</h3>
-                        <p className="text-xs text-gray-400">Download transaction history</p>
+                        <h3 className="font-bold text-slate-900">Export CSV</h3>
+                        <p className="text-xs text-slate-500">Download transaction history</p>
                     </div>
                 </Card>
             </div>
@@ -102,8 +127,8 @@ export default function EarningsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <Card className="lg:col-span-2 p-6 min-h-[400px] flex flex-col">
                     <div className="flex items-center justify-between mb-8">
-                        <h3 className="text-lg font-bold">Revenue Over Time</h3>
-                        <select className="bg-black/20 border border-white/10 rounded-lg px-3 py-1 text-xs outline-none focus:border-white/30 text-gray-400">
+                        <h3 className="text-lg font-bold text-slate-900">Revenue Over Time</h3>
+                        <select className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-1 text-xs outline-none focus:border-slate-300 text-slate-600">
                             <option>Last 7 Days</option>
                             <option>Last 30 Days</option>
                             <option>Last Year</option>
@@ -112,33 +137,34 @@ export default function EarningsPage() {
                     <div className="flex-1 w-full h-full min-h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={earningsHistory}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                                <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.05)" vertical={false} />
                                 <XAxis
                                     dataKey="date"
-                                    stroke="#666"
+                                    stroke="#64748b"
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                 />
                                 <YAxis
-                                    stroke="#666"
+                                    stroke="#64748b"
                                     fontSize={12}
                                     tickLine={false}
                                     axisLine={false}
                                     tickFormatter={(val) => `$${val}`}
                                 />
                                 <Tooltip
-                                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                                    cursor={{ fill: 'rgba(0,0,0,0.02)' }}
                                     contentStyle={{
-                                        backgroundColor: '#1a1d24',
-                                        border: '1px solid rgba(255,255,255,0.1)',
+                                        backgroundColor: '#fff',
+                                        border: '1px solid rgba(0,0,0,0.1)',
                                         borderRadius: '8px',
-                                        boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                                        boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                                        color: '#0f172a'
                                     }}
                                 />
                                 <Bar
                                     dataKey="amount"
-                                    fill="#10b981"
+                                    fill="#6366f1"
                                     radius={[4, 4, 0, 0]}
                                     barSize={40}
                                 />
@@ -158,12 +184,18 @@ export default function EarningsPage() {
                                             IN
                                         </div>
                                         <div>
-                                            <div className="text-sm font-bold text-white">Tip from Supporter</div>
-                                            <div className="text-xs text-gray-500">2 mins ago</div>
+                                            <div className="text-sm font-bold text-slate-900">
+                                                {tx.sender.slice(0, 6)}...{tx.sender.slice(-4)}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                {new Date(tx.timestamp).toLocaleDateString()}
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="text-sm font-bold text-emerald-400">+$5.00</div>
+                                        <div className="text-sm font-bold text-emerald-400">
+                                            +{tx.amount} {tx.currency || 'USDC'}
+                                        </div>
                                         <div className="text-xs text-gray-500">Completed</div>
                                     </div>
                                 </div>
