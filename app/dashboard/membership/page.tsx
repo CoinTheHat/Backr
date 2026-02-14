@@ -35,8 +35,10 @@ export default function MembershipPage() {
 
     const fetchTiers = async () => {
         try {
+            console.log('🔍 [Membership Page] Fetching tiers for address:', address);
             const res = await fetch(`/api/tiers?creator=${address}`);
             const data = await res.json();
+            console.log('🔍 [Membership Page] Received tiers:', data);
             if (Array.isArray(data)) {
                 setTiers(data);
             }

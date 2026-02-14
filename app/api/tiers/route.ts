@@ -5,11 +5,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const creator = searchParams.get('creator'); // This is the address
 
+    console.log('🔍 [Tiers API] GET request, creator:', creator);
+
     if (!creator) {
         return NextResponse.json([]);
     }
 
     const tiers = await db.tiers.getByCreator(creator);
+    console.log('🔍 [Tiers API] Found tiers:', tiers.length, 'for creator:', creator);
     return NextResponse.json(tiers);
 }
 

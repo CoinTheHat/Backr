@@ -1,7 +1,7 @@
-import { useWallets } from "@privy-io/react-auth";
+import { useWallets, usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
 import { tempoModerato } from "viem/chains";
-import { parseUnits, pad, stringToHex } from "viem";
+import { parseUnits } from "viem";
 import {
     createWalletClient,
     custom,
@@ -23,6 +23,7 @@ interface SubscribeParams {
 
 export function useSubscribe() {
     const { wallets } = useWallets();
+    const { user } = usePrivy();
     const [isSubscribing, setIsSubscribing] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [txHash, setTxHash] = useState<string | null>(null);
@@ -33,9 +34,14 @@ export function useSubscribe() {
         setError(null);
         setTxHash(null);
 
-        const wallet = wallets[0];
+        // Use the wallet that matches the active Privy session
+        const activeAddress = user?.wallet?.address;
+        const wallet = activeAddress
+            ? wallets.find(w => w.address.toLowerCase() === activeAddress.toLowerCase()) || wallets[0]
+            : wallets[0];
+
         if (!wallet?.address) {
-            const errMsg = "No active wallet";
+            const errMsg = "No active wallet. Please log in first.";
             setError(errMsg);
             setIsSubscribing(false);
             throw new Error(errMsg);
@@ -49,10 +55,10 @@ export function useSubscribe() {
                 transport: custom(provider),
             }).extend(walletActions);
 
-            // Step 1: Approve the token
+            // Step 1: Approve the token (USDC 6 decimals)
             const amountInWei = parseUnits(amount, 6);
 
-            const approveTx = await client.writeContract({
+            await client.writeContract({
                 address: alphaUsd as Address,
                 abi: TIP20_ABI,
                 functionName: "approve",
@@ -60,12 +66,9 @@ export function useSubscribe() {
             });
 
             // Wait for approval confirmation
-            // In production, you'd want to wait for the transaction receipt
             await new Promise(resolve => setTimeout(resolve, 2000));
 
             // Step 2: Subscribe via contract
-            const memoBytes = pad(stringToHex(memo || `Subscribe tier ${tierId}`), { size: 32 });
-
             const subscribeTx = await client.writeContract({
                 address: contractAddress as Address,
                 abi: SUBSCRIPTION_CONTRACT_ABI,
@@ -85,9 +88,11 @@ export function useSubscribe() {
         }
     };
 
-    // Helper to get subscription contract address for a creator
     const getCreatorContract = async (creatorAddress: string): Promise<string> => {
-        const wallet = wallets[0];
+        const activeAddress = user?.wallet?.address;
+        const wallet = activeAddress
+            ? wallets.find(w => w.address.toLowerCase() === activeAddress.toLowerCase()) || wallets[0]
+            : wallets[0];
         if (!wallet?.address) throw new Error("No active wallet");
 
         const provider = await wallet.getEthereumProvider();

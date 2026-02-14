@@ -14,7 +14,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
 
-        if (existingPost.creatorAddress !== body.creatorAddress) {
+        if (existingPost.creatorAddress.toLowerCase() !== body.creatorAddress.toLowerCase()) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 
@@ -50,7 +50,7 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Post not found' }, { status: 404 });
         }
 
-        if (existingPost.creatorAddress !== body.creatorAddress) {
+        if (existingPost.creatorAddress.toLowerCase() !== body.creatorAddress.toLowerCase()) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
         }
 

@@ -220,6 +220,7 @@ export default function LoginPage() {
                                     type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && email && handleSendCode()}
                                     placeholder="name@example.com"
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 focus:border-[#0f172a] focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-500/10 transition-all"
                                     autoFocus
@@ -245,6 +246,7 @@ export default function LoginPage() {
                                     type="text"
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && code.length >= 6 && handleLoginWithCode()}
                                     placeholder="123456"
                                     className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-center text-2xl font-bold tracking-widest text-slate-900 focus:border-[#0f172a] focus:bg-white focus:outline-none focus:ring-4 focus:ring-slate-500/10 transition-all"
                                     autoFocus

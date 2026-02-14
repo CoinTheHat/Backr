@@ -231,9 +231,9 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const canViewPost = (post: any) => {
         if (post.isPublic) return true;
         const viewer = address?.toLowerCase();
-        const currentCreator = creatorId?.toLowerCase();
+        const currentCreator = creatorProfile?.address?.toLowerCase();
         // Creator themselves
-        if (viewer === currentCreator) return true;
+        if (viewer && currentCreator && viewer === currentCreator) return true;
 
         // Subscription Check
         if (activeSubscription) return true;
@@ -744,16 +744,84 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 </div>
 
                 {/* Right Column: Sticky Sidebar (Desktop) */}
-                <aside className="hidden lg:block space-y-8">
-                    {/* Tip Jar */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm sticky top-24">
-                        <TipJar receiverAddress={creatorId} />
-                    </div>
+                <aside className="hidden lg:block space-y-8 sticky top-24">
 
-                    {/* Leaderboard */}
-                    <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
-                        <SupporterLeaderboard creatorAddress={creatorId} />
-                    </div>
+                    {/* Subscription Status / Creator Stats */}
+                    {activeSubscription ? (
+                        <div className="bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-6 border border-indigo-100 shadow-sm">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-200">
+                                    <Check size={20} strokeWidth={3} />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-slate-900">Active Member</p>
+                                    <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">Subscribed</p>
+                                </div>
+                            </div>
+                            <div className="space-y-3">
+                                {activeSubscription.tierName && (
+                                    <div className="flex items-center justify-between text-sm">
+                                        <span className="text-slate-500 font-medium">Tier</span>
+                                        <span className="font-bold text-slate-900">{activeSubscription.tierName}</span>
+                                    </div>
+                                )}
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-slate-500 font-medium">Expires</span>
+                                    <span className="font-bold text-slate-900">
+                                        {new Date(activeSubscription.expiresAt).toLocaleDateString()}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="mt-4 pt-4 border-t border-indigo-100">
+                                <p className="text-xs text-indigo-600 font-medium text-center">✨ You have full access to all content</p>
+                            </div>
+                        </div>
+                    ) : address && creatorProfile?.address?.toLowerCase() !== address?.toLowerCase() ? (
+                        <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-sm">
+                            <div className="text-center">
+                                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto mb-4 text-slate-400">
+                                    <Lock size={24} />
+                                </div>
+                                <h4 className="font-bold text-slate-900 mb-1">Become a Member</h4>
+                                <p className="text-xs text-slate-500 mb-4">Unlock exclusive content and support {displayName}</p>
+                                <button
+                                    onClick={() => setActiveTab('membership')}
+                                    className="w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all active:scale-[0.98]"
+                                >
+                                    View Plans
+                                </button>
+                            </div>
+                        </div>
+                    ) : address && creatorProfile?.address?.toLowerCase() === address?.toLowerCase() ? (
+                        <div className="bg-gradient-to-br from-slate-50 to-blue-50 rounded-3xl p-6 border border-slate-200 shadow-sm">
+                            <h4 className="font-bold text-slate-900 text-sm mb-4 uppercase tracking-wider">Your Stats</h4>
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-500 font-medium">Members</span>
+                                    <span className="text-lg font-bold text-slate-900">{realMemberCount}</span>
+                                </div>
+                                <div className="h-px bg-slate-200/60" />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-500 font-medium">Posts</span>
+                                    <span className="text-lg font-bold text-slate-900">{posts.length}</span>
+                                </div>
+                                <div className="h-px bg-slate-200/60" />
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm text-slate-500 font-medium">Tiers</span>
+                                    <span className="text-lg font-bold text-slate-900">{creatorTiers.length}</span>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => router.push('/dashboard')}
+                                className="mt-5 w-full bg-slate-900 text-white py-3 rounded-xl font-bold text-sm hover:bg-slate-800 transition-all active:scale-[0.98]"
+                            >
+                                Go to Dashboard
+                            </button>
+                        </div>
+                    ) : null}
+
+                    {/* Leaderboard - only show wrapper if component renders content */}
+                    <SupporterLeaderboard creatorAddress={creatorId} />
                 </aside>
 
                 {/* Mobile: Bottom Tip Jar */}

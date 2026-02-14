@@ -28,13 +28,7 @@ export function useSend() {
         setError(null);
         setTxHash(null);
 
-        // Use the wallet that matches the active Privy session
         const activeAddress = user?.wallet?.address;
-        console.log('🔍 [useSend] Debug wallet state:', {
-            activeAddress,
-            walletsCount: wallets.length,
-            walletsList: wallets.map(w => ({ address: w.address, type: w.walletClientType })),
-        });
         const wallet = activeAddress
             ? wallets.find(w => w.address.toLowerCase() === activeAddress.toLowerCase()) || wallets[0]
             : wallets[0];
@@ -55,21 +49,17 @@ export function useSend() {
                 transport: custom(provider),
             }).extend(walletActions);
 
-            // Use a PUBLIC client (http) to fetch the REAL nonce from the chain
-            // This avoids stale nonce from Privy's cached provider
             const publicClient = createPublicClient({
                 chain: tempoModerato,
                 transport: http(),
             });
 
             const recipient = await getAddress(to);
-            const amountInWei = parseUnits(amount, 6); // USDC = 6 decimals
+            const amountInWei = parseUnits(amount, 6);
 
-            // Get the correct nonce directly from the chain
             const nonce = await publicClient.getTransactionCount({
                 address: wallet.address as Address,
             });
-            console.log('🔢 [useSend] Nonce from chain:', nonce);
 
             const tx = await walletClient.writeContract({
                 address: alphaUsd,
@@ -79,11 +69,9 @@ export function useSend() {
                 nonce,
             });
 
-            console.log('✅ [useSend] Transaction hash:', tx);
             setTxHash(tx);
             return tx;
         } catch (err) {
-            console.error('❌ [useSend] Error:', err);
             const errorMessage =
                 err instanceof Error ? err.message : "Failed to send";
             setError(errorMessage);

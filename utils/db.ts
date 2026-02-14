@@ -136,7 +136,7 @@ export const db = {
             return res.rows;
         },
         find: async (address: string) => {
-            const res = await pool.query('SELECT * FROM creators WHERE address = $1', [address.toLowerCase()]);
+            const res = await pool.query('SELECT * FROM creators WHERE LOWER(address) = LOWER($1)', [address]);
             return res.rows[0];
         },
         findByUsername: async (username: string) => {
@@ -148,12 +148,16 @@ export const db = {
             // Sync avatar fields for compatibility across different components
             const finalAvatar = avatarUrl || profileImage || '';
 
+            // First, check if a profile already exists with this address (case-insensitive)
+            const existing = await pool.query('SELECT address FROM creators WHERE LOWER(address) = LOWER($1)', [address]);
+            const canonicalAddress = existing.rows.length > 0 ? existing.rows[0].address : address;
+
             const query = `
                 INSERT INTO creators (address, username, name, bio, "profileImage", "coverImage", email, "avatarUrl", "updatedAt")
                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
                 ON CONFLICT (address) DO UPDATE
                 SET 
-                    username = $2, 
+                    username = COALESCE(NULLIF($2, ''), creators.username), 
                     name = COALESCE(NULLIF($3, ''), creators.name), 
                     bio = COALESCE(NULLIF($4, ''), creators.bio), 
                     "profileImage" = CASE WHEN $5 <> '' THEN $5 ELSE creators."profileImage" END,
@@ -163,7 +167,7 @@ export const db = {
                     "updatedAt" = NOW()
                 RETURNING *;
             `;
-            const res = await pool.query(query, [address.toLowerCase(), username, name, bio, finalAvatar, coverImage, email, finalAvatar]);
+            const res = await pool.query(query, [canonicalAddress, username, name, bio, finalAvatar, coverImage, email, finalAvatar]);
             return res.rows[0];
         },
         updateSocials: async (address: string, socials: any) => {
@@ -186,11 +190,15 @@ export const db = {
             const client = await pool.connect();
             try {
                 await client.query('BEGIN');
+                // Find the canonical address from creators table
+                const creatorRes = await client.query('SELECT address FROM creators WHERE LOWER(address) = LOWER($1)', [address]);
+                const canonicalAddress = creatorRes.rows.length > 0 ? creatorRes.rows[0].address : address;
+
                 await client.query('DELETE FROM tiers WHERE LOWER("creatorAddress") = LOWER($1)', [address]);
                 for (const tier of newTiers) {
                     await client.query(
-                        'INSERT INTO tiers (id, "creatorAddress", name, price, description, perks, image) VALUES ($1, LOWER($2), $3, $4, $5, $6, $7)',
-                        [tier.id || Math.random().toString(36).substr(2, 9), address, tier.name, tier.price, tier.description, JSON.stringify(tier.perks), tier.image]
+                        'INSERT INTO tiers (id, "creatorAddress", name, price, description, perks, image) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+                        [tier.id || Math.random().toString(36).substr(2, 9), canonicalAddress, tier.name, tier.price, tier.description, JSON.stringify(tier.perks), tier.image]
                     );
                 }
                 await client.query('COMMIT');
@@ -216,13 +224,17 @@ export const db = {
             return res.rows[0];
         },
         create: async (post: any) => {
+            // Find canonical address from creators table
+            const creatorRes = await pool.query('SELECT address FROM creators WHERE LOWER(address) = LOWER($1)', [post.creatorAddress]);
+            const canonicalAddress = creatorRes.rows.length > 0 ? creatorRes.rows[0].address : post.creatorAddress;
+
             const query = `
                 INSERT INTO posts ("creatorAddress", title, content, image, "videoUrl", "minTier", "isPublic", "createdAt")
                 VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
                 RETURNING *;
             `;
             const res = await pool.query(query, [
-                post.creatorAddress.toLowerCase(), post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
+                canonicalAddress, post.title, post.content, post.image, post.videoUrl, post.minTier, post.isPublic
             ]);
             return res.rows[0];
         },
@@ -252,7 +264,7 @@ export const db = {
             const res = await pool.query(`
                 SELECT c.*, cr.username, cr."avatarUrl" 
                 FROM comments c
-                LEFT JOIN creators cr ON c."userAddress" = cr.address
+                LEFT JOIN creators cr ON LOWER(c."userAddress") = LOWER(cr.address)
                 WHERE c."postId" = $1 
                 ORDER BY c."createdAt" ASC
             `, [postId]);
@@ -388,11 +400,11 @@ export const db = {
             const query = `
                 SELECT m.*, c.name as "creatorName", c.username as "creatorUsername", c."avatarUrl" as "creatorAvatar", c."profileImage" as "creatorProfileImage"
                 FROM memberships m
-                LEFT JOIN creators c ON m."creatorAddress" = c.address
-                WHERE m."userAddress" = $1
+                LEFT JOIN creators c ON LOWER(m."creatorAddress") = LOWER(c.address)
+                WHERE LOWER(m."userAddress") = LOWER($1)
                 ORDER BY m."createdAt" DESC
             `;
-            const res = await pool.query(query, [address.toLowerCase()]);
+            const res = await pool.query(query, [address]);
             return res.rows;
         },
         getByCreator: async (address: string) => {
@@ -400,14 +412,20 @@ export const db = {
             return res.rows;
         },
         create: async (membership: any) => {
+            // Find canonical addresses from creators table
+            const userRes = await pool.query('SELECT address FROM creators WHERE LOWER(address) = LOWER($1)', [membership.userAddress]);
+            const creatorRes = await pool.query('SELECT address FROM creators WHERE LOWER(address) = LOWER($1)', [membership.creatorAddress]);
+            const canonicalUser = userRes.rows.length > 0 ? userRes.rows[0].address : membership.userAddress;
+            const canonicalCreator = creatorRes.rows.length > 0 ? creatorRes.rows[0].address : membership.creatorAddress;
+
             const query = `
                 INSERT INTO memberships ("userAddress", "creatorAddress", "tierId", "expiresAt", "txHash", "createdAt", "updatedAt")
                 VALUES ($1, $2, $3, $4, $5, NOW(), NOW())
                 RETURNING *;
             `;
             const res = await pool.query(query, [
-                membership.userAddress.toLowerCase(),
-                membership.creatorAddress.toLowerCase(),
+                canonicalUser,
+                canonicalCreator,
                 membership.tierId,
                 membership.expiresAt,
                 membership.txHash || null

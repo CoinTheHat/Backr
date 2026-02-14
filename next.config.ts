@@ -19,11 +19,7 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  env: {
-    // Obfuscate to bypass build-time secret scanner
-    ['NEXT_PUBLIC_SUPABASE_URL']: process.env.SUPABASE_URL,
-    ['NEXT_PUBLIC_SUPABASE_ANON_KEY']: process.env.SUPABASE_ANON_KEY,
-  },
+  // env vars are set directly in .env.local with NEXT_PUBLIC_ prefix
 };
 
 export default nextConfig;
