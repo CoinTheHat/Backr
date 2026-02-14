@@ -1,8 +1,8 @@
 import { TOKENS } from "@/app/utils/constants";
 import { useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
-import { tempo } from "tempo.ts/chains";
-import { tempoActions } from "tempo.ts/viem";
+import { tempoModerato as tempo } from "viem/chains";
+import { tempoActions } from "viem/tempo";
 import {
     createWalletClient,
     custom,
@@ -42,7 +42,7 @@ export function useSend() {
             // @ts-ignore
             const client: any = createWalletClient({
                 account: wallet.address as Address,
-                chain: tempo({ feeToken: alphaUsd }),
+                chain: tempo,
                 transport: custom(provider),
             })
                 .extend(walletActions)
