@@ -1,8 +1,8 @@
 import { TOKENS } from "@/app/utils/constants";
 import { useWallets } from "@privy-io/react-auth";
 import { useState } from "react";
-import { tempoModerato } from "viem/chains";
-import { tempoActions } from "viem/tempo";
+import { tempo } from "tempo.ts/chains";
+import { tempoActions } from "tempo.ts/viem";
 import {
     createWalletClient,
     custom,
@@ -13,7 +13,7 @@ import {
     type Address,
 } from "viem";
 
-const alphaUsd = TOKENS.USDC;
+const alphaUsd = TOKENS.USDC as Address;
 
 export function useSend() {
     const { wallets } = useWallets();
@@ -37,29 +37,31 @@ export function useSend() {
 
         try {
             const provider = await wallet.getEthereumProvider();
-            // @ts-ignore - Tempo types conflict with viem wallet client
+
+            // Following Technical Cheatsheet for Tempo integration
+            // @ts-ignore
             const client: any = createWalletClient({
                 account: wallet.address as Address,
-                chain: tempoModerato,
+                chain: tempo({ feeToken: alphaUsd }),
                 transport: custom(provider),
             })
                 .extend(walletActions)
                 .extend(tempoActions());
 
-            // @ts-ignore - Tempo token.getMetadata typing
+            // @ts-ignore
             const metadata = await client.token.getMetadata({
-                token: alphaUsd as Address,
+                token: alphaUsd,
             });
 
+            // Ensure memo is correctly formatted
             const memoBytes = pad(stringToHex(memo || to), { size: 32 });
 
-            // @ts-ignore - Tempo transferSync with feePayer
             const result = await client.token.transferSync({
                 to: to as Address,
                 amount: parseUnits(amount, metadata.decimals),
                 memo: memoBytes,
-                token: alphaUsd as Address,
-                feePayer: feePayer, // Use Tempo fee sponsorship for gasless transactions
+                token: alphaUsd,
+                feePayer: feePayer,
             });
 
             const receipt = result.receipt;

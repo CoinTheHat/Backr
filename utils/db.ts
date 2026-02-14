@@ -105,6 +105,14 @@ const initDb = async () => {
                 "createdAt" TIMESTAMP DEFAULT NOW(),
                 "updatedAt" TIMESTAMP DEFAULT NOW()
             );
+
+            CREATE TABLE IF NOT EXISTS comments (
+                id TEXT PRIMARY KEY DEFAULT gen_random_uuid(),
+                "postId" TEXT REFERENCES posts(id) ON DELETE CASCADE,
+                "userAddress" TEXT,
+                content TEXT,
+                "createdAt" TIMESTAMP DEFAULT NOW()
+            );
         `);
     } catch (err) {
         console.error('Error initializing DB:', err);
@@ -230,8 +238,31 @@ export const db = {
             ]);
             return res.rows[0];
         },
-        delete: async (id: string) => {
+        async delete(id: string) {
             const res = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING *', [id]);
+            return res.rows[0];
+        },
+        async like(id: string) {
+            const res = await pool.query('UPDATE posts SET likes = likes + 1 WHERE id = $1 RETURNING likes', [id]);
+            return res.rows[0];
+        }
+    },
+    comments: {
+        getByPost: async (postId: string) => {
+            const res = await pool.query(`
+                SELECT c.*, cr.username, cr."avatarUrl" 
+                FROM comments c
+                LEFT JOIN creators cr ON c."userAddress" = cr.address
+                WHERE c."postId" = $1 
+                ORDER BY c."createdAt" ASC
+            `, [postId]);
+            return res.rows;
+        },
+        create: async (comment: { postId: string, userAddress: string, content: string }) => {
+            const res = await pool.query(
+                'INSERT INTO comments ("postId", "userAddress", content) VALUES ($1, $2, $3) RETURNING *',
+                [comment.postId, comment.userAddress.toLowerCase(), comment.content]
+            );
             return res.rows[0];
         }
     },

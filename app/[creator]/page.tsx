@@ -72,6 +72,13 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
     const [selectedTierIndex, setSelectedTierIndex] = useState<number | null>(null);
     const [checkoutStatus, setCheckoutStatus] = useState<'idle' | 'pending' | 'success' | 'error'>('idle');
 
+    // Comment State
+    const [commentModalOpen, setCommentModalOpen] = useState(false);
+    const [activeCommentPost, setActiveCommentPost] = useState<any>(null);
+    const [commentContent, setCommentContent] = useState('');
+    const [isCommenting, setIsCommenting] = useState(false);
+    const [postComments, setPostComments] = useState<any[]>([]);
+
     // Fetch Data
     useEffect(() => {
         if (!creatorId) return;
@@ -232,6 +239,54 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
         if (activeSubscription) return true;
 
         return false;
+    };
+
+    const handleLike = async (postId: string, index: number) => {
+        try {
+            // Optimistic Update
+            const updatedPosts = [...posts];
+            updatedPosts[index] = { ...updatedPosts[index], likes: (updatedPosts[index].likes || 0) + 1 };
+            setPosts(updatedPosts);
+
+            await fetch(`/api/posts/${postId}/like`, { method: 'POST' });
+        } catch (error) {
+            console.error("Error liking post:", error);
+        }
+    };
+
+    const openComments = async (post: any) => {
+        setActiveCommentPost(post);
+        setCommentModalOpen(true);
+        setPostComments([]);
+        try {
+            const res = await fetch(`/api/posts/${post.id}/comments`);
+            const data = await res.json();
+            if (Array.isArray(data)) setPostComments(data);
+        } catch (error) {
+            console.error("Error loading comments:", error);
+        }
+    };
+
+    const handleCommentSubmit = async () => {
+        if (!address || !commentContent || !activeCommentPost) return;
+        setIsCommenting(true);
+        try {
+            const res = await fetch(`/api/posts/${activeCommentPost.id}/comments`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userAddress: address,
+                    content: commentContent
+                })
+            });
+            const newComment = await res.json();
+            setPostComments([...postComments, { ...newComment, username: user?.email || 'User' }]);
+            setCommentContent('');
+        } catch (error) {
+            console.error("Error submitting comment:", error);
+        } finally {
+            setIsCommenting(false);
+        }
     };
 
     const toggleExpand = (index: number) => {
@@ -586,13 +641,19 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
 
                                                     {/* Actions */}
                                                     <div className="mt-6 flex items-center gap-6 pt-6 border-t border-slate-50">
-                                                        <button className="flex items-center gap-2 text-slate-400 hover:text-rose-500 transition-colors group">
+                                                        <button
+                                                            onClick={() => handleLike(post.id, i)}
+                                                            className="flex items-center gap-2 text-slate-400 hover:text-rose-500 transition-colors group"
+                                                        >
                                                             <Heart size={20} className="group-hover:fill-current" />
-                                                            <span className="text-xs font-bold">1.2k</span>
+                                                            <span className="text-xs font-bold">{post.likes || 0}</span>
                                                         </button>
-                                                        <button className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors">
+                                                        <button
+                                                            onClick={() => openComments(post)}
+                                                            className="flex items-center gap-2 text-slate-400 hover:text-primary transition-colors"
+                                                        >
                                                             <MessageCircle size={20} />
-                                                            <span className="text-xs font-bold">45</span>
+                                                            <span className="text-xs font-bold">{postComments.filter(c => c.postId === post.id).length || 0}</span>
                                                         </button>
                                                     </div>
                                                 </div>
@@ -709,6 +770,73 @@ export default function CreatorPage({ params }: { params: Promise<{ creator: str
                 status={checkoutStatus}
                 txHash={paymentTxHash || undefined}
             />
+
+            {/* Comment Modal */}
+            {commentModalOpen && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                    <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setCommentModalOpen(false)}></div>
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] overflow-hidden shadow-2xl relative animate-in fade-in zoom-in duration-300">
+                        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h3 className="font-serif text-xl font-bold text-slate-900">Comments</h3>
+                            <button onClick={() => setCommentModalOpen(false)} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 max-h-[60vh] overflow-y-auto space-y-6">
+                            {postComments.length === 0 ? (
+                                <div className="text-center py-12">
+                                    <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300">
+                                        <MessageCircle size={32} />
+                                    </div>
+                                    <p className="text-slate-400 font-medium">No comments yet. Be the first to reply!</p>
+                                </div>
+                            ) : (
+                                postComments.map((comment, i) => (
+                                    <div key={i} className="flex gap-4">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 shrink-0 overflow-hidden">
+                                            {comment.avatarUrl ? (
+                                                <img src={comment.avatarUrl} alt="" className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-slate-400 bg-slate-200">
+                                                    <User size={20} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1">
+                                            <div className="bg-slate-50 rounded-2xl p-4">
+                                                <p className="text-sm font-bold text-slate-900 mb-1">{comment.username || 'User'}</p>
+                                                <p className="text-sm text-slate-600 leading-relaxed">{comment.content}</p>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 mt-2 ml-2 font-medium">
+                                                {new Date(comment.createdAt).toLocaleDateString()}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+
+                        <div className="p-6 bg-slate-50 border-t border-slate-100">
+                            <div className="relative">
+                                <textarea
+                                    value={commentContent}
+                                    onChange={(e) => setCommentContent(e.target.value)}
+                                    placeholder="Write a reply..."
+                                    className="w-full bg-white border border-slate-200 rounded-2xl p-4 pr-16 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none min-h-[100px]"
+                                />
+                                <button
+                                    onClick={handleCommentSubmit}
+                                    disabled={isCommenting || !commentContent.trim()}
+                                    className="absolute bottom-4 right-4 p-2 bg-primary text-white rounded-xl shadow-lg shadow-primary/30 hover:scale-105 active:scale-95 disabled:opacity-50 disabled:scale-100 transition-all"
+                                >
+                                    {isCommenting ? <Loader2 size={20} className="animate-spin" /> : <Zap size={20} className="fill-current" />}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
