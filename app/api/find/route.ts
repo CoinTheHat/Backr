@@ -1,10 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrivyClient } from "@privy-io/node";
 
-const privy = new PrivyClient({
-    appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID!,
-    appSecret: process.env.PRIVY_APP_SECRET!,
-});
+// Robust Privy Initialization
+let privy: PrivyClient;
+try {
+    if (!process.env.NEXT_PUBLIC_PRIVY_APP_ID || !process.env.PRIVY_APP_SECRET) {
+        throw new Error("Privy credentials missing");
+    }
+    privy = new PrivyClient({
+        appId: process.env.NEXT_PUBLIC_PRIVY_APP_ID,
+        appSecret: process.env.PRIVY_APP_SECRET,
+    });
+} catch (e) {
+    console.warn("PrivyClient not initialized (expected during build):", (e as Error).message);
+    // Dummy client to prevent crash during build
+    privy = {
+        users: () => ({
+            getByPhoneNumber: () => Promise.resolve(null),
+            getByEmailAddress: () => Promise.resolve(null),
+            create: () => Promise.reject(new Error("Privy not configured")),
+        })
+    } as any;
+}
 
 export async function POST(request: NextRequest) {
     try {

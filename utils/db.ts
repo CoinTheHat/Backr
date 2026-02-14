@@ -114,7 +114,12 @@ const initDb = async () => {
 };
 
 // Run init on import (or you could call this explicitly)
-initDb();
+// Only run if we have a database URL, and don't crash if it fails (e.g. during build)
+if (process.env.DATABASE_URL) {
+    initDb().catch(e => {
+        console.warn("Failed to initialize DB (this is expected during build):", e.message);
+    });
+}
 
 export const db = {
     creators: {
