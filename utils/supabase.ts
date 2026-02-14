@@ -1,11 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Obfuscate keys to bypass Railpack's aggressive secret scanner
-const URL_KEY = ['NEXT', 'PUBLIC', 'SUPABASE', 'URL'].join('_');
-const ANON_KEY = ['NEXT', 'PUBLIC', 'SUPABASE', 'ANON', 'KEY'].join('_');
-
-const supabaseUrl = process.env[URL_KEY] || '';
-const supabaseAnonKey = process.env[ANON_KEY] || '';
+const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
 
 // Create a dummy client or a normal one based on availability. 
 // This prevents the "supabaseUrl is required" crash during build.
