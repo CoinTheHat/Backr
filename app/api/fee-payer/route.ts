@@ -11,8 +11,9 @@ const feePayerAccount = privateKeyToAccount(
 );
 
 // Create a viem client for Tempo Moderato (testnet)
+// feeToken: gas fees will be paid in AlphaUSD (USDC), not native ETH
 const client = createClient({
-    chain: tempoModerato,
+    chain: tempoModerato.extend({ feeToken: '0x20c0000000000000000000000000000000000001' }),
     transport: http(),
 });
 
