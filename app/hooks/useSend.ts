@@ -49,6 +49,13 @@ export function useSend() {
         try {
             const provider = await wallet.getEthereumProvider();
 
+            // Auto-switch to Tempo Moderato testnet if on wrong chain
+            try {
+                await wallet.switchChain(42431);
+            } catch (switchErr) {
+                console.warn('⚠️ [useSend] Chain switch failed, continuing anyway:', switchErr);
+            }
+
             const walletClient = createWalletClient({
                 account: wallet.address as Address,
                 chain: tempoModerato,

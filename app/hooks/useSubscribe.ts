@@ -52,6 +52,13 @@ export function useSubscribe() {
         try {
             const provider = await wallet.getEthereumProvider();
 
+            // Auto-switch to Tempo Moderato testnet if on wrong chain
+            try {
+                await wallet.switchChain(42431);
+            } catch (switchErr) {
+                console.warn('⚠️ [useSubscribe] Chain switch failed, continuing anyway:', switchErr);
+            }
+
             // Create wallet client with Tempo fee payer transport
             // This wraps the user's wallet provider with the sponsor service
             // so gas fees are paid by the sponsor, not the user
