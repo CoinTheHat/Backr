@@ -1,7 +1,9 @@
 import { createClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { tempoModerato } from 'viem/chains';
-import { Handler } from 'tempo.ts/server';
+import { signTransaction } from 'viem/actions';
+import { Transaction, Formatters } from 'viem/tempo';
+import { NextResponse } from 'next/server';
 
 // Fee payer account from environment variable
 const feePayerAccount = privateKeyToAccount(
@@ -14,13 +16,91 @@ const client = createClient({
     transport: http(),
 });
 
-// Create the fee payer handler using tempo.ts SDK
-const handler = Handler.feePayer({
-    account: feePayerAccount,
-    client,
-});
-
-// Next.js App Router: export the handler for POST requests
 export async function POST(request: Request) {
-    return handler.fetch(request);
+    try {
+        const body = await request.json();
+        const { method, params, id, jsonrpc } = body;
+
+        // Only support fee payer RPC methods
+        if (
+            method !== 'eth_signTransaction' &&
+            method !== 'eth_signRawTransaction' &&
+            method !== 'eth_sendRawTransaction' &&
+            method !== 'eth_sendRawTransactionSync'
+        ) {
+            return NextResponse.json({
+                jsonrpc,
+                id,
+                error: {
+                    code: -32004,
+                    name: 'RpcResponse.MethodNotSupportedError',
+                    message: `Method not supported: ${method}`,
+                },
+            });
+        }
+
+        if (method === 'eth_signTransaction') {
+            const transactionRequest = Formatters.formatTransaction(params?.[0] as never);
+            const serializedTransaction = await signTransaction(client, {
+                ...transactionRequest,
+                account: feePayerAccount,
+                feePayer: feePayerAccount,
+            } as any);
+
+            return NextResponse.json({
+                jsonrpc,
+                id,
+                result: serializedTransaction,
+            });
+        }
+
+        if (method === 'eth_signRawTransaction') {
+            const serialized = params?.[0] as `0x76${string}`;
+            const transaction = Transaction.deserialize(serialized);
+            const serializedTransaction = await signTransaction(client, {
+                ...transaction,
+                account: feePayerAccount,
+                feePayer: feePayerAccount,
+            } as any);
+
+            return NextResponse.json({
+                jsonrpc,
+                id,
+                result: serializedTransaction,
+            });
+        }
+
+        // eth_sendRawTransaction or eth_sendRawTransactionSync
+        if (method === 'eth_sendRawTransaction' || method === 'eth_sendRawTransactionSync') {
+            const serialized = params?.[0] as `0x76${string}`;
+            const transaction = Transaction.deserialize(serialized);
+            const serializedTransaction = await signTransaction(client, {
+                ...transaction,
+                account: feePayerAccount,
+                feePayer: feePayerAccount,
+            } as any);
+
+            const result = await client.request({
+                method: method as any,
+                params: [serializedTransaction] as any,
+            });
+
+            return NextResponse.json({
+                jsonrpc,
+                id,
+                result,
+            });
+        }
+    } catch (error) {
+        console.error('❌ [fee-payer] Error:', error);
+        return NextResponse.json({
+            jsonrpc: '2.0',
+            id: null,
+            error: {
+                code: -32603,
+                name: 'RpcResponse.InternalError',
+                message: (error as Error).message,
+            },
+        });
+    }
 }
