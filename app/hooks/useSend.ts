@@ -1,4 +1,4 @@
-import { TOKENS, TEMPO_FEE_PAYER_URL } from "@/app/utils/constants";
+import { TOKENS } from "@/app/utils/constants";
 import { TIP20_ABI } from "@/app/utils/abis";
 import { useWallets, usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
@@ -11,7 +11,6 @@ import {
     walletActions,
     type Address,
 } from "viem";
-import { withFeePayer } from "viem/tempo";
 
 const alphaUsd = TOKENS.USDC as Address;
 
@@ -30,11 +29,6 @@ export function useSend() {
 
         // Use the wallet that matches the active Privy session
         const activeAddress = user?.wallet?.address;
-        console.log('🔍 [useSend] Debug wallet state:', {
-            activeAddress,
-            walletsCount: wallets.length,
-            walletsList: wallets.map(w => ({ address: w.address, type: w.walletClientType })),
-        });
         const wallet = activeAddress
             ? wallets.find(w => w.address.toLowerCase() === activeAddress.toLowerCase()) || wallets[0]
             : wallets[0];
@@ -56,27 +50,22 @@ export function useSend() {
                 console.warn('⚠️ [useSend] Chain switch failed, continuing anyway:', switchErr);
             }
 
-            // Create wallet client with fee payer transport (gasless)
             const walletClient = createWalletClient({
                 account: wallet.address as Address,
                 chain: tempoModerato,
-                transport: withFeePayer(
-                    custom(provider),
-                    http(TEMPO_FEE_PAYER_URL)
-                ),
+                transport: custom(provider),
             }).extend(walletActions);
 
             const recipient = await getAddress(to);
             const amountInWei = parseUnits(amount, 6); // USDC = 6 decimals
 
-            console.log('🚀 [useSend] Sending transfer (gasless via fee payer)...');
+            console.log('🚀 [useSend] Sending transfer...');
             const tx = await walletClient.writeContract({
                 address: alphaUsd,
                 abi: TIP20_ABI,
                 functionName: "transfer",
                 args: [recipient, amountInWei],
-                feePayer: true,
-            } as any);
+            });
 
             console.log('✅ [useSend] Transaction hash:', tx);
             setTxHash(tx);
