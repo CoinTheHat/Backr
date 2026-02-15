@@ -9,6 +9,7 @@ import Input from '../../components/Input';
 import ImageUpload from '../../components/ImageUpload';
 import { useToast } from '../../components/Toast';
 import { useCommunity } from '../../context/CommunityContext';
+import DiscoverySettings from './components/DiscoverySettings';
 
 import { Copy, ExternalLink, Save, RefreshCw, Trash2, Info, Wallet } from 'lucide-react';
 import confetti from 'canvas-confetti';
@@ -222,6 +223,9 @@ export default function SettingsPage() {
                     </Button>
                 </div>
             </Card>
+
+            {/* Discovery Settings (Categories & Hashtags) */}
+            {address && <DiscoverySettings address={address} />}
 
             {/* Wallet Settings - Simplified for Hackathon */}
             <Card className="p-0 overflow-hidden border border-white/5">
