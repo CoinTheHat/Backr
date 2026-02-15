@@ -5,12 +5,14 @@ import { parseUnits } from "viem";
 import {
     createWalletClient,
     custom,
+    http,
     walletActions,
     publicActions,
     type Address,
 } from "viem";
+import { withFeePayer } from "viem/tempo";
 import { SUBSCRIPTION_CONTRACT_ABI, TIP20_ABI } from "@/app/utils/abis";
-import { SUBSCRIPTION_FACTORY_ADDRESS, TOKENS } from "@/app/utils/constants";
+import { SUBSCRIPTION_FACTORY_ADDRESS, TOKENS, TEMPO_FEE_PAYER_URL } from "@/app/utils/constants";
 
 const alphaUsd = TOKENS.USDC;
 
@@ -49,36 +51,49 @@ export function useSubscribe() {
 
         try {
             const provider = await wallet.getEthereumProvider();
+
+            // Create wallet client with Tempo fee payer transport
+            // This wraps the user's wallet provider with the sponsor service
+            // so gas fees are paid by the sponsor, not the user
             const client = createWalletClient({
                 account: wallet.address as Address,
                 chain: tempoModerato,
-                transport: custom(provider),
+                transport: withFeePayer(
+                    custom(provider),
+                    http(TEMPO_FEE_PAYER_URL)
+                ),
             }).extend(walletActions);
 
-            // Step 1: Approve the token (USDC 6 decimals)
+            // Step 1: Approve the token (USDC 6 decimals) — gasless
             const amountInWei = parseUnits(amount, 6);
 
+            console.log('🔓 [useSubscribe] Approving token spend (gasless)...');
             await client.writeContract({
                 address: alphaUsd as Address,
                 abi: TIP20_ABI,
                 functionName: "approve",
                 args: [contractAddress as Address, amountInWei],
-            });
+                feePayer: true,
+            } as any);
 
             // Wait for approval confirmation
             await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Step 2: Subscribe via contract
+            // Step 2: Subscribe via contract — gasless
+            console.log('🚀 [useSubscribe] Subscribing to tier (gasless)...');
             const subscribeTx = await client.writeContract({
                 address: contractAddress as Address,
                 abi: SUBSCRIPTION_CONTRACT_ABI,
                 functionName: "subscribe",
                 args: [BigInt(tierId)],
-            });
+                feePayer: true,
+            } as any);
 
+            console.log('✅ [useSubscribe] Subscription successful! Tx:', subscribeTx);
             setTxHash(subscribeTx);
             return subscribeTx;
         } catch (err) {
+            console.error('❌ [useSubscribe] Error:', err);
             const errorMessage =
                 err instanceof Error ? err.message : "Failed to subscribe";
             setError(errorMessage);

@@ -1,5 +1,8 @@
 export const SUBSCRIPTION_FACTORY_ADDRESS = '0x1Fc0F18C7b86844F2293227d9a1CC5754E491e13';
 
+// Tempo Testnet Fee Payer (gasless transactions)
+export const TEMPO_FEE_PAYER_URL = 'https://sponsor.testnet.tempo.xyz';
+
 export const TOKENS = {
     USDC: '0x20c0000000000000000000000000000000000001', // AlphaUSD
     BetaUSD: '0x20c0000000000000000000000000000000000002',
