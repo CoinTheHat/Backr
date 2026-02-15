@@ -1,17 +1,17 @@
-import { TOKENS } from "@/app/utils/constants";
+import { TOKENS, TEMPO_FEE_PAYER_URL } from "@/app/utils/constants";
 import { TIP20_ABI } from "@/app/utils/abis";
 import { useWallets, usePrivy } from "@privy-io/react-auth";
 import { useState } from "react";
 import { tempoModerato } from "viem/chains";
 import {
     createWalletClient,
-    createPublicClient,
     custom,
     http,
     parseUnits,
     walletActions,
     type Address,
 } from "viem";
+import { withFeePayer } from "viem/tempo";
 
 const alphaUsd = TOKENS.USDC as Address;
 
@@ -56,35 +56,27 @@ export function useSend() {
                 console.warn('⚠️ [useSend] Chain switch failed, continuing anyway:', switchErr);
             }
 
+            // Create wallet client with fee payer transport (gasless)
             const walletClient = createWalletClient({
                 account: wallet.address as Address,
                 chain: tempoModerato,
-                transport: custom(provider),
+                transport: withFeePayer(
+                    custom(provider),
+                    http(TEMPO_FEE_PAYER_URL)
+                ),
             }).extend(walletActions);
-
-            // Use a PUBLIC client (http) to fetch the REAL nonce from the chain
-            // This avoids stale nonce from Privy's cached provider
-            const publicClient = createPublicClient({
-                chain: tempoModerato,
-                transport: http(),
-            });
 
             const recipient = await getAddress(to);
             const amountInWei = parseUnits(amount, 6); // USDC = 6 decimals
 
-            // Get the correct nonce directly from the chain
-            const nonce = await publicClient.getTransactionCount({
-                address: wallet.address as Address,
-            });
-            console.log('🔢 [useSend] Nonce from chain:', nonce);
-
+            console.log('🚀 [useSend] Sending transfer (gasless via fee payer)...');
             const tx = await walletClient.writeContract({
                 address: alphaUsd,
                 abi: TIP20_ABI,
                 functionName: "transfer",
                 args: [recipient, amountInWei],
-                nonce,
-            });
+                feePayer: true,
+            } as any);
 
             console.log('✅ [useSend] Transaction hash:', tx);
             setTxHash(tx);
